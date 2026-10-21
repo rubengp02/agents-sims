@@ -6,7 +6,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { CheckRunner } from '../src/execution/localChecks.js';
 import { TeamCoordinator } from '../src/execution/teamCoordinator.js';
-import { chooseModel, DEFAULT_TEAM_SETTINGS } from '../src/execution/teamPolicy.js';
+import {
+  chooseModel,
+  DEFAULT_TEAM_SETTINGS,
+  validateSettings,
+} from '../src/execution/teamPolicy.js';
 import {
   type ExecuteOptions,
   ExecutionBlocked,
@@ -329,6 +333,7 @@ describe('local team with subscription adapters (offline fixtures)', () => {
     const h = harness();
     h.add({ prompt: 'PRIVATE TASK' });
     expect(h.team.snapshot().settings).toEqual(DEFAULT_TEAM_SETTINGS);
+    expect(h.team.snapshot().settings.experimentalParallelWriters).toBe(false);
     h.team.configure({ ...DEFAULT_TEAM_SETTINGS, maxRuns: 3 });
     const saved = readFileSync(join(h.root, 'settings.json'), 'utf8');
     expect(saved).not.toContain('PRIVATE TASK');
@@ -339,6 +344,19 @@ describe('local team with subscription adapters (offline fixtures)', () => {
         join(h.root, 'settings.json'),
       ).snapshot().settings.maxRuns,
     ).toBe(3);
+  });
+  it('requires a boolean experimental opt-in, separately from the two global slots', () => {
+    expect(
+      validateSettings({ ...DEFAULT_TEAM_SETTINGS, experimentalParallelWriters: true })
+        .experimentalParallelWriters,
+    ).toBe(true);
+    expect(() =>
+      validateSettings({
+        ...DEFAULT_TEAM_SETTINGS,
+        experimentalParallelWriters: 'true' as unknown as boolean,
+      }),
+    ).toThrow();
+    expect(DEFAULT_TEAM_SETTINGS.maxParallel).toBe(2);
   });
   it('runs dependencies in order through real adapter contract, with bounded handoff', async () => {
     const h = harness({ output: 'x'.repeat(22000) });
@@ -494,6 +512,26 @@ describe('local team with subscription adapters (offline fixtures)', () => {
     expect(tasks[2].allowWrites).toBe(false);
     expect(tasks[2].dependsOn).toEqual([tasks[1].id]);
     expect(tasks[1].status).toBe('planned');
+  });
+  it('does not let an AI planner enable multiple programmers in default mode', async () => {
+    const h = harness({
+      output: JSON.stringify({
+        experimentalParallelWriters: true,
+        tasks: [0, 1].map((i) => ({
+          role: 'developer',
+          title: 'Parte ' + i,
+          prompt: 'Implementa ' + i,
+          dependsOn: [],
+        })),
+      }),
+    });
+    await expect(h.team.plan(h.root, 'Implementa el encargo', true)).rejects.toMatchObject({
+      code: 'experimental_parallel_writers_disabled',
+    });
+    expect(h.calls).toHaveLength(1);
+    expect(h.calls[0].allowWrites).toBe(false);
+    expect(h.team.snapshot().settings.experimentalParallelWriters).toBe(false);
+    expect(h.team.snapshot().tasks.filter((t) => t.role === 'developer')).toHaveLength(0);
   });
   it.each([
     'not JSON',

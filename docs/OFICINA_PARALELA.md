@@ -1,5 +1,34 @@
 # Oficina adaptativa con aislamiento
 
+## Política vigente: un Programador por defecto
+
+Desde la decisión posterior al piloto `parallel-dccc1111`, un encargo usa un
+Programador de implementación por defecto. Se mantienen las comprobaciones
+locales y los especialistas/revisores necesarios según riesgo. Dos escritores
+aislados quedan como capacidad experimental conservada, sin promoción automática
+por una estimación favorable de tiempo. No se modifica la interfaz.
+
+El ajuste opcional `experimentalParallelWriters` vale `false` por defecto y en
+configuraciones antiguas que no lo contienen. La configuración local existente
+(`POST /api/team/settings`, protegida por nonce/origen) permite activarlo
+explícitamente con `true`; el modelo no puede cambiar ajustes. Un reparto válido
+se convierte en un encargo completo con un Programador si el experimento está
+apagado; mantiene objetivo, archivos, criterios y comprobaciones globales.
+Los planes de IA con varios Programadores se rechazan antes de despachar sus
+trabajadores. Un flujo de dos escritores preparado con la opción encendida no
+puede arrancar tras desactivarla: se conserva para revisión, sin borrar trabajo.
+
+`maxParallel: 2` sigue siendo el límite global y permite ayudantes de lectura;
+por sí solo no activa dos escritores. Seleccionar AO tampoco los activa.
+Las pruebas y pilotos experimentales existentes declaran la opción de forma
+explícita. No se repiten inferencias ni se autorizan presupuestos por este cambio.
+
+El [piloto real](../reports/paralelismo-real/parallel-dccc1111/RESULTADO.md) acreditó
+concurrencia pero se pausó antes de integrar por la reserva de un trabajador.
+No demuestra ahorro ni una entrega paralela aceptada. La siguiente prioridad es
+reducir contexto y calibrar estimaciones con un Programador; las siguientes
+pruebas reales de paralelismo quedan pendientes de autorización nueva.
+
 Codex CLI sigue siendo el motor predeterminado. La nueva capacidad de dos
 escritores requiere **Agent Orchestrator seleccionado expresamente**, con su
 revisión fijada y sus controles oficiales existentes. No activa automatización

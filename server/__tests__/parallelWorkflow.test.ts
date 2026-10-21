@@ -57,7 +57,12 @@ const decomposition: WorkflowDecomposition = {
   })),
 };
 function fixture(
-  options: { jointFails?: boolean; unknown?: boolean; scopeViolation?: boolean } = {},
+  options: {
+    jointFails?: boolean;
+    unknown?: boolean;
+    scopeViolation?: boolean;
+    experimental?: boolean;
+  } = {},
 ) {
   const dir = mkdtempSync(join(tmpdir(), 'office-parallel-'));
   const project = join(dir, 'repo'),
@@ -200,6 +205,7 @@ function fixture(
     claudeEnabled: false,
     maxRuns: 8,
     maxParallel: 2,
+    experimentalParallelWriters: options.experimental !== false,
     maxMinutes: 2,
     maxTokens: 10000,
   });
@@ -243,6 +249,53 @@ async function finish(h: ReturnType<typeof fixture>) {
 }
 
 describe('isolated workflow, no inference', () => {
+  it('defaults legacy settings to one programmer even with AO, two slots and a valid decomposition', () => {
+    const h = fixture({ experimental: false });
+    const { experimentalParallelWriters: _ignored, ...legacy } = h.team.snapshot().settings;
+    h.team.configure(legacy);
+    expect(h.team.snapshot().settings.experimentalParallelWriters).toBe(false);
+    h.team.addScopedWorkflow(
+      h.project,
+      context,
+      { ...assessment, acceptanceCoverage: 'complete' },
+      true,
+      decomposition,
+    );
+    const state = h.team.snapshot();
+    expect(state.tasks.filter((t) => t.role === 'developer')).toHaveLength(1);
+    expect(state.workflows).toHaveLength(0);
+    expect(h.calls).toHaveLength(0);
+    expect(state.tasks[0].context?.files).toEqual(context.files);
+    expect(state.tasks[0].context?.acceptance).toEqual(context.acceptance);
+    expect(state.tasks[0].prompt).toContain(decomposition.parts[0].objective);
+    expect(state.tasks[0].prompt).toContain(decomposition.parts[1].objective);
+  });
+  it('keeps part decisions and required deep review when collapsing a risky decomposition', () => {
+    const h = fixture({ experimental: false }),
+      split = structuredClone(decomposition);
+    split.parts[0].context.decisions = ['Conservar el formato existente'];
+    split.parts[0].assessment.risk = 'high';
+    const tasks = h.team.addScopedWorkflow(h.project, context, assessment, true, split);
+    expect(tasks.filter((t) => t.role === 'developer')).toHaveLength(1);
+    expect(tasks.find((t) => t.role === 'tester')?.reviewMode).toBe('deep');
+    expect(
+      tasks.every((t) => t.context?.decisions.includes('Conservar el formato existente')),
+    ).toBe(true);
+  });
+  it('disabling the experiment blocks an already prepared two-writer plan without dispatch', async () => {
+    const h = fixture();
+    await prepare(h);
+    h.team.configure({ ...h.team.snapshot().settings, experimentalParallelWriters: false });
+    for (const task of h.team.snapshot().tasks) {
+      await h.team.assign(task.id);
+      h.team.reviewBudget(task.id, 1000, 5000, 12000);
+    }
+    await expect(h.team.start()).rejects.toMatchObject({
+      code: 'experimental_parallel_writers_disabled',
+    });
+    expect(h.calls).toHaveLength(0);
+    expect(h.team.snapshot().workflows).toHaveLength(1);
+  });
   it('rejects a replaced worktree even when it has the same path, repository and commit', async () => {
     const h = fixture(),
       a = await h.manager.prepare(h.project, 'identity', 'a');
@@ -275,6 +328,7 @@ describe('isolated workflow, no inference', () => {
       undefined,
       h.checks,
     );
+    team.configure({ ...h.team.snapshot().settings, experimentalParallelWriters: true });
     await team.plan(h.project, context.objective, true, {
       context,
       assessment: { ...assessment, risk: 'high' },

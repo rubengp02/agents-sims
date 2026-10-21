@@ -132,6 +132,7 @@ export async function prepare(injectedTools) {
     attempt: id,
     status: 'prepared-not-authorized',
     realProviderEnabled: true,
+    experimentalParallelWriters: true,
     sourceFingerprint: sourceFingerprint(),
     limits,
     model: 'gpt-6.1-sol',
@@ -173,6 +174,7 @@ export async function execute(id, injectedTools) {
   const authorization = JSON.parse(fs.readFileSync(path.join(p.privateDir, 'authorization.json')));
   verifyFutureTrial(plan, authorization, sourceFingerprint());
   assert.deepEqual(plan.limits, limits);
+  assert.equal(plan.experimentalParallelWriters, true);
   assert.equal(plan.attempt, id);
   const ledger = {
     startedAt: Date.now(),
@@ -382,6 +384,7 @@ export async function execute(id, injectedTools) {
           claudeEnabled: false,
           maxRuns: 2,
           maxParallel: 2,
+          experimentalParallelWriters: true,
           maxMinutes: limits.officeMs / 60000,
           maxTokens: 120000,
         });

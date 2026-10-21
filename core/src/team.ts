@@ -14,6 +14,8 @@ export interface TeamSettings {
   claudeEnabled: boolean;
   maxRuns: number;
   maxParallel: number;
+  /** Explicit opt-in for experimental decompositions with two isolated writers. */
+  experimentalParallelWriters?: boolean;
   maxMinutes: number;
   maxTokens: number;
 }

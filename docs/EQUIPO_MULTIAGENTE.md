@@ -1,5 +1,13 @@
 # Equipo multiagente local
 
+La política vigente utiliza **un Programador por encargo**. Los ayudantes de
+lectura y las revisiones necesarias se conservan. Dos Programadores aislados
+son experimentales y requieren activar expresamente `experimentalParallelWriters`;
+seleccionar AO o permitir dos actividades simultáneas no basta. La prioridad
+actual es reducir contexto y mejorar estimaciones con un Programador. Los pilotos
+reales de paralelismo quedan pausados hasta una autorización nueva. Detalles en
+[OFICINA_PARALELA.md](OFICINA_PARALELA.md).
+
 ## Cómo utilizarlo
 
 1. Abre la oficina con el lanzador habitual y pulsa **Equipo**.

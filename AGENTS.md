@@ -25,6 +25,11 @@
 - Mantén el modo automático predeterminado, el control manual de asignaciones,
   las dependencias, los límites y la selección sobre modelos realmente disponibles.
   Respeta las pausas: no eleves presupuestos ni reanudes tareas automáticamente.
+- Un Programador por encargo es la política predeterminada. Conserva ayudantes y
+  revisión independiente cuando sean necesarios. Dos escritores aislados son
+  experimentales: requieren `experimentalParallelWriters: true` explícito, AO y
+  todos los controles existentes. Ni el Jefe ni una estimación favorable los
+  activan automáticamente. No hagas nuevos pilotos reales sin autorización.
 
 ## Mapa y contexto
 

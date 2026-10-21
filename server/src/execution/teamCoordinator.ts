@@ -568,6 +568,48 @@ export class TeamCoordinator {
         'invalid_decomposition',
         'El reparto de implementación requiere permiso de escritura.',
       );
+    if (!this.settings.experimentalParallelWriters) {
+      const packet = validateContext({
+        ...context,
+        decisions: [
+          ...new Set([
+            ...context.decisions,
+            ...decomposition.parts.flatMap((p) => p.context.decisions),
+          ]),
+        ],
+      });
+      const suffix =
+        '\nSubtareas que debe cubrir la implementación única:\n' +
+        JSON.stringify(decomposition.parts.map((p) => ({ objective: p.objective })));
+      if (context.objective.length + suffix.length > 20000)
+        throw new ExecutionBlocked(
+          'invalid_context',
+          'El reparto completo no cabe en un encargo; conserva las instrucciones y acota su contexto.',
+        );
+      const levels = (values: Array<'low' | 'high' | 'unknown'>) =>
+        values.includes('high') ? 'high' : values.includes('unknown') ? 'unknown' : 'low';
+      const tasks = this.addScopedWorkflow(
+        project,
+        packet,
+        {
+          ...assessment,
+          risk: levels([assessment.risk, ...decomposition.parts.map((p) => p.assessment.risk)]),
+          uncertainty: levels([
+            assessment.uncertainty,
+            ...decomposition.parts.map((p) => p.assessment.uncertainty),
+          ]),
+        },
+        allowWrites,
+      );
+      for (const task of tasks) {
+        const stored = this.task(task.id);
+        stored.prompt += suffix;
+        stored.scheduleReason =
+          'Un solo Programador por defecto; dos escritores requieren activación experimental explícita.';
+      }
+      this.persist();
+      return tasks.map((t) => structuredClone(this.task(t.id)));
+    }
     const overlap = decomposition.parts[0].ownedFiles.some((f) =>
       decomposition.parts[1].ownedFiles.some((other) => ownershipOverlaps(f, other)),
     );
@@ -773,6 +815,11 @@ export class TeamCoordinator {
   private async prepareWorkflows(): Promise<void> {
     const manager = this.executors.codex.workspaceManager;
     for (const w of this.workflows.filter((w) => w.status === 'planned')) {
+      if (!this.settings.experimentalParallelWriters)
+        throw new ExecutionBlocked(
+          'experimental_parallel_writers_disabled',
+          'El flujo de dos escritores está desactivado. Conserva el plan o prepara un encargo con un Programador.',
+        );
       if (this.tasks.filter((t) => t.workflowId === w.id).some((t) => t.status !== 'queued'))
         throw new ExecutionBlocked(
           'workflow_assignment_required',
@@ -1832,7 +1879,10 @@ export class TeamCoordinator {
         ? `Catálogo actual permitido (revalidado al ejecutar): ${JSON.stringify(catalog.models.filter((m) => ['gpt-6-luna', 'gpt-6.1-sol'].includes(m.id)))}. Puedes proponer choice:{provider:"codex",model,effort}, assessment:{scope,risk,uncertainty,modules,tests}, context:{objective,files,decisions,acceptance,checks} y reviewMode:"focused"|"deep" por tarea. No inventes cobertura ni comandos. Luna para código no se promociona sin evidencia. Usa Sol low para trabajo acotado y medium/high para riesgo justificado. La revisión recibe diff y pruebas, en sesión independiente. Una tarea clara puede resolverse con un solo Programador y aceptación local acreditada. No declares reservas ni permisos.\n`
         : '';
       const decompositionGuide =
-        local && allowWrites && this.executors.codex.workspaceManager
+        this.settings.experimentalParallelWriters &&
+        local &&
+        allowWrites &&
+        this.executors.codex.workspaceManager
           ? `También puedes proponer, en vez de tasks, {"decomposition":{"sharedFiles":[],"parts":[{"title":"...","objective":"...","ownedFiles":["archivo"],"assessment":{"scope":"bounded","risk":"low","uncertainty":"low","modules":["módulo"],"tests":"available"},"context":{"objective":"...","files":["archivo"],"decisions":[],"acceptance":["criterio existente"],"checks":["id existente"]}}, {"...":"segunda parte con el mismo esquema"}]}}. Exactamente dos partes con archivos propios concretos, sin dependencias entre sí. Los contratos compartidos son solo lectura. No omitas criterios ni inventes comprobaciones. La aplicación verificará aislamiento, coste y beneficio; una propuesta no concede concurrencia. Contexto obligatorio: ${JSON.stringify(local.context)}\n`
           : '';
       const task = this.addTask({
@@ -1840,6 +1890,9 @@ export class TeamCoordinator {
         title: 'Plan del Jefe',
         project,
         prompt:
+          (!this.settings.experimentalParallelWriters
+            ? 'Utiliza como máximo un Programador para el encargo completo. Los dos escritores son experimentales y están desactivados. Conserva los especialistas y revisiones imprescindibles por riesgo.\n'
+            : '') +
           plannerGuide +
           decompositionGuide +
           `Divide el objetivo en 1 a 4 tareas necesarias. Decide dependencias por los resultados que necesita cada trabajo, no solo por el nombre del personaje. Si hay arquitectura debe preceder al código; la verificación QA debe esperar a la implementación. Permite hasta dos tareas independientes simultáneas (por ejemplo dos análisis que no necesitan resultados del otro). Marca parallelSafe=true SOLO cuando su independencia esté clara; si dudas usa false. Las escrituras siempre serán exclusivas. Evita reuniones y personajes innecesarios. Responde SOLO JSON: {"tasks":[{"role":"developer|tester|architect|designer","title":"título breve","prompt":"tarea concreta","dependsOn":[],"parallelSafe":false}]}. dependsOn contiene índices de tareas necesarias de esta lista, o []. No marques trabajo como realizado. No cambies diseño ni archivos. Objetivo:\n${goal}`,
@@ -1891,6 +1944,14 @@ export class TeamCoordinator {
         return;
       }
       const validated = normalizeWorkflowPlan(items);
+      if (
+        !this.settings.experimentalParallelWriters &&
+        validated.filter((t) => t.role === 'developer').length > 1
+      )
+        throw new ExecutionBlocked(
+          'experimental_parallel_writers_disabled',
+          'El plan propone varios Programadores; el modo predeterminado admite uno para este encargo.',
+        );
       const goalRouting = assessTask(goal, local?.assessment);
       const sensitive =
         goalRouting.effectiveRisk === 'high' || local?.assessment.uncertainty === 'high';

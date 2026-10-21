@@ -28,6 +28,8 @@ const report = {
   mode: 'offline-structural-fixtures',
   inferenceCalls: 0,
   realTrialAuthorized: false,
+  experimentalParallelWriters: true,
+  defaultOfficePolicy: 'single-programmer',
   sourceFingerprint: sourceFingerprint(),
   limitations:
     'Fixtures reducidos: verifican contratos, decisiones y circuito; no capacidad de modelos ni rendimiento real. Los ceros de recibos internos no son consumo medido de IA.',
@@ -213,6 +215,7 @@ async function simulate(item, variant) {
     claudeEnabled: false,
     maxRuns: 8,
     maxParallel: 2,
+    experimentalParallelWriters: true,
     maxMinutes: 2,
     maxTokens: 30000,
   });

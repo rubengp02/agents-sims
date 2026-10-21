@@ -7,11 +7,20 @@ export const DEFAULT_TEAM_SETTINGS: TeamSettings = {
   claudeEnabled: false,
   maxRuns: 8,
   maxParallel: 2,
+  experimentalParallelWriters: false,
   maxMinutes: 15,
   maxTokens: 30_000,
 };
 
 export function validateSettings(value: TeamSettings): TeamSettings {
+  if (
+    value.experimentalParallelWriters !== undefined &&
+    typeof value.experimentalParallelWriters !== 'boolean'
+  )
+    throw new ExecutionBlocked(
+      'invalid_settings',
+      'La activación experimental debe ser explícita y booleana.',
+    );
   if (!['auto', 'manual', 'mixed'].includes(value.mode) || typeof value.claudeEnabled !== 'boolean')
     throw new ExecutionBlocked('invalid_settings', 'Modo o proveedor incorrectos.');
   for (const [key, min, max] of [
@@ -30,6 +39,7 @@ export function validateSettings(value: TeamSettings): TeamSettings {
     claudeEnabled: value.claudeEnabled,
     maxRuns: value.maxRuns,
     maxParallel: value.maxParallel,
+    experimentalParallelWriters: value.experimentalParallelWriters === true,
     maxMinutes: value.maxMinutes,
     maxTokens: value.maxTokens,
   };
