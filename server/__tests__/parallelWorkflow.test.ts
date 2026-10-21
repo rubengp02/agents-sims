@@ -4,6 +4,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  rmSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
@@ -524,7 +525,8 @@ describe('isolated workflow, no inference', () => {
       h.runtime,
     );
     expect(restored.snapshot().tokensUsed).toBe(220);
-    expect(restored.snapshot().workflows![0].status).toBe('accepted');
+    expect(restored.snapshot().workflows![0].status).toBe('paused');
+    expect(restored.snapshot().workflows![0].reasonCode).toBe('workflow_recovery_required');
     expect(restored.snapshot().running).toBe(false);
     expect(restored.snapshot().tasks.map((t) => t.choice)).toEqual(
       h.team.snapshot().tasks.map((t) => t.choice),
@@ -547,6 +549,65 @@ describe('isolated workflow, no inference', () => {
     expect(interrupted.snapshot().runsUsed).toBe(2);
     await expect(interrupted.start()).rejects.toMatchObject({ code: 'workflow_recovery_required' });
   });
+  it.each(['modified', 'deleted'] as const)(
+    'does not restore acceptance of a %s integrated worktree',
+    async (change) => {
+      const h = fixture();
+      await prepare(h);
+      await h.team.start();
+      await finish(h);
+      const before = h.team.snapshot();
+      const candidate = before.workflows![0];
+      expect(candidate.status).toBe('accepted');
+      if (change === 'modified')
+        writeFileSync(join(candidate.candidateProject!, 'a.mjs'), 'export const a=999;\n');
+      else rmSync(candidate.candidateProject!, { recursive: true });
+
+      // A process restart loses the manager's in-memory workspace capabilities.
+      // Checkpoint paths and past hashes must never recreate that authority.
+      const create = vi.fn(async () => {
+        throw new Error('Recovery must not create or execute anything');
+      });
+      const freshManager = new WorkflowWorkspaceManager(
+        join(h.dir, 'spaces'),
+        join(h.dir, 'evidence'),
+        create,
+      );
+      const freshExecutor = { ...h.executor, workspaceManager: freshManager };
+      const restored = new TeamCoordinator(
+        { codex: freshExecutor, claude: freshExecutor },
+        undefined,
+        undefined,
+        h.checks,
+        undefined,
+        h.checkpoint,
+        h.runtime,
+      );
+      const state = restored.snapshot();
+      expect(state.workflows![0]).toMatchObject({
+        ...candidate,
+        budgetReview: undefined,
+        status: 'paused',
+        reasonCode: 'workflow_recovery_required',
+      });
+      expect(state.tokensUsed).toBe(before.tokensUsed);
+      expect(state.runsUsed).toBe(before.runsUsed);
+      expect(state.timeUsedMs).toBe(before.timeUsedMs);
+      expect(state.usageKnown).toBe(before.usageKnown);
+      expect(state.tasks).toHaveLength(before.tasks.length);
+      expect(state.running).toBe(false);
+      expect(() => restored.resume()).toThrow();
+      await expect(restored.start()).rejects.toMatchObject({ code: 'workflow_recovery_required' });
+      expect(create).not.toHaveBeenCalled();
+      expect(h.calls).toHaveLength(2);
+      const persisted = JSON.parse(readFileSync(h.checkpoint, 'utf8'));
+      expect(persisted.workflows[0].status).toBe('paused');
+      expect(persisted.workflows[0].candidateHash).toBe(candidate.candidateHash);
+      if (change === 'modified')
+        expect(readFileSync(join(candidate.candidateProject!, 'a.mjs'), 'utf8')).toContain('999');
+      else expect(existsSync(candidate.candidateProject!)).toBe(false);
+    },
+  );
   it('serializes without a predicted benefit and rejects altered decisions', () => {
     const base = {
       isolated: true,

@@ -149,6 +149,16 @@ no hay merge, push ni publicación automáticos.
 
 ## Recuperación y métricas
 
+Al restaurar un checkpoint, todos los flujos quedan en pausa con
+`workflow_recovery_required`, incluidos los que antes figuraban como `accepted`.
+Se conservan el candidato, su huella, los resultados de pruebas y los contadores
+como evidencia histórica; no equivalen a una aceptación vigente. El reinicio no
+recupera las acreditaciones internas del gestor de worktrees y no se concede
+autoridad a las rutas del checkpoint. Por ello tampoco se mantiene la aceptación
+si el candidato parece intacto. No se recrean espacios, repiten llamadas ni
+ejecutan reparaciones automáticamente. La recuperación requiere acreditar y
+verificar de nuevo el candidato; esta entrega no añade una reaceptación automática.
+
 El supervisor registra lectura, validación y escritura, causa segura, fase,
 antigüedad de la señal y PID con hora de creación cuando están disponibles.
 La primera incidencia no se sobrescribe. Se mantienen los plazos anteriores.

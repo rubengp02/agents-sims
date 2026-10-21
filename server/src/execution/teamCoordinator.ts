@@ -206,8 +206,11 @@ export class TeamCoordinator {
             this.workflows.push({
               ...w,
               budgetReview: undefined,
-              status: w.status === 'accepted' ? 'accepted' : 'paused',
-              reasonCode: w.status === 'accepted' ? w.reasonCode : 'workflow_recovery_required',
+              // A checkpoint records past acceptance, not a current workspace
+              // capability. The manager's handles are not restored, so even an
+              // accepted candidate needs recovery before it can be trusted again.
+              status: 'paused',
+              reasonCode: 'workflow_recovery_required',
             });
           }
         }
