@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   existsSync,
   mkdirSync,
@@ -20,6 +20,8 @@ import {
   type TeamSettings,
   type TeamSnapshot,
   type TeamTask,
+  type TeamWorkflow,
+  type WorkflowDecomposition,
 } from '../../../core/src/team.js';
 import type { AdaptiveRuntime } from './adaptiveRuntime.js';
 import type { CheckRunner } from './localChecks.js';
@@ -31,6 +33,12 @@ import { parseTaskOutcome } from './taskOutcome.js';
 import { chooseModel, DEFAULT_TEAM_SETTINGS, validateSettings } from './teamPolicy.js';
 import { ExecutionBlocked, type OfficialExecutor, type RunRecord } from './types.js';
 import { normalizeWorkflowPlan } from './workflowPlan.js';
+import {
+  chooseWorkflowSchedule,
+  ownershipOverlaps,
+  validateDecomposition,
+} from './workflowPolicy.js';
+import type { OwnedWorkspace, WorkspaceResult } from './workflowWorkspace.js';
 
 type Executors = Record<'codex' | 'claude', OfficialExecutor>;
 type TaskInput = {
@@ -73,6 +81,14 @@ export class TeamCoordinator {
   private runsUsed = 0;
   private tokensUsed = 0;
   private timeUsedMs = 0;
+  private elapsedUsedMs = 0;
+  private activeClock = 0;
+  private usageKnown = true;
+  private readonly workflows: TeamWorkflow[] = [];
+  private readonly workspaces = new Map<string, OwnedWorkspace>();
+  private readonly workspaceResults = new Map<string, WorkspaceResult>();
+  private operation: Promise<void> | undefined;
+  private operationController: AbortController | undefined;
   private budgetReason: string | null = null;
   private deadline = 0;
   private maxObservedInput = 0;
@@ -119,7 +135,7 @@ export class TeamCoordinator {
       try {
         const saved = JSON.parse(readFileSync(checkpointFile, 'utf8'));
         if (
-          saved.version !== 1 ||
+          ![1, 2].includes(saved.version) ||
           !Array.isArray(saved.tasks) ||
           saved.tasks.length > 100 ||
           ![saved.runsUsed, saved.tokensUsed, saved.maxObservedInput].every(
@@ -140,11 +156,28 @@ export class TeamCoordinator {
           this.addTask({ ...raw, continueTaskId: undefined });
           const task = this.tasks.at(-1)!;
           task.id = raw.id;
+          task.workerId = raw.workerId ?? `role-${raw.role}`;
+          task.workflowId = raw.workflowId;
+          task.workspaceId = raw.workspaceId;
+          task.ownedFiles = raw.ownedFiles;
           task.output = raw.output;
           task.executionProject = raw.executionProject;
           task.executionSessionKey = raw.executionSessionKey;
           task.runId = raw.runId;
           const settled = ['completed', 'failed', 'cancelled'].includes(raw.status);
+          if (settled && raw.choice) {
+            if (
+              !['codex', 'claude'].includes(raw.choice.provider) ||
+              typeof raw.choice.model !== 'string' ||
+              !raw.choice.model ||
+              raw.choice.model.length > 160 ||
+              typeof raw.choice.effort !== 'string' ||
+              !raw.choice.effort ||
+              raw.choice.effort.length > 40
+            )
+              throw new Error();
+            task.choice = { ...raw.choice };
+          }
           interrupted ||= ['running', 'checking'].includes(raw.status);
           task.status = settled ? raw.status : 'paused';
           task.reasonCode = settled ? raw.reasonCode : 'server_restarted';
@@ -159,12 +192,32 @@ export class TeamCoordinator {
         )
           throw new Error();
         this.timeUsedMs = saved.timeUsedMs ?? 0;
+        this.elapsedUsedMs = saved.elapsedMs ?? this.timeUsedMs;
+        if (!Number.isSafeInteger(this.elapsedUsedMs) || this.elapsedUsedMs < 0) throw new Error();
+        this.usageKnown = saved.usageKnown !== false && !interrupted;
+        if (saved.version === 2 && Array.isArray(saved.workflows)) {
+          for (const w of saved.workflows as TeamWorkflow[]) {
+            if (
+              !/^[\w-]{1,100}$/.test(w.id) ||
+              !Array.isArray(w.taskIds) ||
+              w.taskIds.some((id) => !this.tasks.some((t) => t.id === id))
+            )
+              throw new Error();
+            this.workflows.push({
+              ...w,
+              budgetReview: undefined,
+              status: w.status === 'accepted' ? 'accepted' : 'paused',
+              reasonCode: w.status === 'accepted' ? w.reasonCode : 'workflow_recovery_required',
+            });
+          }
+        }
         this.maxObservedInput = saved.maxObservedInput;
         this.budgetReason = interrupted
           ? 'usage_unknown_after_restart'
           : (saved.budgetReason ?? 'server_restarted');
       } catch {
         this.tasks.length = 0;
+        this.workflows.length = 0;
         this.budgetReason = 'checkpoint_invalid';
       }
     }
@@ -174,13 +227,16 @@ export class TeamCoordinator {
     if (!this.checkpointFile || this.budgetReason === 'checkpoint_invalid') return;
     mkdirSync(dirname(this.checkpointFile), { recursive: true, mode: 0o700 });
     const value = {
-      version: 1,
+      version: 2,
       tasks: this.tasks,
       runsUsed: this.runsUsed,
       tokensUsed: this.tokensUsed,
       timeUsedMs: this.timeUsedMs,
       maxObservedInput: this.maxObservedInput,
       budgetReason: this.budgetReason,
+      elapsedMs: this.elapsed(),
+      usageKnown: this.usageKnown,
+      workflows: this.workflows,
     };
     writeFileSync(this.checkpointFile + '.tmp', JSON.stringify(value), { mode: 0o600 });
     renameSync(this.checkpointFile + '.tmp', this.checkpointFile);
@@ -196,8 +252,43 @@ export class TeamCoordinator {
       runsUsed: this.runsUsed,
       tokensUsed: this.tokensUsed,
       timeUsedMs: this.timeUsedMs,
+      elapsedMs: this.elapsed(),
+      usageKnown: this.usageKnown,
+      workflows: this.workflows,
       budgetReason: this.budgetReason,
     });
+  }
+
+  private elapsed() {
+    return this.elapsedUsedMs + (this.activeClock ? Math.max(0, Date.now() - this.activeClock) : 0);
+  }
+  private stopClock() {
+    this.elapsedUsedMs = this.elapsed();
+    this.activeClock = 0;
+  }
+
+  private taskPacket(task: TeamTask, estimate = false) {
+    const packet = prepareTaskContext(
+      task.role,
+      task.prompt,
+      task.context,
+      task.dependsOn.map((id) => {
+        const dep = this.task(id);
+        return {
+          title: dep.title,
+          output: estimate && dep.status !== 'completed' ? 'x'.repeat(4000) : dep.output,
+        };
+      }),
+    );
+    if (task.ownedFiles) {
+      packet.prompt +=
+        '\nPropiedad de escritura exclusiva: ' +
+        JSON.stringify(task.ownedFiles) +
+        '. Los demás archivos, incluidos contratos compartidos, son de solo lectura. No hagas commits ni cambies ramas. La integración y aceptación conjunta las ejecuta la aplicación.';
+      packet.fingerprint = createHash('sha256').update(packet.prompt).digest('hex');
+      packet.characters = packet.prompt.length;
+    }
+    return packet;
   }
 
   private diagnose(provider: 'codex' | 'claude') {
@@ -338,6 +429,7 @@ export class TeamCoordinator {
       );
     const task: TeamTask = {
       id: randomUUID(),
+      workerId: previous?.workerId ?? `role-${input.role}`,
       role: input.role,
       title: input.title.trim(),
       prompt: input.prompt,
@@ -384,9 +476,12 @@ export class TeamCoordinator {
     context: TaskContext,
     assessment: TaskAssessment,
     allowWrites = false,
+    decomposition?: WorkflowDecomposition,
   ): TeamTask[] {
     const packet = validateContext(context);
     let evidence = validateAssessment(assessment);
+    if (decomposition)
+      return this.addDecomposedWorkflow(project, packet, evidence, allowWrites, decomposition);
     if (
       evidence.acceptanceCoverage === 'complete' &&
       !this.checks?.covers?.(packet.checks, packet.acceptance)
@@ -458,6 +553,386 @@ export class TeamCoordinator {
       );
     }
     return tasks;
+  }
+
+  private addDecomposedWorkflow(
+    project: string,
+    context: TaskContext,
+    assessment: TaskAssessment,
+    allowWrites: boolean,
+    raw: WorkflowDecomposition,
+  ): TeamTask[] {
+    const decomposition = validateDecomposition(raw, context);
+    if (!allowWrites)
+      throw new ExecutionBlocked(
+        'invalid_decomposition',
+        'El reparto de implementación requiere permiso de escritura.',
+      );
+    const overlap = decomposition.parts[0].ownedFiles.some((f) =>
+      decomposition.parts[1].ownedFiles.some((other) => ownershipOverlaps(f, other)),
+    );
+    const coupled = decomposition.parts.some(
+      (part, index) =>
+        part.dependsOn?.length ||
+        part.context.files.some((f) => decomposition.parts[1 - index].ownedFiles.includes(f)),
+    );
+    if (!this.executors.codex.workspaceManager || overlap || coupled) {
+      const tasks = this.addScopedWorkflow(project, context, assessment, allowWrites);
+      for (const task of tasks)
+        this.task(task.id).scheduleReason =
+          overlap || coupled
+            ? 'Archivos compartidos o dependencias: un Programador integra el trabajo por orden.'
+            : 'Codex CLI conserva la ejecución sin escritores paralelos; AO sigue opcional.';
+      this.persist();
+      return tasks.map((t) => structuredClone(this.task(t.id)));
+    }
+    if (
+      !this.checks?.hasAcceptance(context.checks) ||
+      context.checks.some((id) => !this.checks?.has(id)) ||
+      decomposition.parts.some(
+        (p) => !p.context.checks.length || p.context.checks.some((id) => !this.checks?.has(id)),
+      )
+    )
+      throw new ExecutionBlocked(
+        'check_unconfigured',
+        'Configura aceptación conjunta y comprobaciones por parte antes de repartir.',
+      );
+    for (const part of decomposition.parts)
+      part.context = validateContext({
+        ...part.context,
+        decisions: [...new Set([...context.decisions, ...part.context.decisions])],
+      });
+    const routing = assessTask(context.objective, assessment);
+    const review =
+      (routing.roles.includes('tester') &&
+        !this.checks.covers?.(context.checks, context.acceptance)) ||
+      routing.effectiveRisk !== 'low' ||
+      assessment.uncertainty !== 'low';
+    if (this.tasks.length + 2 + Number(review) + Number(routing.roles.includes('architect')) > 100)
+      throw new ExecutionBlocked('queue_full', 'La cola no admite el flujo completo.');
+    const id = randomUUID();
+    const workflow: TeamWorkflow = {
+      id,
+      project: realpathSync(project),
+      context,
+      assessment,
+      sharedFiles: decomposition.sharedFiles,
+      taskIds: [],
+      mode: 'serial',
+      reason: 'Pendiente de asignaciones y estimación del coste de integración.',
+      status: 'planned',
+    };
+    const tasks: TeamTask[] = [];
+    if (routing.roles.includes('architect'))
+      tasks.push(
+        this.addTask({
+          role: 'architect',
+          project,
+          title: 'Contrato del flujo',
+          prompt: 'Analiza el contrato compartido y sus riesgos sin editar archivos.',
+          context,
+          assessment,
+        }),
+      );
+    const prerequisites = tasks.map((t) => t.id);
+    for (const part of decomposition.parts) {
+      const task = this.addTask({
+        role: 'developer',
+        project,
+        title: part.title,
+        prompt: part.objective,
+        context: part.context,
+        assessment: {
+          ...part.assessment,
+          risk: routing.effectiveRisk === 'high' ? 'high' : part.assessment.risk,
+        },
+        allowWrites: true,
+        dependsOn: prerequisites,
+      });
+      const stored = this.task(task.id);
+      stored.workerId = randomUUID();
+      stored.workflowId = id;
+      stored.ownedFiles = part.ownedFiles;
+      tasks.push(stored);
+      workflow.taskIds.push(task.id);
+    }
+    if (review) {
+      const task = this.addTask({
+        role: 'tester',
+        project,
+        title: 'Revisión del conjunto integrado',
+        prompt: 'Revisa el resultado integrado, su contrato y sus pruebas con independencia.',
+        context,
+        assessment: { ...assessment, risk: routing.effectiveRisk },
+        reviewMode: routing.reviewMode === 'deep' ? 'deep' : 'focused',
+        dependsOn: [...workflow.taskIds],
+      });
+      this.task(task.id).workflowId = id;
+      tasks.push(this.task(task.id));
+    }
+    this.workflows.push(workflow);
+    this.persist();
+    return structuredClone(tasks);
+  }
+
+  private workflowKey(workflow: TeamWorkflow): string {
+    return createHash('sha256')
+      .update(
+        JSON.stringify({
+          base: captureRevision(workflow.project).digest,
+          context: workflow.context,
+          sharedFiles: workflow.sharedFiles,
+          tasks: workflow.taskIds.map((id) => {
+            const t = this.task(id);
+            return { id, choice: t.choice, context: t.context, ownedFiles: t.ownedFiles };
+          }),
+        }),
+      )
+      .digest('hex');
+  }
+  private operationKey(workflow: TeamWorkflow): string {
+    return createHash('sha256')
+      .update(
+        JSON.stringify({
+          project: workflow.project,
+          context: workflow.context,
+          assessment: workflow.assessment,
+          sharedFiles: workflow.sharedFiles,
+          tasks: workflow.taskIds.map((id) => {
+            const task = this.task(id);
+            return {
+              choice: task.choice,
+              context: task.context,
+              ownedFiles: task.ownedFiles,
+            };
+          }),
+        }),
+      )
+      .digest('hex');
+  }
+  private resolveWorkflowBudget(w: TeamWorkflow): void {
+    if (w.budgetReview) return;
+    const key = this.operationKey(w);
+    const samples = this.workflows.filter(
+      (other) => other.id !== w.id && this.operationKey(other) === key,
+    );
+    // Failed/interrupted operations are retained and prevent optimistic reuse.
+    if (
+      samples.length < 5 ||
+      samples.some((s) => s.status !== 'accepted' || !s.preparationMs || !s.integrationMs)
+    )
+      return;
+    const workers = w.taskIds.map((id) => this.task(id).estimate?.durationMs);
+    if (workers.some((n) => !n || !Number.isFinite(n))) return;
+    w.budgetReview = {
+      profileKey: this.workflowKey(w),
+      preparationMs: Math.ceil(Math.max(...samples.map((s) => s.preparationMs!)) * 1.5),
+      integrationMs: Math.ceil(Math.max(...samples.map((s) => s.integrationMs!)) * 1.5),
+      // Conservative comparator: the same two workers in sequence, without overhead.
+      sequentialMs: workers.reduce<number>((sum, n) => sum + n!, 0),
+    };
+  }
+  reviewWorkflowBudget(
+    id: string,
+    preparationMs: number,
+    integrationMs: number,
+    sequentialMs: number,
+  ): void {
+    const w = this.workflows.find((w) => w.id === id);
+    if (
+      !w ||
+      w.status !== 'planned' ||
+      this.running ||
+      this.starting ||
+      this.planning ||
+      this.controllers.size ||
+      w.taskIds.some((id) => !this.task(id).choice)
+    )
+      throw new ExecutionBlocked(
+        'budget_review_unavailable',
+        'Asigna y detén el flujo antes de revisar sus cotas locales.',
+      );
+    if (
+      ![preparationMs, integrationMs, sequentialMs].every(
+        (n) => Number.isSafeInteger(n) && n > 0 && n <= this.settings.maxMinutes * 60000,
+      )
+    )
+      throw new ExecutionBlocked(
+        'invalid_estimate',
+        'Las cotas deben caber en el plazo existente.',
+      );
+    w.budgetReview = {
+      profileKey: this.workflowKey(w),
+      preparationMs,
+      integrationMs,
+      sequentialMs,
+    };
+    this.persist();
+  }
+
+  private async prepareWorkflows(): Promise<void> {
+    const manager = this.executors.codex.workspaceManager;
+    for (const w of this.workflows.filter((w) => w.status === 'planned')) {
+      if (this.tasks.filter((t) => t.workflowId === w.id).some((t) => t.status !== 'queued'))
+        throw new ExecutionBlocked(
+          'workflow_assignment_required',
+          'Asigna y aprueba todos los pasos obligatorios antes de iniciar el flujo.',
+        );
+      if (!manager || !this.adaptive)
+        throw new ExecutionBlocked(
+          'isolated_engine_required',
+          'El flujo requiere AO y el controlador adaptativo.',
+        );
+      if (w.taskIds.some((id) => this.task(id).choice?.provider !== 'codex'))
+        throw new ExecutionBlocked(
+          'isolated_engine_required',
+          'Los trabajadores aislados requieren Codex en AO.',
+        );
+      const review = w.budgetReview;
+      if (!review || review.profileKey !== this.workflowKey(w))
+        throw new ExecutionBlocked(
+          'workflow_budget_review_required',
+          'Falta una cota de preparación e integración acreditada para este plan.',
+        );
+      const tasks = w.taskIds.map((id) => this.task(id));
+      Object.assign(
+        w,
+        chooseWorkflowSchedule({
+          isolated: true,
+          maxParallel: this.settings.maxParallel,
+          overlap: false,
+          risky: w.assessment.risk !== 'low' || w.assessment.uncertainty !== 'low',
+          workersMs: tasks.map((t) => t.estimate?.durationMs ?? 0),
+          preparationMs: review.preparationMs,
+          integrationMs: review.integrationMs,
+          sequentialMs: review.sequentialMs,
+        }),
+      );
+      if (
+        Date.now() +
+          review.preparationMs +
+          review.integrationMs +
+          (w.mode === 'parallel'
+            ? Math.max(...tasks.map((t) => t.estimate!.durationMs!))
+            : tasks.reduce((n, t) => n + t.estimate!.durationMs!, 0)) >
+        this.deadline
+      )
+        throw new ExecutionBlocked(
+          'time_budget',
+          'El flujo con integración no cabe en el tiempo restante.',
+        );
+      w.status = 'preparing';
+      this.persist();
+      const start = Date.now();
+      const generation = this.generation;
+      this.operationController = new AbortController();
+      const timer = setTimeout(
+        () => this.operationController?.abort(),
+        Math.max(1, Math.min(review.preparationMs, this.deadline - Date.now())),
+      );
+      try {
+        for (const task of tasks) {
+          const handle = await manager.prepare(
+            w.project,
+            w.id,
+            task.workerId!,
+            w.baseSHA,
+            this.operationController.signal,
+          );
+          w.baseSHA ??= handle.baseSHA;
+          task.workspaceId = handle.id;
+          task.executionProject = handle.path;
+          this.workspaces.set(task.id, handle);
+          this.checks?.authorizeWorkspace?.(handle);
+          this.persist();
+          if (generation !== this.generation)
+            throw new ExecutionBlocked(
+              'preparation_cancelled',
+              'La preparación se detuvo; se conservan sus copias.',
+            );
+          if (Date.now() - start > review.preparationMs || Date.now() >= this.deadline)
+            throw new ExecutionBlocked(
+              'preparation_time_budget',
+              'La preparación agotó su reserva; no se inicia ningún modelo.',
+            );
+        }
+        w.status = 'working';
+      } finally {
+        clearTimeout(timer);
+        this.operationController = undefined;
+        w.preparationMs = Date.now() - start;
+        this.timeUsedMs += w.preparationMs;
+        this.persist();
+      }
+    }
+  }
+
+  private async integrateWorkflows(): Promise<void> {
+    for (const w of this.workflows.filter((w) => w.status === 'working')) {
+      const tasks = w.taskIds.map((id) => this.task(id));
+      if (
+        !tasks.every((t) => t.status === 'completed') ||
+        tasks.some((t) => this.controllers.has(t.id))
+      )
+        continue;
+      if (!w.candidateHash) {
+        w.status = 'integrating';
+        this.operationController = new AbortController();
+        this.persist();
+        const start = Date.now();
+        const timeout = setTimeout(
+          () => this.operationController?.abort(),
+          Math.max(1, Math.min(w.budgetReview!.integrationMs, this.deadline - Date.now())),
+        );
+        try {
+          await this.executors.codex.workspaceManager!.integrate(
+            w,
+            tasks.map((t) => {
+              const result = this.workspaceResults.get(t.id);
+              if (!result)
+                throw new ExecutionBlocked(
+                  'workspace_result_missing',
+                  'Falta un resultado acreditado.',
+                );
+              return result;
+            }),
+            this.checks!,
+            this.operationController.signal,
+          );
+          if (
+            !this.running ||
+            this.operationController.signal.aborted ||
+            Date.now() - start > w.budgetReview!.integrationMs ||
+            Date.now() >= this.deadline
+          )
+            throw new ExecutionBlocked(
+              'integration_time_budget',
+              'Integración pausada al alcanzar su reserva o detener el flujo.',
+            );
+          w.status = 'working';
+        } catch (error) {
+          w.status = 'paused';
+          w.reasonCode = failureCode(error);
+          this.pause(w.reasonCode);
+        } finally {
+          clearTimeout(timeout);
+          w.integrationMs = Date.now() - start;
+          this.timeUsedMs += w.integrationMs;
+          this.operationController = undefined;
+          this.persist();
+        }
+      }
+      const reviewers = this.tasks.filter((t) => t.workflowId === w.id && t.role === 'tester');
+      if (
+        this.running &&
+        w.status !== 'paused' &&
+        w.candidateHash &&
+        reviewers.every((t) => t.status === 'completed')
+      ) {
+        this.executors.codex.workspaceManager!.verifyIntegrated(w);
+        w.status = 'accepted';
+      }
+    }
   }
 
   override(id: string, choice: TeamChoice | null): void {
@@ -594,18 +1069,7 @@ export class TeamCoordinator {
     for (const task of remaining) {
       if (!task.choice)
         throw new ExecutionBlocked('assignment_required', 'Falta una asignación del plan.');
-      const packet = prepareTaskContext(
-        task.role,
-        task.prompt,
-        task.context,
-        task.dependsOn.map((id) => {
-          const dep = this.task(id);
-          return {
-            title: dep.title,
-            output: dep.status === 'completed' ? dep.output : 'x'.repeat(4000),
-          };
-        }),
-      );
+      const packet = this.taskPacket(task, true);
       const estimate = this.adaptive.estimate(
         task,
         this.executors[task.choice.provider].engine ?? 'codex-cli',
@@ -616,6 +1080,24 @@ export class TeamCoordinator {
         throw new ExecutionBlocked('budget_review_required', estimate.reason);
       tokens += estimate.tokens;
       durationMs += estimate.durationMs;
+    }
+    for (const w of this.workflows.filter(
+      (w) => ['planned', 'preparing', 'working'].includes(w.status) && !w.candidateHash,
+    )) {
+      this.resolveWorkflowBudget(w);
+      if (!w.budgetReview || w.budgetReview.profileKey !== this.workflowKey(w))
+        throw new ExecutionBlocked(
+          'workflow_budget_review_required',
+          'Revisa el coste local de preparación e integración; no se inicia IA.',
+        );
+      durationMs +=
+        w.budgetReview.integrationMs + (w.status === 'planned' ? w.budgetReview.preparationMs : 0);
+      if (w.mode === 'parallel') {
+        const writers = remaining.filter((t) => w.taskIds.includes(t.id));
+        durationMs -=
+          writers.reduce((n, t) => n + t.estimate!.durationMs!, 0) -
+          Math.max(0, ...writers.map((t) => t.estimate!.durationMs!));
+      }
     }
     if (this.tokensUsed + tokens > this.settings.maxTokens)
       throw new ExecutionBlocked(
@@ -637,6 +1119,11 @@ export class TeamCoordinator {
   private budget(includeReservations = true, ownTokenReserve = 0): void {
     const inputEstimate = this.adaptive ? 0 : (this.startupTokenReserve ?? this.maxObservedInput);
     if (this.closed) throw new ExecutionBlocked('server_stopped', 'La oficina se está cerrando.');
+    if (!this.usageKnown)
+      throw new ExecutionBlocked(
+        'usage_unknown',
+        'El consumo total es desconocido; requiere revisión y no se reinicia.',
+      );
     if (this.runsUsed + (includeReservations ? this.reservedRuns : 0) >= this.settings.maxRuns)
       throw new ExecutionBlocked('run_budget', 'Se alcanzó el límite de llamadas.');
     if (
@@ -650,7 +1137,7 @@ export class TeamCoordinator {
         'El presupuesto de tokens no permite otra llamada según el consumo observado.',
       );
     if (
-      (this.adaptive && this.timeUsedMs >= this.settings.maxMinutes * 60000) ||
+      (this.adaptive && this.elapsed() >= this.settings.maxMinutes * 60000) ||
       (this.deadline && Date.now() >= this.deadline)
     )
       throw new ExecutionBlocked('time_budget', 'Se alcanzó el tiempo máximo del equipo.');
@@ -662,6 +1149,11 @@ export class TeamCoordinator {
   }
 
   private ready(task: TeamTask, active: TeamTask[]): boolean {
+    const workflow = this.workflows.find((w) => w.id === task.workflowId);
+    if (workflow && task.role === 'tester' && !workflow.candidateHash) {
+      task.scheduleReason = 'Espera a la integración y aceptación mecánica del conjunto.';
+      return false;
+    }
     const pending = task.dependsOn
       .map((id) => this.task(id))
       .filter((dep) => dep.status !== 'completed');
@@ -669,12 +1161,25 @@ export class TeamCoordinator {
       task.scheduleReason = `Espera a: ${pending.map((dep) => dep.title).join(', ')}.`;
       return false;
     }
-    if (active.some((other) => other.role === task.role)) {
+    if (active.some((other) => (other.workerId ?? other.role) === (task.workerId ?? task.role))) {
       task.scheduleReason = 'Espera a que su personaje termine la tarea anterior.';
       return false;
     }
+    const isolatedPair =
+      !!workflow &&
+      workflow.mode === 'parallel' &&
+      task.allowWrites &&
+      this.workspaces.has(task.id) &&
+      active.every(
+        (other) =>
+          other.workflowId === workflow.id &&
+          other.allowWrites &&
+          this.workspaces.has(other.id) &&
+          other.workspaceId !== task.workspaceId,
+      );
     if (
       active.length &&
+      !isolatedPair &&
       (!task.parallelSafe ||
         task.allowWrites ||
         active.some((other) => !other.parallelSafe || other.allowWrites))
@@ -683,7 +1188,9 @@ export class TeamCoordinator {
         'Ejecución por orden: hay escritura o no se ha confirmado independencia.';
       return false;
     }
-    const capacity = this.executors[task.choice!.provider].maxConcurrentReadOnly ?? 1;
+    const capacity = isolatedPair
+      ? 2
+      : (this.executors[task.choice!.provider].maxConcurrentReadOnly ?? 1);
     if (
       active.length >= this.settings.maxParallel ||
       active.filter((other) => other.choice?.provider === task.choice!.provider).length >= capacity
@@ -691,24 +1198,32 @@ export class TeamCoordinator {
       task.scheduleReason = 'Espera a que quede una plaza de ejecución libre.';
       return false;
     }
-    task.scheduleReason = task.allowWrites
-      ? 'Exclusiva: esta tarea puede modificar archivos.'
-      : task.parallelSafe
-        ? 'Puede coincidir con otra tarea: independiente y de solo lectura; dependencias cumplidas.'
-        : 'Por orden: independencia no declarada; dependencias cumplidas.';
+    task.scheduleReason = isolatedPair
+      ? 'Escritor aislado: copia propia, contratos y presupuesto verificados.'
+      : task.allowWrites
+        ? 'Exclusiva: esta tarea puede modificar archivos.'
+        : task.parallelSafe
+          ? 'Puede coincidir con otra tarea: independiente y de solo lectura; dependencias cumplidas.'
+          : 'Por orden: independencia no declarada; dependencias cumplidas.';
     return true;
   }
 
   async start(): Promise<void> {
     if (this.running || this.controllers.size || this.draining || this.starting || this.planning)
       throw new ExecutionBlocked('team_busy', 'El equipo ya tiene ejecuciones activas.');
+    if (this.workflows.some((w) => w.status === 'paused'))
+      throw new ExecutionBlocked(
+        'workflow_recovery_required',
+        'El flujo interrumpido conserva sus copias y requiere revisión; no se repite.',
+      );
     this.budget();
     this.starting = true;
     const generation = this.generation;
     try {
       if (!this.deadline)
         this.deadline =
-          Date.now() + this.settings.maxMinutes * 60_000 - (this.adaptive ? this.timeUsedMs : 0);
+          Date.now() + this.settings.maxMinutes * 60_000 - (this.adaptive ? this.elapsed() : 0);
+      this.activeClock ||= Date.now();
       for (const task of this.tasks) {
         if (!['planned', 'paused', 'blocked'].includes(task.status)) continue;
         if (!task.choice || task.reasonCode) await this.assign(task.id);
@@ -729,6 +1244,14 @@ export class TeamCoordinator {
             );
         }
         this.assertAdaptivePlan();
+        this.operation = this.prepareWorkflows();
+        try {
+          await this.operation;
+        } finally {
+          this.operation = undefined;
+        }
+        if (generation !== this.generation) return;
+        this.assertAdaptivePlan();
       } catch (error) {
         this.pause(failureCode(error));
         throw error;
@@ -738,6 +1261,7 @@ export class TeamCoordinator {
       void this.drain();
     } finally {
       this.starting = false;
+      if (!this.running && !this.controllers.size) this.stopClock();
     }
   }
 
@@ -746,8 +1270,15 @@ export class TeamCoordinator {
     this.draining = true;
     try {
       while (this.running) {
+        if (!this.controllers.size) {
+          this.operation = this.integrateWorkflows();
+          await this.operation;
+          this.operation = undefined;
+          if (!this.running) break;
+        }
         if (!this.controllers.size && !this.tasks.some((task) => task.status === 'queued')) {
           this.running = false;
+          this.stopClock();
           this.deadline = 0;
           break;
         }
@@ -787,7 +1318,10 @@ export class TeamCoordinator {
         }
         break;
       }
+    } catch (error) {
+      this.pause(failureCode(error));
     } finally {
+      if (!this.running) this.stopClock();
       this.draining = false;
     }
   }
@@ -833,24 +1367,28 @@ export class TeamCoordinator {
       this.reservedRuns--;
       reserved = false;
       this.runsUsed++;
-      const context = prepareTaskContext(
-        task.role,
-        task.prompt,
-        task.context,
-        task.dependsOn.map((id) => {
-          const dep = this.task(id);
-          return { title: dep.title, output: dep.output };
-        }),
-      );
+      const context = this.taskPacket(task);
       contextCharacters = context.characters;
-      const workspaces = [
-        ...new Set(
-          [
-            task.executionProject,
-            ...task.dependsOn.map((id) => this.task(id).executionProject),
-          ].filter((p): p is string => !!p && p !== task.project),
-        ),
-      ];
+      const workflow = this.workflows.find((w) => w.id === task.workflowId);
+      const ownedWorkspace = this.workspaces.get(task.id);
+      if (ownedWorkspace) {
+        if (contextCharacters > (task.budgetReview?.maxContextCharacters ?? 90000))
+          throw new ExecutionBlocked(
+            'budget_review_required',
+            'El contexto de propiedad supera la cota revisada.',
+          );
+      }
+      const workspaces =
+        workflow && task.role === 'tester' && workflow.candidateProject
+          ? [workflow.candidateProject]
+          : [
+              ...new Set(
+                [
+                  task.executionProject,
+                  ...task.dependsOn.map((id) => this.task(id).executionProject),
+                ].filter((p): p is string => !!p && p !== task.project),
+              ),
+            ];
       if (workspaces.length > 1)
         throw new ExecutionBlocked(
           'workspace_conflict',
@@ -863,7 +1401,7 @@ export class TeamCoordinator {
       )
         this.adaptive.capture(task);
       if (this.adaptive && task.role === 'tester') {
-        const developer = task.dependsOn
+        let developer = task.dependsOn
           .map((id) => this.task(id))
           .find((t) => t.role === 'developer');
         if (!developer)
@@ -871,6 +1409,13 @@ export class TeamCoordinator {
             'review_dependency_missing',
             'La revisión necesita una implementación terminada.',
           );
+        if (workflow?.candidateProject && workflow.candidateHash)
+          developer = {
+            ...developer,
+            executionProject: workflow.candidateProject,
+            checkedRevision: workflow.candidateHash,
+            localChecks: workflow.localChecks,
+          };
         reviewPacket = this.adaptive.review(task, developer);
         // The review packet replaces developer prose; do not send duplicate histories.
         const reviewContext = prepareTaskContext(
@@ -901,6 +1446,7 @@ export class TeamCoordinator {
       dispatchedAt = Date.now();
       const result = await this.executors[provider].execute({
         officeRole: task.role,
+        ownedWorkspace,
         project: task.project,
         executionSessionKey: task.executionSessionKey ?? task.id,
         inheritedWorkspace: workspaces[0],
@@ -914,7 +1460,16 @@ export class TeamCoordinator {
           !task.allowWrites &&
           (this.executors[provider].maxConcurrentReadOnly ?? 1) > 1,
         signal: controller.signal,
-        timeoutMs: Math.max(1, Math.min(15 * 60_000, this.deadline - Date.now())),
+        timeoutMs: Math.max(
+          1,
+          Math.min(
+            15 * 60_000,
+            ownedWorkspace ? task.estimate!.durationMs! : Infinity,
+            this.deadline -
+              Date.now() -
+              (ownedWorkspace ? workflow!.budgetReview!.integrationMs : 0),
+          ),
+        ),
         maxReportedTokens: Math.max(
           1,
           Math.min(
@@ -973,7 +1528,10 @@ export class TeamCoordinator {
       if (result.inputTokens !== null && result.outputTokens !== null) {
         this.tokensUsed += result.inputTokens + result.outputTokens;
         this.maxObservedInput = Math.max(this.maxObservedInput, result.inputTokens);
-      } else this.pause('usage_unknown');
+      } else {
+        this.usageKnown = false;
+        this.pause('usage_unknown');
+      }
       if (this.tokensUsed > this.settings.maxTokens) {
         task.status = 'paused';
         task.reasonCode = 'token_budget';
@@ -1042,6 +1600,26 @@ export class TeamCoordinator {
           this.observer?.state(task, result);
         }
       }
+      if (task.status === 'completed' && ownedWorkspace && task.ownedFiles) {
+        const sealed = this.executors[provider].workspaceManager!.seal(
+          ownedWorkspace,
+          task.ownedFiles,
+        );
+        if (task.checkedRevision && task.checkedRevision !== sealed.revision.digest)
+          throw new ExecutionBlocked(
+            'workspace_result_stale',
+            'El resultado cambió tras las comprobaciones.',
+          );
+        task.checkedRevision = sealed.revision.digest;
+        this.workspaceResults.set(task.id, sealed);
+        task.output = JSON.stringify({
+          status: 'completed',
+          changedFiles: sealed.changedFiles,
+          candidateHash: sealed.revision.digest,
+          checks: task.localChecks,
+          next: 'Integrar y comprobar el conjunto.',
+        });
+      }
       if (task.status !== 'completed' && task.status !== 'cancelled')
         this.pause(task.reasonCode ?? 'execution_failed');
     } catch (error) {
@@ -1059,6 +1637,7 @@ export class TeamCoordinator {
     } finally {
       if (dispatchedAt && this.adaptive) this.timeUsedMs += Math.max(0, Date.now() - dispatchedAt);
       if (dispatchedAt && !receipt && this.adaptive) {
+        this.usageKnown = false;
         receipt = {
           version: 1,
           id: randomUUID(),
@@ -1100,6 +1679,8 @@ export class TeamCoordinator {
       if (reserved) this.reservedRuns--;
       clearTimeout(timer);
       this.controllers.delete(task.id);
+      if (!this.running && !this.controllers.size && !this.operation && !this.planning)
+        this.stopClock();
       if (!this.running && task.status === 'checking') {
         task.status = 'paused';
         task.reasonCode = this.budgetReason ?? 'user_pause';
@@ -1118,12 +1699,24 @@ export class TeamCoordinator {
   async shutdown(): Promise<void> {
     this.closed = true;
     this.pause('server_stopped');
-    await Promise.allSettled([...this.pendingRuns, ...this.pendingChecks]);
+    await Promise.allSettled([
+      ...this.pendingRuns,
+      ...this.pendingChecks,
+      ...(this.operation ? [this.operation] : []),
+    ]);
   }
 
   pause(reason = 'user_pause'): void {
     this.generation++;
     this.running = false;
+    if (!this.controllers.size && !this.operation && !this.starting && !this.planning)
+      this.stopClock();
+    this.operationController?.abort();
+    for (const workflow of this.workflows)
+      if (!['accepted', 'paused'].includes(workflow.status) && workflow.status !== 'planned') {
+        workflow.status = 'paused';
+        workflow.reasonCode = reason;
+      }
     this.budgetReason = reason;
     for (const task of this.tasks) {
       if (task.status === 'queued') {
@@ -1143,10 +1736,16 @@ export class TeamCoordinator {
     this.controllers.get(id)?.abort();
     task.status = 'cancelled';
     task.reasonCode = 'cancelled_by_user';
+    if (task.workflowId) this.pause('workflow_cancelled');
   }
 
   /** Explicit operator action; never auto-reset a budget or subscription quota. */
   resume(): void {
+    if (this.workflows.some((w) => w.status === 'paused'))
+      throw new ExecutionBlocked(
+        'workflow_recovery_required',
+        'Conserva los resultados y revisa el flujo; no se repite automáticamente.',
+      );
     if (
       [
         'usage_unknown_after_restart',
@@ -1179,7 +1778,11 @@ export class TeamCoordinator {
     project: string,
     goal: string,
     allowWrites = false,
-    local?: { context: TaskContext; assessment: TaskAssessment },
+    local?: {
+      context: TaskContext;
+      assessment: TaskAssessment;
+      decomposition?: WorkflowDecomposition;
+    },
   ): Promise<void> {
     if (this.running || this.controllers.size || this.draining || this.starting || this.planning)
       throw new ExecutionBlocked('team_busy', 'Espera a que termine el equipo para pedir un plan.');
@@ -1215,6 +1818,7 @@ export class TeamCoordinator {
               : 'partial',
           },
           allowWrites,
+          local.decomposition,
         );
         return;
       }
@@ -1227,12 +1831,17 @@ export class TeamCoordinator {
       const plannerGuide = catalog
         ? `Catálogo actual permitido (revalidado al ejecutar): ${JSON.stringify(catalog.models.filter((m) => ['gpt-6-luna', 'gpt-6.1-sol'].includes(m.id)))}. Puedes proponer choice:{provider:"codex",model,effort}, assessment:{scope,risk,uncertainty,modules,tests}, context:{objective,files,decisions,acceptance,checks} y reviewMode:"focused"|"deep" por tarea. No inventes cobertura ni comandos. Luna para código no se promociona sin evidencia. Usa Sol low para trabajo acotado y medium/high para riesgo justificado. La revisión recibe diff y pruebas, en sesión independiente. Una tarea clara puede resolverse con un solo Programador y aceptación local acreditada. No declares reservas ni permisos.\n`
         : '';
+      const decompositionGuide =
+        local && allowWrites && this.executors.codex.workspaceManager
+          ? `También puedes proponer, en vez de tasks, {"decomposition":{"sharedFiles":[],"parts":[{"title":"...","objective":"...","ownedFiles":["archivo"],"assessment":{"scope":"bounded","risk":"low","uncertainty":"low","modules":["módulo"],"tests":"available"},"context":{"objective":"...","files":["archivo"],"decisions":[],"acceptance":["criterio existente"],"checks":["id existente"]}}, {"...":"segunda parte con el mismo esquema"}]}}. Exactamente dos partes con archivos propios concretos, sin dependencias entre sí. Los contratos compartidos son solo lectura. No omitas criterios ni inventes comprobaciones. La aplicación verificará aislamiento, coste y beneficio; una propuesta no concede concurrencia. Contexto obligatorio: ${JSON.stringify(local.context)}\n`
+          : '';
       const task = this.addTask({
         role: 'chief',
         title: 'Plan del Jefe',
         project,
         prompt:
           plannerGuide +
+          decompositionGuide +
           `Divide el objetivo en 1 a 4 tareas necesarias. Decide dependencias por los resultados que necesita cada trabajo, no solo por el nombre del personaje. Si hay arquitectura debe preceder al código; la verificación QA debe esperar a la implementación. Permite hasta dos tareas independientes simultáneas (por ejemplo dos análisis que no necesitan resultados del otro). Marca parallelSafe=true SOLO cuando su independencia esté clara; si dudas usa false. Las escrituras siempre serán exclusivas. Evita reuniones y personajes innecesarios. Responde SOLO JSON: {"tasks":[{"role":"developer|tester|architect|designer","title":"título breve","prompt":"tarea concreta","dependsOn":[],"parallelSafe":false}]}. dependsOn contiene índices de tareas necesarias de esta lista, o []. No marques trabajo como realizado. No cambies diseño ni archivos. Objetivo:\n${goal}`,
       });
       // Classify the actual goal, not our schema/instructions mentioning architecture.
@@ -1247,7 +1856,8 @@ export class TeamCoordinator {
       if (!chief.choice)
         throw new ExecutionBlocked(chief.reasonCode ?? 'planning_blocked', chief.explanation);
       this.deadline ||=
-        Date.now() + this.settings.maxMinutes * 60_000 - (this.adaptive ? this.timeUsedMs : 0);
+        Date.now() + this.settings.maxMinutes * 60_000 - (this.adaptive ? this.elapsed() : 0);
+      this.activeClock ||= Date.now();
       await this.executeTask(chief);
       if (chief.status !== 'completed')
         throw new ExecutionBlocked(
@@ -1255,12 +1865,30 @@ export class TeamCoordinator {
           'El Jefe no ha podido completar el plan.',
         );
       let items: unknown;
+      let generatedDecomposition: WorkflowDecomposition | undefined;
       try {
-        items = object(
+        const parsed = object(
           JSON.parse(chief.output.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')),
-        ).tasks;
+        );
+        items = parsed.tasks;
+        generatedDecomposition = parsed.decomposition as WorkflowDecomposition | undefined;
       } catch {
         /* rejected below */
+      }
+      if (generatedDecomposition) {
+        if (items !== undefined || !local || !allowWrites || !this.executors.codex.workspaceManager)
+          throw new ExecutionBlocked(
+            'invalid_plan',
+            'La descomposición requiere alcance local acreditado y AO seleccionado.',
+          );
+        this.addScopedWorkflow(
+          project,
+          validateContext(local.context),
+          validateAssessment(local.assessment),
+          true,
+          generatedDecomposition,
+        );
+        return;
       }
       const validated = normalizeWorkflowPlan(items);
       const goalRouting = assessTask(goal, local?.assessment);
@@ -1340,7 +1968,10 @@ export class TeamCoordinator {
       throw error;
     } finally {
       this.planning = false;
-      if (!this.controllers.size && !this.running) this.deadline = 0;
+      if (!this.controllers.size && !this.running) {
+        this.stopClock();
+        this.deadline = 0;
+      }
     }
   }
 }

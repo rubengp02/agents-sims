@@ -6,8 +6,10 @@ import { dirname, isAbsolute, join, relative } from 'node:path';
 import type { TeamTask } from '../../../core/src/team.js';
 import { stopProcess } from './cliProcess.js';
 import { ExecutionBlocked } from './types.js';
+import { type OwnedWorkspace, verifiedWorkspace } from './workflowWorkspace.js';
 
 export interface CheckRunner {
+  authorizeWorkspace?(workspace: OwnedWorkspace): void;
   has(id: string): boolean;
   hasAcceptance(ids: string[]): boolean;
   covers?(ids: string[], criteria: string[]): boolean;
@@ -28,6 +30,16 @@ export interface LocalCheckCommand {
 
 /** Registry is supplied by local application code, never by a task/model/HTTP request. */
 export class LocalChecks implements CheckRunner {
+  private readonly ownedWorkspaces = new Set<string>();
+  authorizeWorkspace(workspace: OwnedWorkspace) {
+    verifiedWorkspace(workspace);
+    if (this.allowedProject && realpathSync(this.allowedProject) !== workspace.project)
+      throw new ExecutionBlocked(
+        'check_project_mismatch',
+        'Las pruebas pertenecen a otro proyecto.',
+      );
+    this.ownedWorkspaces.add(realpathSync(workspace.path));
+  }
   private readonly commands: Readonly<Record<string, LocalCheckCommand>>;
   constructor(
     commands: Record<string, LocalCheckCommand>,
@@ -51,7 +63,11 @@ export class LocalChecks implements CheckRunner {
     return criteria.length > 0 && criteria.every((criterion) => covered.has(criterion));
   }
   async run(ids: string[], project: string, signal: AbortSignal) {
-    if (this.allowedProject && realpathSync(project) !== realpathSync(this.allowedProject)) {
+    if (
+      this.allowedProject &&
+      realpathSync(project) !== realpathSync(this.allowedProject) &&
+      !this.ownedWorkspaces.has(realpathSync(project))
+    ) {
       let owned = false;
       try {
         const rel = relative(

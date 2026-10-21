@@ -40,8 +40,48 @@ export interface TaskContext {
   acceptance: string[];
   checks: string[];
 }
+export interface WorkflowPart {
+  title: string;
+  objective: string;
+  ownedFiles: string[];
+  dependsOn?: number[];
+  context: TaskContext;
+  assessment: TaskAssessment;
+}
+export interface WorkflowDecomposition {
+  parts: WorkflowPart[];
+  sharedFiles: string[];
+}
+export interface TeamWorkflow {
+  id: string;
+  project: string;
+  taskIds: string[];
+  context: TaskContext;
+  assessment: TaskAssessment;
+  sharedFiles: string[];
+  mode: 'parallel' | 'serial';
+  reason: string;
+  status: 'planned' | 'preparing' | 'working' | 'integrating' | 'accepted' | 'paused';
+  baseSHA?: string;
+  candidateProject?: string;
+  candidateHash?: string;
+  reasonCode?: string;
+  localChecks?: TeamTask['localChecks'];
+  preparationMs?: number;
+  integrationMs?: number;
+  budgetReview?: {
+    profileKey: string;
+    preparationMs: number;
+    integrationMs: number;
+    sequentialMs: number;
+  };
+}
 export interface TeamTask {
   id: string;
+  workerId?: string;
+  workflowId?: string;
+  workspaceId?: string;
+  ownedFiles?: string[];
   role: TeamRole;
   title: string;
   prompt: string;
@@ -117,5 +157,8 @@ export interface TeamSnapshot {
   tokensUsed: number;
   /** Conservative sum of dispatched work durations, including planning/checks. */
   timeUsedMs?: number;
+  elapsedMs?: number;
+  usageKnown?: boolean;
+  workflows?: TeamWorkflow[];
   budgetReason: string | null;
 }

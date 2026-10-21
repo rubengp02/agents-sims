@@ -22,6 +22,7 @@ import {
   type OfficialExecutor,
   type RunRecord,
 } from './types.js';
+import { WorkflowWorkspaceManager } from './workflowWorkspace.js';
 
 const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
 const REVISION = '1550d440b82ac9cfb3e671b060709457cdffbaea';
@@ -48,6 +49,7 @@ interface Dependencies {
 
 /** AO supplies native session/worktree infrastructure. Office policy owns all starts. */
 export class OrchestratorExecutor implements OfficialExecutor {
+  readonly workspaceManager: WorkflowWorkspaceManager;
   readonly engine = 'agent-orchestrator' as const;
   readonly provider = 'codex' as const;
   readonly maxConcurrentReadOnly = 2 as const;
@@ -68,6 +70,11 @@ export class OrchestratorExecutor implements OfficialExecutor {
     );
     this.env = deps.env ?? process.env;
     this.metadata = deps.metadata ?? new CodexExecutor(stateDir);
+    this.workspaceManager = new WorkflowWorkspaceManager(
+      join(this.local, 'workspaces'),
+      join(this.local, 'workflow-evidence'),
+      (project, id, base, signal) => this.workspace(project, id, base, signal),
+    );
   }
   private verifyBuild(): void {
     if (this.deps.verifyBuild) return this.deps.verifyBuild();
@@ -112,7 +119,15 @@ export class OrchestratorExecutor implements OfficialExecutor {
     writeFileSync(file + '.tmp', JSON.stringify(value), { mode: 0o600 });
     renameSync(file + '.tmp', file);
   }
-  private async workspace(project: string, key: string): Promise<string> {
+  private async workspace(
+    project: string,
+    key: string,
+    expectedBase?: string,
+    signal?: AbortSignal,
+  ): Promise<string> {
+    this.verifyBuild();
+    if (signal?.aborted)
+      throw new ExecutionBlocked('preparation_cancelled', 'Preparación detenida.');
     // A branch must never silently omit the user's uncommitted work.
     try {
       if (
@@ -136,6 +151,15 @@ export class OrchestratorExecutor implements OfficialExecutor {
         'El trabajo con escritura requiere un repositorio Git con un commit inicial.',
       );
     }
+    const baseRef = execFileSync('git', ['-C', project, 'rev-parse', 'HEAD'], {
+      encoding: 'utf8',
+      windowsHide: true,
+    }).trim();
+    if (expectedBase && expectedBase !== baseRef)
+      throw new ExecutionBlocked(
+        'workspace_changed_base',
+        'El proyecto cambió antes del aislamiento.',
+      );
     const child = this.launch();
     child.stdin.on('error', () => {});
     let path: string | null = null;
@@ -152,10 +176,6 @@ export class OrchestratorExecutor implements OfficialExecutor {
       }
     });
     child.stderr.on('data', () => {});
-    const baseRef = execFileSync('git', ['-C', project, 'rev-parse', 'HEAD'], {
-      encoding: 'utf8',
-      windowsHide: true,
-    }).trim();
     child.stdin.end(
       JSON.stringify({
         action: 'workspace',
@@ -167,10 +187,25 @@ export class OrchestratorExecutor implements OfficialExecutor {
         baseRef,
       }) + '\n',
     );
-    const code = await new Promise<number | null>((resolve, reject) => {
-      child.once('error', reject);
-      child.once('close', resolve);
-    });
+    const abort = () => {
+      void stopProcess(child);
+    };
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) abort();
+    let code: number | null;
+    try {
+      code = await new Promise<number | null>((resolve, reject) => {
+        child.once('error', reject);
+        child.once('close', resolve);
+      });
+    } finally {
+      signal?.removeEventListener('abort', abort);
+    }
+    if (signal?.aborted)
+      throw new ExecutionBlocked(
+        'preparation_cancelled',
+        'Preparación cancelada; se conserva la evidencia.',
+      );
     if (code !== 0 || invalid || !path)
       throw new ExecutionBlocked(
         'ao_workspace_failed',
@@ -198,6 +233,14 @@ export class OrchestratorExecutor implements OfficialExecutor {
         'Revisa el encargo y los permisos del personaje.',
       );
     const project = realpathSync(options.project);
+    if (options.ownedWorkspace) {
+      this.workspaceManager.require(options.ownedWorkspace);
+      if (!options.allowWrites || options.ownedWorkspace.project !== project)
+        throw new ExecutionBlocked(
+          'workspace_unowned',
+          'El espacio no pertenece a este encargo de escritura.',
+        );
+    }
     const key = hash(
       JSON.stringify([
         project,
@@ -233,6 +276,7 @@ export class OrchestratorExecutor implements OfficialExecutor {
       this.stateDir,
       key,
       options.parallelReadOnly === true && !options.allowWrites,
+      options.ownedWorkspace,
     );
     let child: ChildProcessWithoutNullStreams | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -272,8 +316,13 @@ export class OrchestratorExecutor implements OfficialExecutor {
       }
       const workspace =
         session?.workspace ??
+        options.ownedWorkspace?.path ??
         inherited ??
-        (options.allowWrites ? await this.workspace(project, key) : project);
+        (options.allowWrites
+          ? await this.workspace(project, key, undefined, options.signal)
+          : project);
+      if (options.ownedWorkspace && workspace !== options.ownedWorkspace.path)
+        throw new ExecutionBlocked('ao_session_scope', 'La sesión apunta a otra copia de trabajo.');
       session ??= {
         version: 1,
         project,

@@ -58,6 +58,12 @@ func main() {
 		if strings.Contains(text, "FIXTURE_WRITE") && policy["type"] == "workspaceWrite" {
 			_ = os.WriteFile("output.txt", []byte("isolated fixture output"), 0600)
 		}
+		for _, name := range []string{"a", "b"} {
+			if strings.Contains(text, "FIXTURE_PART_"+name) && policy["type"] == "workspaceWrite" {
+				time.Sleep(300 * time.Millisecond)
+				_ = os.WriteFile(name+".txt", []byte(name+" ready"), 0600)
+			}
+		}
 		file := filepath.Join(".", ".fixture-usage.json")
 		n := 0
 		if b, e := os.ReadFile(file); e == nil {

@@ -139,6 +139,11 @@ export class CodexExecutor implements OfficialExecutor {
   }
 
   async execute(options: ExecuteOptions): Promise<RunRecord> {
+    if (options.ownedWorkspace)
+      throw new ExecutionBlocked(
+        'isolated_engine_required',
+        'Selecciona AO para escritores aislados; no se cambia de motor automáticamente.',
+      );
     if (
       options.maxReportedTokens !== undefined &&
       (!Number.isSafeInteger(options.maxReportedTokens) || options.maxReportedTokens < 1)

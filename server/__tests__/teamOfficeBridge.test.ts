@@ -50,6 +50,23 @@ function harness() {
 }
 
 describe('execution to existing office bridge', () => {
+  it('keeps two real worker instances of the same role independent without changing sprites', () => {
+    const h = harness();
+    const a = { ...h.task, workerId: 'worker-a' },
+      b = { ...h.task, id: 'other-task', workerId: 'worker-b' };
+    const first = h.bridge.state(a, h.record)!;
+    const second = h.bridge.state(b, { ...h.record, id: 'other-run', sessionId: 'other-session' })!;
+    expect(first).not.toBe(second);
+    h.bridge.activity(a, 'working');
+    h.bridge.activity(b, 'reading');
+    expect([...h.store.get(first)!.activeToolNames.values()]).toContain('Edit');
+    expect([...h.store.get(second)!.activeToolNames.values()]).toContain('Read');
+    h.bridge.state(a, { ...h.record, status: 'completed' });
+    expect(h.store.get(first)!.isWaiting).toBe(true);
+    expect(h.store.get(second)!.isWaiting).toBe(false);
+    const bridge = new TeamOfficeBridge(h.store, h.runtime);
+    expect(bridge.state(b, { ...h.record, sessionId: 'other-session' })).toBe(second);
+  });
   it('does not remove a managed role when external observation hooks are disabled', () => {
     vi.useFakeTimers();
     const h = harness();

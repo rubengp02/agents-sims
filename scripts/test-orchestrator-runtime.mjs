@@ -87,6 +87,79 @@ const check = async (name, run) => {
 };
 try {
   await check(
+    'two scoped AO writers use the same base and integrate in a third real worktree',
+    async () => {
+      const repo = path.join(testRoot, 'parallel-repo');
+      fs.mkdirSync(repo);
+      command('git', ['init', '--initial-branch=main', repo]);
+      fs.writeFileSync(path.join(repo, '.gitignore'), '.fixture*\n');
+      fs.writeFileSync(path.join(repo, 'base.txt'), 'base');
+      command('git', ['add', '.'], repo);
+      command(
+        'git',
+        [
+          '-c',
+          'user.name=Fixture',
+          '-c',
+          'user.email=fixture@example.invalid',
+          'commit',
+          '-m',
+          'base',
+        ],
+        repo,
+      );
+      const ex = executor(),
+        manager = ex.workspaceManager;
+      const workflowId = 'native-' + randomUUID().slice(0, 8);
+      const a = await manager.prepare(repo, workflowId, 'a'),
+        b = await manager.prepare(repo, workflowId, 'b', a.baseSHA);
+      const records = await Promise.all(
+        [a, b].map((handle) =>
+          ex.execute({
+            project: repo,
+            ownedWorkspace: handle,
+            prompt: 'FIXTURE_PART_' + handle.workerId,
+            officeRole: 'developer',
+            allowWrites: true,
+            executionSessionKey: 'parallel-' + handle.workerId,
+          }),
+        ),
+      );
+      assert(records.every((r) => r.status === 'completed' && r.subscriptionCheckedAt));
+      assert.equal(a.baseSHA, b.baseSHA);
+      const checks = new LocalChecks(
+        {
+          joint: {
+            executable: process.execPath,
+            args: [
+              '-e',
+              "const fs=require('node:fs');for(const n of ['a','b'])if(fs.readFileSync(n+'.txt','utf8')!==n+' ready')process.exit(1)",
+            ],
+            timeoutMs: 5000,
+            acceptance: true,
+          },
+        },
+        path.join(testRoot, 'parallel-checks'),
+        repo,
+      );
+      const workflow = {
+        id: workflowId,
+        project: repo,
+        baseSHA: a.baseSHA,
+        context: { checks: ['joint'] },
+      };
+      const target = await manager.integrate(
+        workflow,
+        [manager.seal(a, ['a.txt']), manager.seal(b, ['b.txt'])],
+        checks,
+        new AbortController().signal,
+      );
+      assert.equal(new Set([a.path, b.path, target.path]).size, 3);
+      assert.equal(fs.existsSync(path.join(repo, 'a.txt')), false);
+      assert(workflow.localChecks.every((c) => c.passed));
+    },
+  );
+  await check(
     'completed-only, streamed-and-completed and delta-only messages settle once',
     async () => {
       for (const shape of ['FIXTURE_COMPLETE_ONLY', 'FIXTURE_BOTH', 'FIXTURE_DELTA_ONLY']) {

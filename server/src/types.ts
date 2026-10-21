@@ -3,6 +3,7 @@ import type * as vscode from 'vscode';
 export interface AgentState {
   /** Managed role characters belong to the current queue, not transcript restoration. */
   officeRole?: import('../../core/src/team.js').TeamRole;
+  officeWorkerId?: string;
   id: number;
   sessionId: string;
   /** Terminal reference — undefined for extension panel sessions */

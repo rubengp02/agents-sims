@@ -1,5 +1,6 @@
 import type { TeamRole } from '../../../core/src/team.js';
 import type { ExecutionMetrics } from './executionMetrics.js';
+import type { OwnedWorkspace, WorkflowWorkspaceManager } from './workflowWorkspace.js';
 
 export type ProviderId = 'codex' | 'claude' | 'antigravity';
 export type RunStatus =
@@ -58,6 +59,8 @@ export interface RunRecord {
 }
 
 export interface ExecuteOptions {
+  /** In-process capability. Never reconstructed from request JSON. */
+  ownedWorkspace?: OwnedWorkspace;
   officeRole?: TeamRole;
   project: string;
   prompt: string;
@@ -83,6 +86,7 @@ export interface ExecuteOptions {
 
 /** Only local official CLIs may implement this contract. No Google client exists. */
 export interface OfficialExecutor {
+  readonly workspaceManager?: WorkflowWorkspaceManager;
   readonly provider: ProviderId;
   readonly engine?: 'codex-cli' | 'agent-orchestrator';
   readonly maxConcurrentReadOnly?: 1 | 2;

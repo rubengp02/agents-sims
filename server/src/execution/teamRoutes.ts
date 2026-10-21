@@ -7,6 +7,7 @@ import type {
   TaskContext,
   TeamChoice,
   TeamSettings,
+  WorkflowDecomposition,
 } from '../../../core/src/team.js';
 import { object } from './subscriptionPolicy.js';
 import type { TeamCoordinator } from './teamCoordinator.js';
@@ -72,6 +73,7 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
         body.context as TaskContext,
         body.assessment as TaskAssessment,
         body.allowWrites as boolean | undefined,
+        body.decomposition as WorkflowDecomposition | undefined,
       );
       return team.snapshot();
     });
@@ -95,6 +97,16 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
         body.tokens as number,
         body.durationMs as number,
         body.maxContextCharacters as number,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/workflow-budget-review', async (request) => {
+      const body = object(request.body);
+      team.reviewWorkflowBudget(
+        String(body.id),
+        body.preparationMs as number,
+        body.integrationMs as number,
+        body.sequentialMs as number,
       );
       return team.snapshot();
     });
@@ -142,6 +154,7 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
             ? {
                 context: body.context as TaskContext,
                 assessment: body.assessment as TaskAssessment,
+                decomposition: body.decomposition as WorkflowDecomposition | undefined,
               }
             : undefined,
         )

@@ -15,15 +15,22 @@ export class TeamOfficeBridge implements TeamObserver {
   ) {}
 
   state(task: TeamTask, record: Readonly<RunRecord>): number | null {
-    let id = this.ids.get(task.role);
+    const key = `${task.role}:${task.workerId ?? `role-${task.role}`}`;
+    let id = this.ids.get(key);
     if (!id || !this.store.has(id))
-      id = [...this.store.values()].find((agent) => agent.officeRole === task.role)?.id;
+      id = [...this.store.values()].find(
+        (agent) =>
+          agent.officeRole === task.role &&
+          (agent.officeWorkerId === key ||
+            (!agent.officeWorkerId && (!task.workerId || task.workerId === `role-${task.role}`))),
+      )?.id;
     if (record.status !== 'running' && (!id || !this.store.has(id))) return null;
     if (!id || !this.store.has(id)) {
       id = this.store.nextAgentId.current++;
       const agent: AgentState = {
         id,
         officeRole: task.role,
+        officeWorkerId: key,
         sessionId: record.sessionId ?? `managed-${record.id}`,
         isExternal: true,
         projectDir: task.project,
@@ -50,9 +57,9 @@ export class TeamOfficeBridge implements TeamObserver {
         maxContextTokens: DEFAULT_MAX_CONTEXT_TOKENS,
       };
       this.store.set(id, agent);
-      this.ids.set(task.role, id);
+      this.ids.set(key, id);
     }
-    this.ids.set(task.role, id);
+    this.ids.set(key, id);
     const agent = this.store.get(id)!;
     if (record.sessionId) {
       // The transcript can be noticed just before thread.started reaches stdout.
@@ -90,7 +97,7 @@ export class TeamOfficeBridge implements TeamObserver {
   }
 
   activity(task: TeamTask, activity: 'thinking' | 'reading' | 'working'): void {
-    const id = this.ids.get(task.role);
+    const id = this.ids.get(`${task.role}:${task.workerId ?? `role-${task.role}`}`);
     const agent = id === undefined ? undefined : this.store.get(id);
     if (!agent || id === undefined) return;
     this.store.broadcast({ type: 'agentToolsClear', id });

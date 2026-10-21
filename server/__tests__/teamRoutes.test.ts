@@ -48,6 +48,21 @@ async function harness() {
 }
 
 describe('local team HTTP control', () => {
+  it('protects decomposition and integration-budget routes with the same local control nonce', async () => {
+    const h = await harness();
+    for (const url of ['/api/team/scope', '/api/team/workflow-budget-review']) {
+      const response = await h.app.inject({ method: 'POST', url, headers: h.headers, payload: {} });
+      expect(response.statusCode).toBe(403);
+    }
+    const result = await h.app.inject({
+      method: 'POST',
+      url: '/api/team/workflow-budget-review',
+      headers: h.control,
+      payload: { id: 'unknown', preparationMs: 1000, integrationMs: 1000, sequentialMs: 5000 },
+    });
+    expect(result.statusCode).toBe(409);
+    expect(h.execute).not.toHaveBeenCalled();
+  });
   it('opening the office reads state without launching or probing models', async () => {
     const h = await harness();
     const response = await h.app.inject({ url: '/api/team', headers: h.headers });
