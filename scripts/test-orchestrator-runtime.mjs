@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const local = path.join(root, '.local-office/agent-orchestrator');
-const go = path.join(local, 'toolchain/go/bin', process.platform === 'win32' ? 'go.exe' : 'go');
+const go = process.platform === 'win32' ? path.join(local, 'toolchain/go/bin/go.exe') : 'go';
 const fake = path.join(
   local,
   'bin',

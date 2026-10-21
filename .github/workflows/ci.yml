@@ -3,6 +3,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -231,6 +232,39 @@ jobs:
           done
           exit "$failed"
 
+  agent-runtime:
+    name: Agent runtime (sin inferencia)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Setup Go fijado
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.27.3'
+          cache: false
+      - name: Install Dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Prepare pinned AO (no model)
+        run: npm run engine:prepare
+      - name: Verify application, policy, supervision, native AO, 72 cases and standalone
+        run: npm run parallel:verify
+      - name: Write scope
+        if: always()
+        run: |
+          echo '## Agent runtime: proveedores simulados, sin inferencia ni API de pago' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Incluye recuperacion, AO nativo, matriz de 72 casos y navegador. El job es obligatorio.' >> "$GITHUB_STEP_SUMMARY"
+
   npm-package-node20:
     name: npm Package Smoke (Node 20)
     runs-on: ubuntu-latest
@@ -434,6 +468,7 @@ jobs:
       - ci
       - npm-package-node20
       - e2e
+      - agent-runtime
     runs-on: ubuntu-latest
     steps:
       - name: Verify all required jobs succeeded
@@ -441,9 +476,11 @@ jobs:
           echo "ci=${{ needs.ci.result }}"
           echo "npm-package-node20=${{ needs.npm-package-node20.result }}"
           echo "e2e=${{ needs.e2e.result }}"
+          echo "agent-runtime=${{ needs.agent-runtime.result }}"
           if [ "${{ needs.ci.result }}" != "success" ] \
             || [ "${{ needs.npm-package-node20.result }}" != "success" ] \
-            || [ "${{ needs.e2e.result }}" != "success" ]; then
+            || [ "${{ needs.e2e.result }}" != "success" ] \
+            || [ "${{ needs.agent-runtime.result }}" != "success" ]; then
             echo "::error::One or more required jobs did not succeed"
             exit 1
           fi
