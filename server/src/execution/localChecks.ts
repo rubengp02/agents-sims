@@ -1,7 +1,7 @@
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { closeSync, existsSync, mkdirSync, openSync, realpathSync } from 'node:fs';
-import { isAbsolute, join } from 'node:path';
+import { dirname, isAbsolute, join, relative } from 'node:path';
 
 import type { TeamTask } from '../../../core/src/team.js';
 import { stopProcess } from './cliProcess.js';
@@ -40,11 +40,35 @@ export class LocalChecks implements CheckRunner {
     return ids.some((id) => this.has(id) && this.commands[id].acceptance === true);
   }
   async run(ids: string[], project: string, signal: AbortSignal) {
-    if (this.allowedProject && realpathSync(project) !== realpathSync(this.allowedProject))
-      throw new ExecutionBlocked(
-        'check_project_mismatch',
-        'Las comprobaciones pertenecen a otro proyecto.',
-      );
+    if (this.allowedProject && realpathSync(project) !== realpathSync(this.allowedProject)) {
+      let owned = false;
+      try {
+        const rel = relative(
+          realpathSync(join(this.allowedProject, '.local-office/agent-orchestrator/workspaces')),
+          realpathSync(project),
+        );
+        const common = (dir: string) =>
+          realpathSync(
+            execFileSync(
+              'git',
+              ['-C', dir, 'rev-parse', '--path-format=absolute', '--git-common-dir'],
+              { encoding: 'utf8', windowsHide: true },
+            ).trim(),
+          );
+        owned =
+          !!rel &&
+          !rel.startsWith('..') &&
+          !isAbsolute(rel) &&
+          common(project) === common(this.allowedProject);
+      } catch {
+        /* Unknown workspace ownership never authorizes a check. */
+      }
+      if (!owned)
+        throw new ExecutionBlocked(
+          'check_project_mismatch',
+          'Las comprobaciones pertenecen a otro proyecto.',
+        );
+    }
     if (ids.some((id) => !this.has(id)))
       throw new ExecutionBlocked('check_unconfigured', 'Comprobación local no configurada.');
     const results: NonNullable<TeamTask['localChecks']> = [];
@@ -93,7 +117,8 @@ export class LocalChecks implements CheckRunner {
 /** Existing project scripts, configured by this local launcher, not by the model. */
 export function pixelOfficeChecks(
   project: string,
-  npmCli = process.env.npm_execpath,
+  npmCli = process.env.npm_execpath ??
+    join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'),
 ): LocalChecks | undefined {
   if (
     !npmCli ||

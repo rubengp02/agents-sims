@@ -47,6 +47,8 @@ export interface TeamTask {
   assessment?: TaskAssessment;
   localChecks?: Array<{ id: string; exitCode: number | null; durationMs: number; passed: boolean }>;
   project: string;
+  executionProject?: string;
+  executionSessionKey?: string;
   dependsOn: string[];
   allowWrites: boolean;
   parallelSafe: boolean;

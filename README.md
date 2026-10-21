@@ -5,6 +5,7 @@ Oficina visual de agentes con ejecución local de Codex mediante la suscripción
 - [Guía de uso en español](LEEME-PRIMERO.md).
 - [Instalación y requisitos](docs/INSTALACION_LOCAL.md).
 - [Equipo, asignaciones y límites](docs/EQUIPO_MULTIAGENTE.md).
+- [Integración candidata de Agent Orchestrator y estado de aceptación](reports/agent-orchestrator/ESTADO.md).
 - [Resultados medidos de la comparación con Codex](reports/comparacion-codex/v2/RESULTADOS_REALES.md). La comparación todavía no demuestra una ventaja general del equipo.
 
 Para instalar desde la raíz: `npm ci` y `npm run package`. En Windows, abre `ABRIR-OFICINA.cmd`; usa `CERRAR-OFICINA.cmd` para apagarla. Node.js 20 o superior; la ejecución de tareas requiere Codex CLI oficial y su comprobación de suscripción. Claude permanece desactivado y Antigravity sin conectar.

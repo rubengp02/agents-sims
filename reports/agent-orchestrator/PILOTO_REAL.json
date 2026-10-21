@@ -1,0 +1,445 @@
+{
+  "protocol": "ao-integration-pilot-v1",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 400000,
+    "perMethodTokens": 200000,
+    "perMethodMs": 240000,
+    "totalMs": 480000,
+    "perRunMs": 180000,
+    "minReserve": 20000
+  },
+  "sourceFingerprint": "0dd4857cc926924141702b8520d7756b48e0d9cab23dfa69f75b67826e13d9a7",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "realInference": true,
+  "runs": [
+    {
+      "method": "direct",
+      "role": "developer",
+      "status": "completed",
+      "reason": null,
+      "inputTokens": 57503,
+      "outputTokens": 2189,
+      "cachedInputTokens": 46208,
+      "durationMs": 61538,
+      "sessionMode": "new",
+      "subscriptionVerified": true,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null
+    },
+    {
+      "method": "office",
+      "role": "architect",
+      "status": "completed",
+      "reason": null,
+      "inputTokens": 42862,
+      "outputTokens": 981,
+      "cachedInputTokens": 31744,
+      "durationMs": 38146,
+      "sessionMode": "new",
+      "subscriptionVerified": true,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null
+    }
+  ],
+  "methods": [
+    {
+      "method": "direct",
+      "initialHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "status": "accepted",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 72
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "mechanical": [
+        {
+          "id": "public-tests",
+          "exitCode": 0,
+          "durationMs": 125,
+          "passed": true
+        }
+      ],
+      "tokens": 59692,
+      "durationMs": 61989,
+      "roles": []
+    },
+    {
+      "method": "office",
+      "initialHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "status": "not-accepted",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": false
+          },
+          {
+            "id": "parse-overflow",
+            "passed": false
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": false
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": false
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": false
+          },
+          {
+            "id": "discount-type",
+            "passed": false
+          },
+          {
+            "id": "discount-range-0",
+            "passed": false
+          },
+          {
+            "id": "discount-range-1",
+            "passed": false
+          },
+          {
+            "id": "discount-range-2",
+            "passed": false
+          },
+          {
+            "id": "discount-range-3",
+            "passed": false
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": false
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "parse-invalid-0",
+          "parse-invalid-1",
+          "parse-invalid-2",
+          "parse-invalid-3",
+          "parse-invalid-4",
+          "parse-invalid-5",
+          "parse-invalid-6",
+          "parse-invalid-7",
+          "parse-invalid-8",
+          "parse-invalid-9",
+          "parse-invalid-10",
+          "parse-overflow",
+          "half-up",
+          "sum-overflow",
+          "quantity-type",
+          "quantity-range-0",
+          "quantity-range-1",
+          "quantity-range-2",
+          "quantity-range-3",
+          "quantity-range-4",
+          "discount-type",
+          "discount-range-0",
+          "discount-range-1",
+          "discount-range-2",
+          "discount-range-3",
+          "generated-integer-cases"
+        ],
+        "durationMs": 88
+      },
+      "changes": {
+        "changed": [],
+        "unexpected": [],
+        "passed": true
+      },
+      "mechanical": [
+        {
+          "id": "public-tests",
+          "exitCode": 1,
+          "durationMs": 134,
+          "passed": false
+        }
+      ],
+      "tokens": 43843,
+      "durationMs": 43030,
+      "roles": [
+        {
+          "role": "architect",
+          "status": "blocked",
+          "reason": "task_result_unverified"
+        },
+        {
+          "role": "developer",
+          "status": "paused",
+          "reason": "task_result_unverified"
+        },
+        {
+          "role": "tester",
+          "status": "paused",
+          "reason": "task_result_unverified"
+        }
+      ]
+    }
+  ],
+  "repairs": 0,
+  "status": "completed",
+  "reason": null,
+  "totalTokens": 103535,
+  "durationMs": 105084
+}

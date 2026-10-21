@@ -52,6 +52,7 @@ export async function loadTools() {
         'export * from "./server/src/execution/taskAssessment.ts";',
         'export * from "./server/src/execution/localChecks.ts";',
         'export * from "./server/src/execution/codexExecutor.ts";',
+        'export * from "./server/src/execution/orchestratorExecutor.ts";',
         'export * from "./server/src/execution/cliProcess.ts";',
         'export * from "./server/src/execution/teamCoordinator.ts";',
         'export * from "./server/src/execution/optionalExecutors.ts";',

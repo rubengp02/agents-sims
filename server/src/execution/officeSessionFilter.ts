@@ -18,6 +18,7 @@ export class OfficeSessionFilter {
     } catch {
       return false;
     }
+    let latest: { updatedAt: number; status: string; officeRole: string } | null = null;
     for (const name of names) {
       if (!/^[\da-f-]{36}\.json$/i.test(name)) continue;
       try {
@@ -32,19 +33,25 @@ export class OfficeSessionFilter {
           record.sessionId !== sessionId
         )
           continue;
-        const terminal = ['completed', 'failed', 'cancelled', 'blocked', 'paused'].includes(
-          record.status,
-        );
-        if (!terminal) return Object.hasOwn(TEAM_ROLES, record.officeRole);
-        // A later manual continuation is a real external session. Only suppress
-        // replay of the finished office run, not future user work in that chat.
-        if (transcript && Number.isFinite(record.updatedAt)) {
-          if (statSync(transcript).mtimeMs > record.updatedAt + 2000) return false;
-        }
-        return true;
+        if (!Number.isFinite(record.updatedAt)) continue;
+        if (!latest || record.updatedAt >= latest.updatedAt) latest = record;
       } catch {
         // Invalid/missing receipts cannot classify an unrelated external chat.
       }
+    }
+    if (latest) {
+      const terminal = ['completed', 'failed', 'cancelled', 'blocked', 'paused'].includes(
+        latest.status,
+      );
+      if (!terminal) return Object.hasOwn(TEAM_ROLES, latest.officeRole);
+      // A native conversation can have multiple receipts. Decide from its latest
+      // turn, so an older terminal receipt cannot duplicate a resumed character.
+      try {
+        if (transcript && statSync(transcript).mtimeMs > latest.updatedAt + 2000) return false;
+      } catch {
+        return false;
+      }
+      return true;
     }
     return false;
   }

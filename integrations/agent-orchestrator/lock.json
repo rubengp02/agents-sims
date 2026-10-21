@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/OrchestratorInc/agent-orchestrator.git",
+  "revision": "1550d440b82ac9cfb3e671b060709457cdffbaea",
+  "license": "Apache-2.0",
+  "protocol": 1,
+  "mode": "restricted-native-runtime",
+  "providers": ["codex"],
+  "goVersion": "go1.27.3"
+}

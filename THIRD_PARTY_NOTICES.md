@@ -25,3 +25,19 @@ new local queue. Its credential readers, direct HTTP provider requests, API/OAut
 storage, autonomous meetings and UI artwork were not incorporated.
 
 The rest of the existing Pixel Office project retains its original notices.
+
+## Agent Orchestrator
+
+Project: https://github.com/OrchestratorInc/agent-orchestrator
+
+Revision: `1550d440b82ac9cfb3e671b060709457cdffbaea`, Apache License 2.0.
+A copy is included at `licenses/Agent-Orchestrator-Apache-2.0.txt`.
+
+`integrations/agent-orchestrator/` builds a restricted bridge against the original
+native Codex conversation driver and Git worktree adapter. `office_driver.go`
+adds an opt-in constructor and adapts the original `spawnAppServer` pipe lifecycle:
+it fixes the official provider, disables plugins and nested agents, and keeps the
+provider tied to the owned bridge process. Original source files remain unchanged.
+The official source checkout and compiled binaries stay in ignored local storage.
+No upstream desktop artwork is incorporated. No account-switching, credit-reset,
+cloud, automatic-review or scheduled-execution service is exposed by the bridge.

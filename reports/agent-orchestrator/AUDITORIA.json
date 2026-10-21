@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-21",
+  "engineDefault": "codex-cli",
+  "promotionAccepted": false,
+  "integration": "restricted AO native session and worktree adapters; office coordinator retained",
+  "realPilot": {
+    "runs": 2,
+    "totalTokens": 103535,
+    "durationMs": 105084,
+    "results": [
+      {
+        "method": "direct",
+        "status": "accepted",
+        "tokens": 59692,
+        "durationMs": 61989,
+        "qualityPassed": 36,
+        "qualityTotal": 36
+      },
+      {
+        "method": "office",
+        "status": "not-accepted",
+        "tokens": 43843,
+        "durationMs": 43030,
+        "qualityPassed": 10,
+        "qualityTotal": 36
+      }
+    ],
+    "nativeReplyAudit": {
+      "nativeAssistantReplyFound": true,
+      "finalLine": "OFFICE_RESULT {\"status\":\"completed\"}",
+      "nativeUsage": 43843,
+      "capturedOfficeReplyCharacters": 0,
+      "inferenceCallsDuringAudit": 0
+    }
+  },
+  "repairsAfterPilot": [
+    "Correct message delta field (Delta, not Text)",
+    "Settle completed messages and fall back to deltas without duplicates",
+    "Do not inherit the original project as if it were a managed worktree"
+  ],
+  "realRerunsAfterRepair": 0,
+  "upstreamWindowsTests": {
+    "passed": false,
+    "limitations": [
+      "POSIX /tmp/ws fixtures fail absolute-path validation on Windows",
+      "Remoteless repository error text assertion differs on Windows",
+      "Symlink creation requires an unavailable Windows privilege"
+    ]
+  },
+  "failedLocalAttempts": [
+    "Initial Go compilation used an incorrect upstream constant; corrected to KindWorker",
+    "Initial TypeScript compilation had an extra parenthesis; fixed",
+    "Vitest invoked from the wrong root found no test files; rerun from server",
+    "Timeout cause was overwritten by later shutdown frames; preserve first failure",
+    "Workspace fixture omitted allowWrites; corrected fixture",
+    "AO workspace creation lacked a branch and used HEAD as a branch name; pass managed branch and exact commit SHA",
+    "Pilot preparation missed fileURLToPath import and used reversed acceptance arguments; fixed before inference",
+    "Completed-message fixture exposed the incorrect Delta field; corrected",
+    "Full compiled pipeline exposed original-project workspace inheritance; corrected"
+  ]
+}

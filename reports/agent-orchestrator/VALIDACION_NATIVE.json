@@ -1,0 +1,34 @@
+{
+  "inferenceCalls": 0,
+  "provider": "compiled local protocol fixture",
+  "engine": "real pinned Agent Orchestrator modules",
+  "checks": [
+    {
+      "name": "completed-only, streamed-and-completed and delta-only messages settle once",
+      "passed": true,
+      "durationMs": 330
+    },
+    {
+      "name": "native protocol start and explicit resume after restart, cumulative cache accounting",
+      "passed": true,
+      "durationMs": 209
+    },
+    {
+      "name": "real AO worktree preserves source and sends tester to the changed workspace",
+      "passed": true,
+      "durationMs": 1234
+    },
+    {
+      "name": "unknown native usage pauses and a second attempt remains blocked",
+      "passed": true,
+      "durationMs": 139
+    },
+    {
+      "name": "full office workflow on compiled AO: diagnosis, isolated implementation, independent mechanical acceptance",
+      "passed": true,
+      "durationMs": 1783
+    }
+  ],
+  "failures": [],
+  "subscriptionVerificationsSimulated": 28
+}

@@ -48,7 +48,9 @@ export interface RunRecord {
   cliVersion?: string;
   subscriptionCheckedAt?: number;
   contextFingerprint?: string;
-  sessionMode?: 'new';
+  sessionMode?: 'new' | 'resume';
+  engine?: 'codex-cli' | 'agent-orchestrator';
+  executionProject?: string;
   toolCalls?: number;
 }
 
@@ -65,6 +67,10 @@ export interface ExecuteOptions {
   /** Observed CLI usage, checked at turn completion; not a provider generation cap. */
   maxReportedTokens?: number;
   contextFingerprint?: string;
+  /** Stable ownership key; continuing a character alone never resumes a conversation. */
+  executionSessionKey?: string;
+  /** Workspace returned by a completed dependency, never a caller-chosen extra root. */
+  inheritedWorkspace?: string;
   signal?: AbortSignal;
   onOutput?: (text: string) => void;
   onState?: (record: Readonly<RunRecord>) => void;

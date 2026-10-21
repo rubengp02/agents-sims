@@ -22,7 +22,7 @@ import type { AssetCache, ReloadAssetsSideEffect } from './clientMessageHandler.
 import { readConfig } from './configPersistence.js';
 import { MAX_PORT, MIN_PORT } from './constants.js';
 import { ClaudeExecutor } from './execution/claudeExecutor.js';
-import { CodexExecutor } from './execution/codexExecutor.js';
+import { createOfficeExecutor } from './execution/engine.js';
 import { pixelOfficeChecks } from './execution/localChecks.js';
 import { OfficeSessionFilter } from './execution/officeSessionFilter.js';
 import { TeamCoordinator } from './execution/teamCoordinator.js';
@@ -160,12 +160,14 @@ async function main(): Promise<void> {
     });
     const team: TeamCoordinator = new TeamCoordinator(
       {
-        codex: new CodexExecutor(executionDirectory),
+        codex: createOfficeExecutor(process.cwd(), executionDirectory),
         claude: new ClaudeExecutor(() => team.snapshot().settings.claudeEnabled),
       },
       path.resolve('.local-office', 'team-settings.json'),
       new TeamOfficeBridge(store, runtime),
       pixelOfficeChecks(process.cwd()),
+      undefined,
+      path.resolve('.local-office', 'team-checkpoint.json'),
     );
     console.log(`[Pixel Agents] Enabled providers: ${providers.map((p) => p.id).join(', ')}`);
 

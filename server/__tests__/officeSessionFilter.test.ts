@@ -54,6 +54,23 @@ describe('office-owned sessions are not duplicated by observation', () => {
     expect(h.filter.shouldIgnore('codex', 'owned', h.transcript)).toBe(false);
     expect(h.filter.shouldIgnore('codex', 'owned')).toBe(false);
   });
+  it('uses the latest receipt when a native session is explicitly resumed', () => {
+    const h = harness();
+    utimesSync(h.transcript, (h.now + 10000) / 1000, (h.now + 10000) / 1000);
+    writeFileSync(
+      join(h.root, '00000000-0000-0000-0000-000000000002.json'),
+      JSON.stringify({
+        version: 1,
+        provider: 'codex',
+        billing: 'subscription-only',
+        sessionId: 'owned',
+        status: 'running',
+        officeRole: 'architect',
+        updatedAt: h.now + 10000,
+      }),
+    );
+    expect(h.filter.shouldIgnore('codex', 'owned', h.transcript)).toBe(true);
+  });
   it('does not classify invalid receipts or unrelated JSON as office ownership', () => {
     const h = harness();
     writeFileSync(h.file, 'invalid');

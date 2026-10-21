@@ -41,6 +41,7 @@ type TaskInput = {
   parallelSafe?: boolean;
   context?: TaskContext;
   assessment?: TaskAssessment;
+  continueTaskId?: string;
 };
 export interface TeamObserver {
   state(task: TeamTask, record: Readonly<RunRecord>): number | null;
@@ -88,6 +89,7 @@ export class TeamCoordinator {
     private readonly checks?: CheckRunner,
     /** Optional local scheduling estimate; actual usage and maxTokens still govern. */
     private readonly startupTokenReserve?: number,
+    private readonly checkpointFile?: string,
   ) {
     if (
       startupTokenReserve !== undefined &&
@@ -107,9 +109,71 @@ export class TeamCoordinator {
         this.budgetReason = 'settings_invalid';
       }
     }
+    if (checkpointFile && existsSync(checkpointFile)) {
+      try {
+        const saved = JSON.parse(readFileSync(checkpointFile, 'utf8'));
+        if (
+          saved.version !== 1 ||
+          !Array.isArray(saved.tasks) ||
+          saved.tasks.length > 100 ||
+          ![saved.runsUsed, saved.tokensUsed, saved.maxObservedInput].every(
+            (n) => Number.isSafeInteger(n) && n >= 0,
+          )
+        )
+          throw new Error();
+        let interrupted = false;
+        for (const raw of saved.tasks as TeamTask[]) {
+          if (
+            typeof raw.id !== 'string' ||
+            !/^[\w-]{1,100}$/.test(raw.id) ||
+            typeof raw.output !== 'string' ||
+            raw.output.length > 20_000 ||
+            this.tasks.some((t) => t.id === raw.id)
+          )
+            throw new Error();
+          this.addTask({ ...raw, continueTaskId: undefined });
+          const task = this.tasks.at(-1)!;
+          task.id = raw.id;
+          task.output = raw.output;
+          task.executionProject = raw.executionProject;
+          task.executionSessionKey = raw.executionSessionKey;
+          task.runId = raw.runId;
+          const settled = ['completed', 'failed', 'cancelled'].includes(raw.status);
+          interrupted ||= ['running', 'checking'].includes(raw.status);
+          task.status = settled ? raw.status : 'paused';
+          task.reasonCode = settled ? raw.reasonCode : 'server_restarted';
+          task.localChecks = raw.localChecks;
+        }
+        this.runsUsed = saved.runsUsed;
+        this.tokensUsed = saved.tokensUsed;
+        this.maxObservedInput = saved.maxObservedInput;
+        this.budgetReason = interrupted
+          ? 'usage_unknown_after_restart'
+          : (saved.budgetReason ?? 'server_restarted');
+      } catch {
+        this.tasks.length = 0;
+        this.budgetReason = 'checkpoint_invalid';
+      }
+    }
+  }
+
+  private persist(): void {
+    if (!this.checkpointFile || this.budgetReason === 'checkpoint_invalid') return;
+    mkdirSync(dirname(this.checkpointFile), { recursive: true, mode: 0o700 });
+    const value = {
+      version: 1,
+      tasks: this.tasks,
+      runsUsed: this.runsUsed,
+      tokensUsed: this.tokensUsed,
+      maxObservedInput: this.maxObservedInput,
+      budgetReason: this.budgetReason,
+    };
+    writeFileSync(this.checkpointFile + '.tmp', JSON.stringify(value), { mode: 0o600 });
+    renameSync(this.checkpointFile + '.tmp', this.checkpointFile);
   }
 
   snapshot(): TeamSnapshot {
+    this.persist();
     return structuredClone({
       settings: this.settings,
       tasks: this.tasks,
@@ -228,6 +292,18 @@ export class TeamCoordinator {
         'invalid_dependencies',
         'Las dependencias deben ser tareas anteriores del mismo proyecto.',
       );
+    const previous = input.continueTaskId ? this.task(input.continueTaskId) : null;
+    if (
+      previous &&
+      (previous.status !== 'completed' ||
+        previous.project !== project ||
+        previous.role !== input.role ||
+        previous.allowWrites !== (input.allowWrites === true))
+    )
+      throw new ExecutionBlocked(
+        'continuation_scope',
+        'Solo se puede continuar explícitamente una tarea terminada del mismo papel y alcance.',
+      );
     const task: TeamTask = {
       id: randomUUID(),
       role: input.role,
@@ -236,6 +312,8 @@ export class TeamCoordinator {
       context: input.context === undefined ? undefined : validateContext(input.context),
       assessment: input.assessment === undefined ? undefined : validateAssessment(input.assessment),
       project,
+      executionSessionKey: previous?.executionSessionKey ?? previous?.id,
+      executionProject: previous?.executionProject,
       dependsOn: [...new Set(deps)],
       allowWrites: input.allowWrites === true,
       parallelSafe: input.parallelSafe === true && input.allowWrites !== true,
@@ -475,6 +553,7 @@ export class TeamCoordinator {
         task.status = 'queued';
       }
       this.running = true;
+      this.persist();
       void this.drain();
     } finally {
       this.starting = false;
@@ -573,9 +652,25 @@ export class TeamCoordinator {
           return { title: dep.title, output: dep.output };
         }),
       );
+      const workspaces = [
+        ...new Set(
+          [
+            task.executionProject,
+            ...task.dependsOn.map((id) => this.task(id).executionProject),
+          ].filter((p): p is string => !!p && p !== task.project),
+        ),
+      ];
+      if (workspaces.length > 1)
+        throw new ExecutionBlocked(
+          'workspace_conflict',
+          'Las dependencias pertenecen a espacios distintos; revisa cómo integrar sus cambios.',
+        );
+      this.persist();
       const result = await this.executors[provider].execute({
         officeRole: task.role,
         project: task.project,
+        executionSessionKey: task.executionSessionKey ?? task.id,
+        inheritedWorkspace: workspaces[0],
         prompt: context.prompt,
         contextFingerprint: context.fingerprint,
         model: task.choice!.model,
@@ -587,6 +682,10 @@ export class TeamCoordinator {
           (this.executors[provider].maxConcurrentReadOnly ?? 1) > 1,
         signal: controller.signal,
         timeoutMs: Math.max(1, Math.min(15 * 60_000, this.deadline - Date.now())),
+        maxReportedTokens: Math.max(
+          1,
+          this.settings.maxTokens - this.tokensUsed - (this.reservedTokens - tokenReserve),
+        ),
         onOutput: (output) => {
           task.output = (task.output + output).slice(0, 20_000);
           outcomeTail = (outcomeTail + output).slice(-1024);
@@ -596,6 +695,7 @@ export class TeamCoordinator {
           const paused =
             record.status === 'cancelled' && this.budgetReason && !this.cancelled.has(task.id);
           task.runId = record.id;
+          task.executionProject = record.executionProject ?? task.executionProject;
           task.confirmedModel = record.confirmedModel;
           task.status = paused
             ? 'paused'
@@ -608,11 +708,13 @@ export class TeamCoordinator {
               task,
               paused ? { ...record, status: 'paused', reasonCode: this.budgetReason } : record,
             ) ?? task.agentId;
+          this.persist();
         },
       });
       const paused =
         result.status === 'cancelled' && this.budgetReason && !this.cancelled.has(task.id);
       task.runId = result.id;
+      task.executionProject = result.executionProject ?? task.executionProject;
       task.status = paused ? 'paused' : result.status;
       task.reasonCode = paused ? this.budgetReason : result.reasonCode;
       if (result.status === 'completed' && task.role !== 'chief') {
@@ -643,7 +745,7 @@ export class TeamCoordinator {
         task.status = 'running';
         task.localChecks = await this.checks.run(
           task.context.checks,
-          task.project,
+          task.executionProject ?? task.project,
           controller.signal,
         );
         if (controller.signal.aborted) {
@@ -688,6 +790,7 @@ export class TeamCoordinator {
         task.status = 'paused';
         task.reasonCode = this.budgetReason ?? 'user_pause';
       }
+      this.persist();
     }
   }
 
@@ -715,6 +818,7 @@ export class TeamCoordinator {
       }
     }
     for (const controller of this.controllers.values()) controller.abort();
+    this.persist();
   }
 
   cancel(id: string): void {
@@ -729,6 +833,11 @@ export class TeamCoordinator {
 
   /** Explicit operator action; never auto-reset a budget or subscription quota. */
   resume(): void {
+    if (['usage_unknown_after_restart', 'checkpoint_invalid'].includes(this.budgetReason ?? ''))
+      throw new ExecutionBlocked(
+        'recovery_required',
+        'La recuperación necesita revisar el consumo o el archivo de estado; no se reinicia el presupuesto.',
+      );
     if (this.controllers.size || this.draining)
       throw new ExecutionBlocked('team_busy', 'Espera a que terminen de detenerse los procesos.');
     if (this.runsUsed >= this.settings.maxRuns || this.tokensUsed >= this.settings.maxTokens)
