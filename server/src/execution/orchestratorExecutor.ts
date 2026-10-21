@@ -14,6 +14,7 @@ import { createInterface } from 'node:readline';
 import { type CliRuntime, discoverCodex, stopProcess } from './cliProcess.js';
 import { CodexExecutor } from './codexExecutor.js';
 import { acquireCodexLease } from './executionLease.js';
+import { createExecutionMetrics } from './executionMetrics.js';
 import { object, safeCliEnvironment, verifyChoice } from './subscriptionPolicy.js';
 import {
   type ExecuteOptions,
@@ -309,6 +310,7 @@ export class OrchestratorExecutor implements OfficialExecutor {
         outputTokens: null,
         cachedInputTokens: null,
         toolCalls: 0,
+        metrics: createExecutionMetrics('ao-activity', options.prompt),
         contextFingerprint: options.contextFingerprint,
       };
       this.save(file, session);
@@ -372,9 +374,11 @@ export class OrchestratorExecutor implements OfficialExecutor {
         else if (value.kind === 'text' && typeof value.text === 'string')
           options.onOutput?.(value.text);
         else if (value.kind === 'activity') {
+          record.metrics!.activityEvents++;
           record.toolCalls = (record.toolCalls ?? 0) + 1;
           options.onActivity?.(value.activity === 'file_change' ? 'working' : 'reading');
         } else if (value.kind === 'usage') {
+          record.metrics!.usageEvents++;
           const counters = [value.input, value.output, value.cached];
           if (
             !counters.every((n) => Number.isSafeInteger(n) && Number(n) >= 0) ||
@@ -398,6 +402,8 @@ export class OrchestratorExecutor implements OfficialExecutor {
             fail('token_budget');
         } else if (value.kind === 'finished' && !finished) {
           finished = true;
+          if (value.status === 'completed') record.metrics!.completedTurns++;
+          else record.metrics!.failedTurns++;
           record.status = value.status === 'completed' ? 'completed' : 'failed';
         } else fail(value.kind === 'error' ? 'ao_runtime_failed' : 'ao_protocol_invalid');
       });

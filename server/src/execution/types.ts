@@ -1,4 +1,5 @@
 import type { TeamRole } from '../../../core/src/team.js';
+import type { ExecutionMetrics } from './executionMetrics.js';
 
 export type ProviderId = 'codex' | 'claude' | 'antigravity';
 export type RunStatus =
@@ -52,6 +53,8 @@ export interface RunRecord {
   engine?: 'codex-cli' | 'agent-orchestrator';
   executionProject?: string;
   toolCalls?: number;
+  /** Safe aggregates, absent on historical receipts. No raw event payloads. */
+  metrics?: ExecutionMetrics;
 }
 
 export interface ExecuteOptions {

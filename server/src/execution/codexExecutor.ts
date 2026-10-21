@@ -12,6 +12,7 @@ import {
   stopProcess,
 } from './cliProcess.js';
 import { acquireCodexLease } from './executionLease.js';
+import { cliMetricsObserver, createExecutionMetrics } from './executionMetrics.js';
 import {
   object,
   safeCliEnvironment,
@@ -25,6 +26,9 @@ import {
   type RunRecord,
   type SubscriptionEvidence,
 } from './types.js';
+
+export const CODEX_TASK_PREFIX =
+  'Cumple las instrucciones del proyecto. No hagas commits, push ni cambios de rama. No uses APIs de pago, créditos, recargas ni credenciales. No delegues en otros modelos o proveedores.\n\n';
 
 export function buildCodexArguments(
   options: ExecuteOptions,
@@ -194,6 +198,11 @@ export class CodexExecutor implements OfficialExecutor {
       contextFingerprint: options.contextFingerprint,
       sessionMode: 'new',
       toolCalls: 0,
+      metrics: createExecutionMetrics(
+        'codex-json',
+        options.prompt,
+        CODEX_TASK_PREFIX + options.prompt,
+      ),
     };
     mkdirSync(this.stateDir, { recursive: true, mode: 0o700 });
     const release = acquireCodexLease(this.stateDir, record.id, options.parallelReadOnly === true);
@@ -252,6 +261,7 @@ export class CodexExecutor implements OfficialExecutor {
       const reader = createInterface({ input: child.stdout });
       let completed = false;
       let protocolFailed = false;
+      const observeMetrics = cliMetricsObserver(record.metrics!);
       reader.on('line', (line) => {
         if (line.length > 2_000_000 || stopped) return;
         let event: Record<string, unknown>;
@@ -262,6 +272,7 @@ export class CodexExecutor implements OfficialExecutor {
           stop('invalid_cli_output', 'paused');
           return;
         }
+        observeMetrics(event);
         if (event.type === 'thread.started' && typeof event.thread_id === 'string') {
           record.sessionId = event.thread_id;
           save();
@@ -350,10 +361,7 @@ export class CodexExecutor implements OfficialExecutor {
           });
       }, this.dependencies.pollMs ?? 8000);
       timeout = setTimeout(() => stop('time_limit', 'paused'), options.timeoutMs ?? 15 * 60_000);
-      child.stdin.end(
-        'Cumple las instrucciones del proyecto. No hagas commits, push ni cambios de rama. No uses APIs de pago, créditos, recargas ni credenciales. No delegues en otros modelos o proveedores.\n\n' +
-          options.prompt,
-      );
+      child.stdin.end(CODEX_TASK_PREFIX + options.prompt);
       const code = await exit;
       clearInterval(interval);
       clearTimeout(timeout);

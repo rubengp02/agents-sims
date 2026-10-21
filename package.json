@@ -142,7 +142,9 @@
     "engine:pilot": "node scripts/orchestrator-pilot.mjs execute",
     "adaptive:history": "node scripts/adaptive-history.mjs",
     "adaptive:evaluate": "node scripts/adaptive-evaluation.mjs",
-    "adaptive:verify": "node scripts/verify-adaptive.mjs"
+    "adaptive:verify": "node scripts/verify-adaptive.mjs",
+    "context:audit": "node scripts/context-audit.mjs",
+    "context:verify": "node scripts/verify-context.mjs"
   },
   "devDependencies": {
     "@asyncapi/modelina": "^5.10.1",

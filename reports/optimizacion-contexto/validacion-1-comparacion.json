@@ -1,0 +1,1535 @@
+{
+  "protocol": "context-audit-offline-v1",
+  "inferenceCalls": 0,
+  "sourceFingerprint": "96a248ce888c372198f0fe115291c1cd7e3883b1088dc58a6cbf22098f63ea97",
+  "passed": true,
+  "results": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "injectDefect": false,
+      "simulated": true,
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+      "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+      "callsToFake": 1,
+      "taskStatus": "completed",
+      "accepted": true,
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 69
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "localChecks": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 130,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 59,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "method": "office",
+      "variant": "standard",
+      "injectDefect": false,
+      "simulated": true,
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+      "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+      "callsToFake": 1,
+      "taskStatus": "completed",
+      "accepted": true,
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 77
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "localChecks": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 129,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 62,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "method": "direct",
+      "variant": "compact",
+      "injectDefect": false,
+      "simulated": true,
+      "submittedPromptHash": "24e45cece53cdf8da108453ccf05201720da78ddfbca38f9d621dace029bd90d",
+      "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+      "callsToFake": 1,
+      "taskStatus": "completed",
+      "accepted": true,
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 70
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "localChecks": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 121,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 57,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "method": "office",
+      "variant": "compact",
+      "injectDefect": false,
+      "simulated": true,
+      "submittedPromptHash": "24e45cece53cdf8da108453ccf05201720da78ddfbca38f9d621dace029bd90d",
+      "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+      "callsToFake": 1,
+      "taskStatus": "completed",
+      "accepted": true,
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 74
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "localChecks": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 120,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 57,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "method": "direct",
+      "variant": "canonical",
+      "injectDefect": false,
+      "simulated": true,
+      "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f",
+      "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+      "callsToFake": 1,
+      "taskStatus": "completed",
+      "accepted": true,
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 69
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "localChecks": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 119,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 60,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "method": "office",
+      "variant": "canonical",
+      "injectDefect": false,
+      "simulated": true,
+      "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f",
+      "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+      "callsToFake": 1,
+      "taskStatus": "completed",
+      "accepted": true,
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 74
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "localChecks": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 121,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 56,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "method": "office",
+      "variant": "canonical",
+      "injectDefect": true,
+      "simulated": true,
+      "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f",
+      "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+      "callsToFake": 1,
+      "taskStatus": "blocked",
+      "accepted": false,
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": false
+          },
+          {
+            "id": "parse-overflow",
+            "passed": false
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": false
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": false
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": false
+          },
+          {
+            "id": "discount-type",
+            "passed": false
+          },
+          {
+            "id": "discount-range-0",
+            "passed": false
+          },
+          {
+            "id": "discount-range-1",
+            "passed": false
+          },
+          {
+            "id": "discount-range-2",
+            "passed": false
+          },
+          {
+            "id": "discount-range-3",
+            "passed": false
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": false
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "parse-invalid-0",
+          "parse-invalid-1",
+          "parse-invalid-2",
+          "parse-invalid-3",
+          "parse-invalid-4",
+          "parse-invalid-5",
+          "parse-invalid-6",
+          "parse-invalid-7",
+          "parse-invalid-8",
+          "parse-invalid-9",
+          "parse-invalid-10",
+          "parse-overflow",
+          "half-up",
+          "sum-overflow",
+          "quantity-type",
+          "quantity-range-0",
+          "quantity-range-1",
+          "quantity-range-2",
+          "quantity-range-3",
+          "quantity-range-4",
+          "discount-type",
+          "discount-range-0",
+          "discount-range-1",
+          "discount-range-2",
+          "discount-range-3",
+          "generated-integer-cases"
+        ],
+        "durationMs": 70
+      },
+      "changes": {
+        "changed": [],
+        "unexpected": [],
+        "passed": true
+      },
+      "localChecks": [
+        {
+          "id": "public",
+          "exitCode": 1,
+          "durationMs": 125,
+          "passed": false
+        }
+      ]
+    }
+  ],
+  "context": {
+    "standard": {
+      "characters": 2762,
+      "utf8Bytes": 2784,
+      "fingerprint": "95d0a9abcdc4c70b5c10aa15c8d617fe2bb41e2d5a513a3b185638cdb181ae51",
+      "charReductionVsStandard": 0,
+      "tokenSaving": null
+    },
+    "compact": {
+      "characters": 2528,
+      "utf8Bytes": 2549,
+      "fingerprint": "c00e82a6b6116f18b6cc8f877d15d18dc9e48b76e1c893841fafed17a81c2758",
+      "charReductionVsStandard": 234,
+      "tokenSaving": null
+    },
+    "canonical": {
+      "characters": 1420,
+      "utf8Bytes": 1434,
+      "fingerprint": "7ffc440b1c9e5adb65b32531d05abc06a2e5310816c5b2f73fcc564f86847b19",
+      "charReductionVsStandard": 1342,
+      "tokenSaving": null
+    }
+  },
+  "history": {
+    "reportHash": "cc50beed9adfd5cdf25c4352c9dfe859bec43ff0ac2545482ff2d90798360d38",
+    "reconstructedDirectPromptCharacters": 1566,
+    "reconstructedOfficePromptCharacters": 2762,
+    "rows": [
+      {
+        "name": "direct-historical",
+        "input": 58064,
+        "output": 2277,
+        "cached": 45184,
+        "total": 60341,
+        "nonCachedInput": 12880,
+        "legacyToolCalls": 4,
+        "legacyToolMeaning": "completed tool events",
+        "cliVersion": "0.163.0-alpha.10.2",
+        "fingerprintMatched": null
+      },
+      {
+        "name": "office-historical",
+        "input": 71154,
+        "output": 2023,
+        "cached": 51456,
+        "total": 73177,
+        "nonCachedInput": 19698,
+        "legacyToolCalls": 5,
+        "legacyToolMeaning": "activity-start events; not comparable with completed tools",
+        "cliVersion": "0.163.0-alpha.10.2",
+        "fingerprintMatched": true
+      }
+    ],
+    "additionalInput": 13090,
+    "additionalOutput": -254,
+    "additionalTotal": 12836,
+    "causalAttribution": "unknown: prompts, effort, transport and cache differed; aggregate receipts cannot identify file reads or internal model requests"
+  },
+  "comparison": {
+    "protocol": "context-controlled-offline-v1",
+    "authorizedRealRuns": 0,
+    "executableRealRunner": false,
+    "status": "offline-preparation-only",
+    "limits": {
+      "realRuns": 0,
+      "realTokens": 0,
+      "retries": 0
+    },
+    "arms": [
+      {
+        "method": "direct",
+        "variant": "standard",
+        "engine": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "low",
+        "sessionMode": "new",
+        "allowWrites": true,
+        "role": "developer",
+        "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+        "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+        "acceptanceHash": "da82e45458775c295d74b7ee03f44340ce82c6608ec51faea7f2d4a15b4e968d",
+        "checks": [
+          "public",
+          "acceptance"
+        ]
+      },
+      {
+        "method": "office",
+        "variant": "standard",
+        "engine": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "low",
+        "sessionMode": "new",
+        "allowWrites": true,
+        "role": "developer",
+        "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+        "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+        "acceptanceHash": "da82e45458775c295d74b7ee03f44340ce82c6608ec51faea7f2d4a15b4e968d",
+        "checks": [
+          "public",
+          "acceptance"
+        ]
+      },
+      {
+        "method": "direct",
+        "variant": "compact",
+        "engine": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "low",
+        "sessionMode": "new",
+        "allowWrites": true,
+        "role": "developer",
+        "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+        "submittedPromptHash": "24e45cece53cdf8da108453ccf05201720da78ddfbca38f9d621dace029bd90d",
+        "acceptanceHash": "da82e45458775c295d74b7ee03f44340ce82c6608ec51faea7f2d4a15b4e968d",
+        "checks": [
+          "public",
+          "acceptance"
+        ]
+      },
+      {
+        "method": "office",
+        "variant": "compact",
+        "engine": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "low",
+        "sessionMode": "new",
+        "allowWrites": true,
+        "role": "developer",
+        "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+        "submittedPromptHash": "24e45cece53cdf8da108453ccf05201720da78ddfbca38f9d621dace029bd90d",
+        "acceptanceHash": "da82e45458775c295d74b7ee03f44340ce82c6608ec51faea7f2d4a15b4e968d",
+        "checks": [
+          "public",
+          "acceptance"
+        ]
+      },
+      {
+        "method": "direct",
+        "variant": "canonical",
+        "engine": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "low",
+        "sessionMode": "new",
+        "allowWrites": true,
+        "role": "developer",
+        "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+        "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f",
+        "acceptanceHash": "da82e45458775c295d74b7ee03f44340ce82c6608ec51faea7f2d4a15b4e968d",
+        "checks": [
+          "public",
+          "acceptance"
+        ]
+      },
+      {
+        "method": "office",
+        "variant": "canonical",
+        "engine": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "low",
+        "sessionMode": "new",
+        "allowWrites": true,
+        "role": "developer",
+        "fixtureHash": "0f9b4c97eaa3be18ce39646773ec62d5b5e4eaa9eef47a0eacbc6a61af01d5b8",
+        "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f",
+        "acceptanceHash": "da82e45458775c295d74b7ee03f44340ce82c6608ec51faea7f2d4a15b4e968d",
+        "checks": [
+          "public",
+          "acceptance"
+        ]
+      }
+    ],
+    "invariants": [
+      "same Codex CLI binary and configuration",
+      "same model and effort",
+      "same complete contract, protected file hashes and allowed edits",
+      "same submitted prompt for direct and office within a variant",
+      "same subscription verification, permissions and checks",
+      "fresh separate workspaces and sessions; no concurrent benchmark runs",
+      "local initialization and public tests, independent 36-check acceptance and scope check for every arm"
+    ],
+    "futureAuthorization": "Exact aggregate run, token and time bounds must be approved before implementing or starting a real runner. Previous ledgers remain closed.",
+    "design": "Interleave balanced order across repeated pairs, record order and all failures. Report medians and individual runs, never only the best. Cache is observed, not assumed equal. Limit hits and unknown counters are censored failures, never excluded to claim savings.",
+    "gates": "No promotion until acceptance, protected files, local checks, subscription and limits all pass; then repeat to demonstrate fewer total tokens without a material latency regression. Zero observed defects is not proof of exhaustive quality.",
+    "engineExperiment": "AO remains optional. Compare AO against CLI separately after aligning flags, permission profile and submitted prefix; do not mix transport with the primary context contrast.",
+    "lunaExperiment": "Separate Sol/low vs Luna/low after current subscription catalog validation. Keep engine, context, task, session mode and acceptance fixed; include failures and repairs in total cost. No automatic promotion.",
+    "sessionExperiment": "Separate two-step new/new vs new/resume with identical second-step goal and starting revision. Include both steps and cumulative-counter deltas, cache, stale-context defects and time. Explicit session ownership; reviewers never resume the author."
+  },
+  "errors": [],
+  "transportAudit": {
+    "scope": "current source settings, not a capture of historical provider prompts",
+    "codexIgnoreUserConfig": true,
+    "codexSkillsContextCap": 1000,
+    "aoIgnoreUserConfigExplicit": false,
+    "aoSkillsContextCapExplicit": false,
+    "codexPrefixCharacters": 185,
+    "aoPrefixCharacters": 0,
+    "aoSourceHash": "a3485b68da9e22b9bc3aff3a5065072a6d532ed74fd74fa584da20fae770b971",
+    "implication": "Configuration and hidden provider instructions are not proven equivalent across engines. Use the same CLI in the primary comparison; align and verify AO separately without reading credentials or changing global configuration."
+  },
+  "duplication": {
+    "objectiveCopiesInStandardPrompt": 2,
+    "acceptanceCriteriaInline": 12,
+    "allCriteriaAlsoInTaskFile": true,
+    "taskFileCharacters": 1414,
+    "projectGuideCharacters": 517,
+    "canonicalFileRequiresRead": true,
+    "note": "Exact criteria remain in the trusted mechanical registry for all variants; canonical omits only their prompt copy after fixture validation. This is not a proof of model comprehension or fewer tokens."
+  },
+  "oracle": {
+    "rejectsInitial": true,
+    "acceptsReference": true,
+    "checks": 36
+  }
+}

@@ -92,6 +92,13 @@ describe('official Codex executor (fake CLI, no inference)', () => {
     expect(result.sessionId).toBe('fixture-session');
     expect(result.confirmedModel).toBeNull();
     expect(result.inputTokens).toBe(20);
+    expect(result.metrics).toMatchObject({
+      source: 'codex-json',
+      completedToolEvents: 1,
+      completedTurns: 1,
+      fileReads: null,
+    });
+    expect(result.metrics!.submittedCharacters).toBeGreaterThan(result.metrics!.promptCharacters);
     expect(h.launch).toHaveBeenCalledTimes(1);
     expect(output).toEqual(['fixture answer']);
     const args = h.launch.mock.calls[0] as unknown[];

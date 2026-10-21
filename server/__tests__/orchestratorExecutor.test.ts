@@ -129,6 +129,12 @@ describe('restricted Agent Orchestrator boundary (simulated provider)', () => {
     expect(next.inputTokens).toBe(100);
     expect(next.outputTokens).toBe(20);
     expect(next.cachedInputTokens).toBe(40);
+    expect(next.metrics).toMatchObject({
+      source: 'ao-activity',
+      completedToolEvents: null,
+      completedTurns: 1,
+      usageEvents: 1,
+    });
   });
   it('a character alone does not continue a session', async () => {
     const h = fixture();
