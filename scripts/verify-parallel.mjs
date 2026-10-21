@@ -97,6 +97,20 @@ for (const [name, exe, args] of jobs) {
   save();
   console.log(`${name}: ${result === 0 && !timedOut ? 'OK' : 'FALLO'} (${Date.now() - at} ms)`);
   if (result !== 0 || timedOut) {
+    // Publish only TAP failure names and scalar assertions, never raw private
+    // logs, provider output, stack traces, file paths or arbitrary messages.
+    const diagnostics = fs
+      .readFileSync(path.join(privateDir, name + '.log'), 'utf8')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(
+        (line) =>
+          /^not ok \d+ - [a-zA-Z0-9 ,.:()/_-]+$/.test(line) ||
+          /^(?:expected|actual): (?:true|false|null|\d+)$/.test(line) ||
+          /^code: '[A-Z_]+'$/.test(line),
+      )
+      .slice(0, 40);
+    console.log(JSON.stringify({ check: name, diagnostics }));
     process.exitCode = 1;
     break;
   }
