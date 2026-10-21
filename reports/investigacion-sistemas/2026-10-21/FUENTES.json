@@ -1,0 +1,354 @@
+{
+  "consultedOn": "2026-10-21",
+  "localCommit": "f2f45592383d5925610ec960751979ff5e50ce41",
+  "runtimeChanges": 0,
+  "realInferenceRuns": 0,
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Codex App Server",
+      "url": "https://learn.chatgpt.com/docs/app-server",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S02",
+      "title": "Codex as a platform",
+      "url": "https://developers.openai.com/blog/codex-as-a-platform",
+      "publishedAt": "2026-08-19",
+      "kind": "official-engineering",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S03",
+      "title": "Codex Worktrees",
+      "url": "https://learn.chatgpt.com/docs/environments/git-worktrees",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S04",
+      "title": "Scaling long-running autonomous coding",
+      "url": "https://cursor.com/blog/scaling-agents",
+      "publishedAt": "2026-01-14",
+      "kind": "vendor-research",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S05",
+      "title": "Agent swarms and the new model economics",
+      "url": "https://cursor.com/blog/agent-swarm-model-economics",
+      "publishedAt": "2026-07-20",
+      "kind": "vendor-research",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S06",
+      "title": "How Cursor Router chooses the right model",
+      "url": "https://cursor.com/blog/how-cursor-router-works",
+      "publishedAt": "2026-08-06",
+      "kind": "vendor-research",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S07",
+      "title": "Improved token efficiency for longer agent runs",
+      "url": "https://cursor.com/blog/improved-token-efficiency",
+      "publishedAt": "2026-09-23",
+      "kind": "vendor-research",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S08",
+      "title": "Claude Code agent teams",
+      "url": "https://code.claude.com/docs/en/agent-teams",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S09",
+      "title": "Claude Code subagents",
+      "url": "https://code.claude.com/docs/en/sub-agents",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S10",
+      "title": "Claude Code power user tips",
+      "url": "https://support.claude.com/en/articles/14554000-claude-code-power-user-tips",
+      "publishedAt": null,
+      "kind": "official-practitioner-guide",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S11",
+      "title": "Building a C compiler with parallel Claudes",
+      "url": "https://www.anthropic.com/research/building-c-compiler",
+      "publishedAt": "2026-02-05",
+      "kind": "vendor-experiment",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S12",
+      "title": "How we built our multi-agent research system",
+      "url": "https://www.anthropic.com/research/multi-agent-research-system",
+      "publishedAt": "2025-06-13",
+      "kind": "vendor-research",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S13",
+      "title": "Effective harnesses for long-running agents",
+      "url": "https://www.anthropic.com/research/effective-harnesses-for-long-running-agents",
+      "publishedAt": "2025-11-26",
+      "kind": "official-engineering",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S14",
+      "title": "Harness design for long-running apps",
+      "url": "https://www.anthropic.com/research/harness-design-long-running-apps",
+      "publishedAt": "2026-03-24",
+      "kind": "vendor-experiment",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S15",
+      "title": "Redesigning source control at Anthropic",
+      "url": "https://www.anthropic.com/research/redesigning-source-control",
+      "publishedAt": "2026-10-13",
+      "kind": "official-engineering",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S16",
+      "title": "Devin can now Manage Devins",
+      "url": "https://cognition.com/blog/devin-can-now-manage-devins",
+      "publishedAt": "2026-03-19",
+      "kind": "vendor-product-announcement",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S17",
+      "title": "Multi-Agents: What's Actually Working",
+      "url": "https://cognition.com/blog/multi-agents-working",
+      "publishedAt": "2026-04-22",
+      "kind": "vendor-engineering",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S18",
+      "title": "Factory: Context compaction must preserve the next step",
+      "url": "https://factory.com/articles/coding-agent-context-compaction",
+      "publishedAt": "2026-09-24",
+      "kind": "vendor-methodology",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S19",
+      "title": "Factory: Compressing Context",
+      "url": "https://factory.com/news/compressing-context",
+      "publishedAt": "2025-07-21",
+      "kind": "vendor-engineering",
+      "consultedOn": "2026-10-21",
+      "assessment": "Self-reported; not independently reproduced in Agents Sims."
+    },
+    {
+      "id": "S20",
+      "title": "GitHub Agent HQ: Claude and Codex",
+      "url": "https://github.blog/changelog/2026-02-26-claude-and-codex-now-available-for-copilot-business-pro-users/",
+      "publishedAt": "2026-02-26",
+      "kind": "official-release-announcement",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S21",
+      "title": "OpenCollab v3",
+      "url": "https://arxiv.org/html/2609.38345v3",
+      "publishedAt": "2026-10-18",
+      "kind": "preprint",
+      "consultedOn": "2026-10-21",
+      "assessment": "Not a production validation or universal ranking."
+    },
+    {
+      "id": "S22",
+      "title": "MAST v3",
+      "url": "https://arxiv.org/abs/2503.13657v3",
+      "publishedAt": "2025-10-26",
+      "kind": "research-paper",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S23",
+      "title": "LangGraph persistence",
+      "url": "https://docs.langchain.com/oss/javascript/langgraph/persistence",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S24",
+      "title": "OpenHands persistence",
+      "url": "https://docs.openhands.dev/sdk/guides/convo-persistence",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S25",
+      "title": "OpenHands task tool set",
+      "url": "https://docs.openhands.dev/sdk/guides/task-tool-set",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S26",
+      "title": "OpenHands LLM subscriptions",
+      "url": "https://docs.openhands.dev/sdk/guides/llm-subscriptions",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S27",
+      "title": "Claude Code legal and compliance",
+      "url": "https://code.claude.com/docs/en/legal-and-compliance",
+      "publishedAt": null,
+      "kind": "official-policy",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S28",
+      "title": "Codex authentication",
+      "url": "https://learn.chatgpt.com/docs/auth",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    },
+    {
+      "id": "S29",
+      "title": "Sign in with ChatGPT quickstart",
+      "url": "https://developers.openai.com/siwc/quickstart",
+      "publishedAt": null,
+      "kind": "official-documentation",
+      "consultedOn": "2026-10-21",
+      "assessment": "Primary source; integration not executed."
+    }
+  ],
+  "repositories": [
+    {
+      "repository": "OrchestratorInc/agent-orchestrator",
+      "url": "https://github.com/OrchestratorInc/agent-orchestrator",
+      "branch": "main",
+      "headAtConsultation": "43563a9606b6a7644eef2daf684655022afa1cef",
+      "headDate": "2026-10-21T19:36:57Z",
+      "pushedAt": "2026-10-21T19:36:57Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "language": "Go",
+      "testsExecutedLocally": false
+    },
+    {
+      "repository": "iOfficeAI/AionUi",
+      "url": "https://github.com/iOfficeAI/AionUi",
+      "branch": "main",
+      "headAtConsultation": "886dcbdeabeee77867daf47ed99548140f05b378",
+      "headDate": "2026-10-19T13:25:45Z",
+      "pushedAt": "2026-10-19T13:25:47Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "language": "TypeScript",
+      "testsExecutedLocally": false
+    },
+    {
+      "repository": "code-yeongyu/oh-my-openagent",
+      "url": "https://github.com/code-yeongyu/oh-my-openagent",
+      "branch": "dev",
+      "headAtConsultation": "9219feccafa3e6fb5c1cde96fc4d193fbc80e55f",
+      "headDate": "2026-10-21T13:36:04Z",
+      "pushedAt": "2026-10-21T18:39:46Z",
+      "archived": false,
+      "license": "SUL-1.0",
+      "language": "TypeScript",
+      "testsExecutedLocally": false
+    },
+    {
+      "repository": "OpenHands/software-agent-sdk",
+      "url": "https://github.com/OpenHands/software-agent-sdk",
+      "branch": "main",
+      "headAtConsultation": null,
+      "headDate": null,
+      "pushedAt": "2026-10-21T19:25:04Z",
+      "archived": false,
+      "license": "MIT",
+      "language": "Python",
+      "testsExecutedLocally": false
+    },
+    {
+      "repository": "langchain-ai/langgraph",
+      "url": "https://github.com/langchain-ai/langgraph",
+      "branch": "main",
+      "headAtConsultation": null,
+      "headDate": null,
+      "pushedAt": "2026-10-21T17:38:11Z",
+      "archived": false,
+      "license": "MIT",
+      "language": "Python",
+      "testsExecutedLocally": false
+    }
+  ],
+  "localFiles": [
+    "server/src/execution/teamCoordinator.ts",
+    "server/src/execution/taskAssessment.ts",
+    "server/src/execution/taskContext.ts",
+    "server/src/execution/executionLease.ts",
+    "server/src/execution/orchestratorExecutor.ts",
+    "server/src/execution/usageHistory.ts",
+    "server/__tests__/teamCoordinator.test.ts",
+    "scripts/context-pilot.mjs",
+    "scripts/adaptive-evaluation.mjs",
+    "scripts/pilot-supervision.mjs",
+    "integrations/agent-orchestrator/main.go",
+    "integrations/agent-orchestrator/office_driver.go",
+    "integrations/agent-orchestrator/lock.json",
+    "reports/optimizacion-contexto/piloto-controlado/recuperacion-2/RESULTADO.json"
+  ],
+  "limitations": [
+    "No universal best-system ranking or elite-programmer adoption ranking established.",
+    "Vendor performance numbers are not our measurements or ChatGPT quota estimates.",
+    "No external software installed; repository tests and CI workflows inspected, not executed.",
+    "GitHub default branches can advance during research; recorded heads are consultation snapshots.",
+    "Unavailable URLs were corrected via primary indexes or repository listings; inaccessible pages were excluded as evidence."
+  ]
+}
