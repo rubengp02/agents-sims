@@ -16,3 +16,5 @@ Comprobaciones reales locales:
 - Estado privado, transcripciones, logs, dependencias y compilados excluidos por Git.
 
 Estas comprobaciones no han iniciado inferencia real ni consumido cuota de modelos. No se repite ni se modifica la comparación real previa.
+
+El primer push fue detenido por el hook local: el inventario E2E generado todavía indicaba 77 casos y faltaba el caso nuevo de equipo. Se regeneró a 78 casos y se incorporó al commit; no se omitió el control. El inventario cuenta casos disponibles, no pruebas E2E ejecutadas en esta publicación.
