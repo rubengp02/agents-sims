@@ -1,0 +1,4586 @@
+{
+  "version": 1,
+  "mode": "offline-structural-fixtures",
+  "inferenceCalls": 0,
+  "realTrialAuthorized": false,
+  "sourceFingerprint": "bf90a51c665f98558e38a56ceaf4e8bfc2f8b935e09b143b55cf462824ad984b",
+  "limitations": "Fixtures reducidos: verifican contratos, decisiones y circuito; no capacidad de modelos ni rendimiento real. Los ceros de recibos internos no son consumo medido de IA.",
+  "results": [
+    {
+      "caseId": "clamp",
+      "family": "simple",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 81,
+      "sumProviderMs": 13,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "clamp",
+      "family": "simple",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 14
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 252,
+      "sumProviderMs": 14,
+      "sumWorkMs": 181,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 58,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "clamp",
+      "family": "simple",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 19
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 244,
+      "sumProviderMs": 19,
+      "sumWorkMs": 175,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "clamp",
+      "family": "simple",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 6
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 237,
+      "sumProviderMs": 6,
+      "sumWorkMs": 171,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 57,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "clamp",
+      "family": "simple",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 7
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 6
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 20
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 508,
+      "sumProviderMs": 46,
+      "sumWorkMs": 263,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 60,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 60,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "clamp",
+      "family": "simple",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 239,
+      "sumProviderMs": 21,
+      "sumWorkMs": 176,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 51,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "slug",
+      "family": "simple",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 74,
+      "sumProviderMs": 18,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "slug",
+      "family": "simple",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 241,
+      "sumProviderMs": 13,
+      "sumWorkMs": 174,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 57,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "slug",
+      "family": "simple",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 14
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 234,
+      "sumProviderMs": 14,
+      "sumWorkMs": 167,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 51,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "slug",
+      "family": "simple",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 238,
+      "sumProviderMs": 13,
+      "sumWorkMs": 169,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "slug",
+      "family": "simple",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 12
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 7
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 20
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 513,
+      "sumProviderMs": 52,
+      "sumWorkMs": 269,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 56,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 56,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "slug",
+      "family": "simple",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 9
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 233,
+      "sumProviderMs": 9,
+      "sumWorkMs": 169,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "invoice",
+      "family": "dependent",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 8
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 60,
+      "sumProviderMs": 8,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "invoice",
+      "family": "dependent",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 19
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 239,
+      "sumProviderMs": 19,
+      "sumWorkMs": 175,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 54,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "invoice",
+      "family": "dependent",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 239,
+      "sumProviderMs": 13,
+      "sumWorkMs": 174,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 59,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "invoice",
+      "family": "dependent",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 22
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 264,
+      "sumProviderMs": 22,
+      "sumWorkMs": 193,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "invoice",
+      "family": "dependent",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 9
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 12
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 17
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 9
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 585,
+      "sumProviderMs": 47,
+      "sumWorkMs": 273,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 60,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 60,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "invoice",
+      "family": "dependent",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 242,
+      "sumProviderMs": 18,
+      "sumWorkMs": 179,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 56,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "render-price",
+      "family": "dependent",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 6
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 62,
+      "sumProviderMs": 6,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "render-price",
+      "family": "dependent",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 239,
+      "sumProviderMs": 18,
+      "sumWorkMs": 171,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "render-price",
+      "family": "dependent",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 17
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 300,
+      "sumProviderMs": 17,
+      "sumWorkMs": 232,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 68,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "render-price",
+      "family": "dependent",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 240,
+      "sumProviderMs": 21,
+      "sumWorkMs": 175,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "render-price",
+      "family": "dependent",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 15
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 7
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 12
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 603,
+      "sumProviderMs": 47,
+      "sumWorkMs": 269,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 60,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 60,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "render-price",
+      "family": "dependent",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 9
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 254,
+      "sumProviderMs": 9,
+      "sumWorkMs": 187,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 62,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "text-and-sum",
+      "family": "separable",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 8
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 61,
+      "sumProviderMs": 8,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "text-and-sum",
+      "family": "separable",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 353,
+      "sumProviderMs": 13,
+      "sumWorkMs": 291,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 61,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "text-and-sum",
+      "family": "separable",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 11
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 326,
+      "sumProviderMs": 11,
+      "sumWorkMs": 262,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 48,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "text-and-sum",
+      "family": "separable",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 16
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 332,
+      "sumProviderMs": 16,
+      "sumWorkMs": 267,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 50,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 47,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "text-and-sum",
+      "family": "separable",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 17
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 15
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 700,
+      "sumProviderMs": 58,
+      "sumWorkMs": 391,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 59,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 58,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 59,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 58,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "text-and-sum",
+      "family": "separable",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 52
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 67
+        }
+      ],
+      "peakConcurrent": 2,
+      "localWallMs": 5848,
+      "sumProviderMs": 119,
+      "sumWorkMs": 5485,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 66,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 314,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": {
+        "mode": "parallel",
+        "reason": "Estimación completa 40000 ms, menor que 70000 ms secuenciales; beneficio aún no demostrado."
+      },
+      "preparationMs": 1700,
+      "integrationMs": 2546,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": "accepted",
+      "reason": null
+    },
+    {
+      "caseId": "unique-and-range",
+      "family": "separable",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 20
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 81,
+      "sumProviderMs": 20,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "unique-and-range",
+      "family": "separable",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 398,
+      "sumProviderMs": 21,
+      "sumWorkMs": 318,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 67,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 59,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 56,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "unique-and-range",
+      "family": "separable",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 9
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 376,
+      "sumProviderMs": 9,
+      "sumWorkMs": 304,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 64,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 59,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "unique-and-range",
+      "family": "separable",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 12
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 358,
+      "sumProviderMs": 12,
+      "sumWorkMs": 296,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 58,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 57,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 58,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "unique-and-range",
+      "family": "separable",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 21
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 7
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 14
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 664,
+      "sumProviderMs": 55,
+      "sumWorkMs": 365,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 50,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            },
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 50,
+              "passed": true
+            },
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "unique-and-range",
+      "family": "separable",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 71
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 65
+        }
+      ],
+      "peakConcurrent": 2,
+      "localWallMs": 5723,
+      "sumProviderMs": 136,
+      "sumWorkMs": 5319,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "part-a",
+              "exitCode": 0,
+              "durationMs": 67,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "part-b",
+              "exitCode": 0,
+              "durationMs": 302,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": {
+        "mode": "parallel",
+        "reason": "Estimación completa 40000 ms, menor que 70000 ms secuenciales; beneficio aún no demostrado."
+      },
+      "preparationMs": 1737,
+      "integrationMs": 2376,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": "accepted",
+      "reason": null
+    },
+    {
+      "caseId": "versioned-contract",
+      "family": "coupled",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 22
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 76,
+      "sumProviderMs": 22,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "versioned-contract",
+      "family": "coupled",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 233,
+      "sumProviderMs": 13,
+      "sumWorkMs": 169,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 50,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "versioned-contract",
+      "family": "coupled",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 20
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 239,
+      "sumProviderMs": 20,
+      "sumWorkMs": 175,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "versioned-contract",
+      "family": "coupled",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 15
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 238,
+      "sumProviderMs": 15,
+      "sumWorkMs": 170,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "versioned-contract",
+      "family": "coupled",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 8
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 20
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 570,
+      "sumProviderMs": 54,
+      "sumWorkMs": 261,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "versioned-contract",
+      "family": "coupled",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 297,
+      "sumProviderMs": 18,
+      "sumWorkMs": 220,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 68,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "pagination-contract",
+      "family": "coupled",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 15
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 69,
+      "sumProviderMs": 15,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "pagination-contract",
+      "family": "coupled",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 9
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 230,
+      "sumProviderMs": 9,
+      "sumWorkMs": 165,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "pagination-contract",
+      "family": "coupled",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 22
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 240,
+      "sumProviderMs": 22,
+      "sumWorkMs": 177,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "pagination-contract",
+      "family": "coupled",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 8
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 233,
+      "sumProviderMs": 8,
+      "sumWorkMs": 166,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 56,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "pagination-contract",
+      "family": "coupled",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 21
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 8
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 570,
+      "sumProviderMs": 63,
+      "sumWorkMs": 270,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "pagination-contract",
+      "family": "coupled",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 249,
+      "sumProviderMs": 18,
+      "sumWorkMs": 171,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 51,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "deny-by-default",
+      "family": "sensitive",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 7
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 66,
+      "sumProviderMs": 7,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "deny-by-default",
+      "family": "sensitive",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": false,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 10
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 255,
+      "sumProviderMs": 10,
+      "sumWorkMs": 182,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "deny-by-default",
+      "family": "sensitive",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": false,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 12
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 232,
+      "sumProviderMs": 12,
+      "sumWorkMs": 165,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "deny-by-default",
+      "family": "sensitive",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 14
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 15
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 452,
+      "sumProviderMs": 29,
+      "sumWorkMs": 230,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": "deep"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "deny-by-default",
+      "family": "sensitive",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 8
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 23
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 10
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 491,
+      "sumProviderMs": 54,
+      "sumWorkMs": 254,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": "deep"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "deny-by-default",
+      "family": "sensitive",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 14
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 19
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 511,
+      "sumProviderMs": 46,
+      "sumWorkMs": 251,
+      "tasks": [
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            }
+          ],
+          "reviewMode": "deep"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 6,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "integer-units",
+      "family": "sensitive",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 15
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 74,
+      "sumProviderMs": 15,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "integer-units",
+      "family": "sensitive",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": false,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 263,
+      "sumProviderMs": 21,
+      "sumWorkMs": 189,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 57,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "integer-units",
+      "family": "sensitive",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": false,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 233,
+      "sumProviderMs": 21,
+      "sumWorkMs": 171,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "integer-units",
+      "family": "sensitive",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 16
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 15
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 454,
+      "sumProviderMs": 31,
+      "sumWorkMs": 227,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 49,
+              "passed": true
+            }
+          ],
+          "reviewMode": "deep"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "integer-units",
+      "family": "sensitive",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 12
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 7
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 8
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 475,
+      "sumProviderMs": 40,
+      "sumWorkMs": 244,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": "deep"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "integer-units",
+      "family": "sensitive",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 6
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 21
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 488,
+      "sumProviderMs": 48,
+      "sumWorkMs": 249,
+      "tasks": [
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": "deep"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 6,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "cursor-continuity",
+      "family": "continuity",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 9
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 70,
+      "sumProviderMs": 9,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "cursor-continuity",
+      "family": "continuity",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 11
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "resume",
+          "durationMs": 19
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 454,
+      "sumProviderMs": 30,
+      "sumWorkMs": 369,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 59,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "cursor-continuity",
+      "family": "continuity",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "resume",
+          "durationMs": 19
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 421,
+      "sumProviderMs": 37,
+      "sumWorkMs": 344,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "cursor-continuity",
+      "family": "continuity",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 10
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "resume",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 397,
+      "sumProviderMs": 23,
+      "sumWorkMs": 324,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 51,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 53,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "cursor-continuity",
+      "family": "continuity",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 11
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 14
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 9
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 9
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "resume",
+          "durationMs": 19
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 669,
+      "sumProviderMs": 62,
+      "sumWorkMs": 413,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 54,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 54,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 11,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "cursor-continuity",
+      "family": "continuity",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "resume",
+          "durationMs": 9
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 439,
+      "sumProviderMs": 27,
+      "sumWorkMs": 352,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 61,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 4,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "retry-idempotency",
+      "family": "continuity",
+      "variant": "codex-individual-strict",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 17
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 78,
+      "sumProviderMs": 17,
+      "sumWorkMs": 0,
+      "tasks": [],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 1,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "retry-idempotency",
+      "family": "continuity",
+      "variant": "light-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 18
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 233,
+      "sumProviderMs": 18,
+      "sumWorkMs": 169,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 50,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "retry-idempotency",
+      "family": "continuity",
+      "variant": "balanced-local",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 11
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 232,
+      "sumProviderMs": 11,
+      "sumWorkMs": 169,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "retry-idempotency",
+      "family": "continuity",
+      "variant": "selective-review",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 21
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 243,
+      "sumProviderMs": 21,
+      "sumWorkMs": 181,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 52,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "retry-idempotency",
+      "family": "continuity",
+      "variant": "full-team",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 8
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 9
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": false,
+          "sessionMode": "new",
+          "durationMs": 13
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 480,
+      "sumProviderMs": 43,
+      "sumWorkMs": 247,
+      "tasks": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null,
+          "checks": [],
+          "reviewMode": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 55,
+              "passed": true
+            }
+          ],
+          "reviewMode": "focused"
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 9,
+      "workflowStatus": null,
+      "reason": null
+    },
+    {
+      "caseId": "retry-idempotency",
+      "family": "continuity",
+      "variant": "adaptive-office",
+      "quality": true,
+      "policyCompliant": true,
+      "circuitCompleted": true,
+      "acceptanceProtected": true,
+      "checksPassed": 1,
+      "checksTotal": 1,
+      "defects": 0,
+      "repairs": 0,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "writes": true,
+          "sessionMode": "new",
+          "durationMs": 6
+        }
+      ],
+      "peakConcurrent": 1,
+      "localWallMs": 250,
+      "sumProviderMs": 6,
+      "sumWorkMs": 175,
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null,
+          "checks": [
+            {
+              "id": "acceptance",
+              "exitCode": 0,
+              "durationMs": 59,
+              "passed": true
+            }
+          ],
+          "reviewMode": null
+        }
+      ],
+      "schedule": null,
+      "preparationMs": 0,
+      "integrationMs": 0,
+      "modelInputTokens": null,
+      "modelOutputTokens": null,
+      "modelCachedInputTokens": null,
+      "simulatedSubscriptionChecks": 2,
+      "workflowStatus": null,
+      "reason": null
+    }
+  ],
+  "failures": [],
+  "passed": true
+}

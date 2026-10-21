@@ -60,6 +60,8 @@ export async function loadTools() {
         'export * from "./server/src/execution/adaptiveRuntime.ts";',
         'export * from "./server/src/execution/usageHistory.ts";',
         'export * from "./server/src/execution/adaptiveState.ts";',
+        'export * from "./server/src/execution/workflowWorkspace.ts";',
+        'export * from "./server/src/execution/workflowPolicy.ts";',
       ].join('\n'),
       resolveDir: root,
       loader: 'ts',

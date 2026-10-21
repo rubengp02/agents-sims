@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "mode": "local-only",
+  "inferenceCalls": 0,
+  "startedAt": "2026-10-21T20:41:59.696Z",
+  "sourceFingerprint": "7e29595ecd2f93ff493c4a144ac0a9555603cf8e4cd8f8e359936b0c1c98d810",
+  "checks": [
+    {
+      "id": "package",
+      "passed": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "durationMs": 29337
+    },
+    {
+      "id": "application",
+      "passed": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "durationMs": 54490
+    },
+    {
+      "id": "policies",
+      "passed": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "durationMs": 5450
+    },
+    {
+      "id": "supervision",
+      "passed": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "durationMs": 71995
+    },
+    {
+      "id": "native-ao",
+      "passed": false,
+      "exitCode": 1,
+      "timedOut": false,
+      "durationMs": 7846
+    }
+  ],
+  "passed": false,
+  "sourceUnchanged": true,
+  "finishedAt": "2026-10-21T20:44:49.040Z"
+}

@@ -1,0 +1,169 @@
+[
+  {
+    "id": "controlled-fixed-v1",
+    "status": "not-authorized",
+    "limits": null,
+    "realProviderEnabled": false,
+    "cases": [
+      "clamp",
+      "slug",
+      "invoice",
+      "render-price",
+      "text-and-sum",
+      "unique-and-range",
+      "versioned-contract",
+      "pagination-contract",
+      "deny-by-default",
+      "integer-units",
+      "cursor-continuity",
+      "retry-idempotency"
+    ],
+    "repetitions": null,
+    "order": "counterbalanced",
+    "baseline": {
+      "id": "codex-individual-strict",
+      "nativeDelegation": false,
+      "delegatingBaseline": "separate-if-ever-authorized"
+    },
+    "controls": [
+      "same-base-commit",
+      "same-objective",
+      "same-acceptance",
+      "same-permissions",
+      "same-CLI-version",
+      "same-subscription-guards",
+      "immutable-acceptance",
+      "fresh-isolated-workspaces",
+      "count-failures-and-repairs",
+      "unknown-usage-is-not-zero",
+      "no-paid-API-or-additional-credits"
+    ],
+    "fixed": [
+      "model",
+      "reasoning",
+      "context-variant",
+      "session-mode"
+    ],
+    "adaptive": [],
+    "costs": [
+      "planning",
+      "preparation",
+      "workers",
+      "local-checks",
+      "integration",
+      "review",
+      "repairs"
+    ],
+    "metrics": [
+      "quality",
+      "policy-compliance",
+      "circuit-completion",
+      "defects",
+      "repairs",
+      "wall-ms",
+      "sum-agent-ms",
+      "input",
+      "output",
+      "cached-input",
+      "uncached-input",
+      "tools",
+      "reads",
+      "turns",
+      "peak-concurrency"
+    ],
+    "stop": [
+      "unverified-subscription",
+      "additional-billing",
+      "unknown-usage",
+      "budget-exhausted",
+      "integration-conflict",
+      "unverified-cleanup"
+    ],
+    "decision": "No promotion without equal required quality and repeated comparable measurements. Cache is included in input, not added twice; character reuse is not session continuation.",
+    "sourceFingerprint": "7e29595ecd2f93ff493c4a144ac0a9555603cf8e4cd8f8e359936b0c1c98d810"
+  },
+  {
+    "id": "adaptive-complete-v1",
+    "status": "not-authorized",
+    "limits": null,
+    "realProviderEnabled": false,
+    "cases": [
+      "clamp",
+      "slug",
+      "invoice",
+      "render-price",
+      "text-and-sum",
+      "unique-and-range",
+      "versioned-contract",
+      "pagination-contract",
+      "deny-by-default",
+      "integer-units",
+      "cursor-continuity",
+      "retry-idempotency"
+    ],
+    "repetitions": null,
+    "order": "counterbalanced",
+    "baseline": {
+      "id": "codex-individual-strict",
+      "nativeDelegation": false,
+      "delegatingBaseline": "separate-if-ever-authorized"
+    },
+    "controls": [
+      "same-base-commit",
+      "same-objective",
+      "same-acceptance",
+      "same-permissions",
+      "same-CLI-version",
+      "same-subscription-guards",
+      "immutable-acceptance",
+      "fresh-isolated-workspaces",
+      "count-failures-and-repairs",
+      "unknown-usage-is-not-zero",
+      "no-paid-API-or-additional-credits"
+    ],
+    "fixed": [],
+    "adaptive": [
+      "chief",
+      "models",
+      "reasoning",
+      "specialists",
+      "parallelism"
+    ],
+    "costs": [
+      "planning",
+      "preparation",
+      "workers",
+      "local-checks",
+      "integration",
+      "review",
+      "repairs"
+    ],
+    "metrics": [
+      "quality",
+      "policy-compliance",
+      "circuit-completion",
+      "defects",
+      "repairs",
+      "wall-ms",
+      "sum-agent-ms",
+      "input",
+      "output",
+      "cached-input",
+      "uncached-input",
+      "tools",
+      "reads",
+      "turns",
+      "peak-concurrency"
+    ],
+    "stop": [
+      "unverified-subscription",
+      "additional-billing",
+      "unknown-usage",
+      "budget-exhausted",
+      "integration-conflict",
+      "unverified-cleanup"
+    ],
+    "decision": "No promotion without equal required quality and repeated comparable measurements. Cache is included in input, not added twice; character reuse is not session continuation.",
+    "sourceFingerprint": "7e29595ecd2f93ff493c4a144ac0a9555603cf8e4cd8f8e359936b0c1c98d810"
+  }
+]
