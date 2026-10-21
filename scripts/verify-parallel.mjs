@@ -46,6 +46,7 @@ const jobs = [
       'scripts/pilot-policy.test.mjs',
       'scripts/chief-pilot.test.mjs',
       'scripts/parallel-evaluation.test.mjs',
+      'scripts/parallel-real-pilot.test.mjs',
     ],
   ],
   ['supervision', process.execPath, ['--test', 'scripts/pilot-supervision.test.mjs']],

@@ -5,11 +5,11 @@ import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { prepare, execute } from './parallel-real-pilot.mjs';
+import { prepare, execute, usageIsFinal } from './parallel-real-pilot.mjs';
 import { references } from './parallel-pilot-case.mjs';
 import { loadTools, root } from './optimization-tools.mjs';
 
-async function fixtures({ unknown = false, overBudget = false } = {}) {
+async function fixtures({ unknown = false, overBudget = false, interrupted = false } = {}) {
   const tools = await loadTools();
   let dispatches = 0;
   const testRoot = path.join(root, '.local-office/parallel-real-fixtures', randomUUID());
@@ -72,6 +72,10 @@ async function fixtures({ unknown = false, overBudget = false } = {}) {
           fs.writeFileSync(path.join(target, file), content);
       r.status = 'completed';
       r.updatedAt = Date.now();
+      if (interrupted) {
+        r.status = 'cancelled';
+        r.reasonCode = 'ao_usage_or_completion_unknown';
+      }
       if (overBudget) r.inputTokens = 80001;
       if (unknown && options.ownedWorkspace?.workerId) {
         r.inputTokens = null;
@@ -152,5 +156,34 @@ test('reported budget overrun stops before starting another arm', async () => {
   const result = await execute(plan.attempt, f.tools);
   assert.equal(result.complete, false);
   assert.equal(result.reason, 'token_budget');
+  assert.equal(f.count(), 1);
+});
+test('numeric counters from an interrupted native turn are partial, never a known total', async () => {
+  assert(
+    !usageIsFinal({
+      status: 'cancelled',
+      reasonCode: 'ao_usage_or_completion_unknown',
+      inputTokens: 54227,
+      outputTokens: 772,
+    }),
+  );
+  assert(
+    !usageIsFinal({
+      status: 'paused',
+      reasonCode: 'token_budget',
+      inputTokens: 75463,
+      outputTokens: 901,
+    }),
+  );
+  const f = await fixtures({ interrupted: true }),
+    plan = await prepare(f.tools);
+  authorizeFixture(plan);
+  const result = await execute(plan.attempt, f.tools);
+  const ledger = JSON.parse(
+    fs.readFileSync(path.join(root, '.local-office/parallel-real', plan.attempt, 'ledger.json')),
+  );
+  assert.equal(result.complete, false);
+  assert.equal(ledger.tokens, null);
+  assert.equal(ledger.observedTokens, 110);
   assert.equal(f.count(), 1);
 });

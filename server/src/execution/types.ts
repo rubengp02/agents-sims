@@ -47,6 +47,8 @@ export interface RunRecord {
   outputTokens: number | null;
   /** Absent on legacy receipts; null means not communicated or invalid. */
   cachedInputTokens?: number | null;
+  /** Last communicated counters on interruption; a lower bound, never a final total. */
+  observedUsage?: { inputTokens: number; outputTokens: number; cachedInputTokens: number | null };
   cliVersion?: string;
   subscriptionCheckedAt?: number;
   contextFingerprint?: string;

@@ -495,6 +495,17 @@ export class OrchestratorExecutor implements OfficialExecutor {
       ) {
         record.status = options.signal?.aborted ? 'cancelled' : 'paused';
         record.reasonCode ??= 'ao_usage_or_completion_unknown';
+        if (record.inputTokens !== null && record.outputTokens !== null)
+          record.observedUsage = {
+            inputTokens: record.inputTokens,
+            outputTokens: record.outputTokens,
+            cachedInputTokens: record.cachedInputTokens ?? null,
+          };
+        // A usage notification may precede the last tool/model activity. Without
+        // a clean completion it cannot prove the total consumed by this turn.
+        record.inputTokens = null;
+        record.outputTokens = null;
+        record.cachedInputTokens = null;
         session.status = 'uncertain';
       } else session.status = 'completed';
       this.save(file, session);

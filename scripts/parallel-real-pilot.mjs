@@ -24,6 +24,16 @@ export const limits = Object.freeze({
 const hash = (x) => createHash('sha256').update(x).digest('hex');
 const files = Object.keys(contracts);
 const tests = ['csv.test.mjs', 'graph.test.mjs', 'integration.test.mjs'];
+export function usageIsFinal(record) {
+  return (
+    record.status === 'completed' &&
+    record.reasonCode == null &&
+    Number.isSafeInteger(record.inputTokens) &&
+    record.inputTokens >= 0 &&
+    Number.isSafeInteger(record.outputTokens) &&
+    record.outputTokens >= 0
+  );
+}
 function paths(id, fixture = false) {
   assert.match(id, /^parallel-[a-f0-9]{8}$/);
   return {
@@ -168,6 +178,7 @@ export async function execute(id, injectedTools) {
     startedAt: Date.now(),
     attempts: 0,
     tokens: 0,
+    observedTokens: 0,
     reserved: 0,
     paused: false,
     closed: false,
@@ -261,12 +272,21 @@ export async function execute(id, injectedTools) {
         sessionMode: r.sessionMode,
         metrics: r.metrics ?? null,
         reason: r.reasonCode,
+        usageComplete: usageIsFinal(r),
+        observedUsage: r.observedUsage ?? null,
         finishedAt: Date.now(),
       });
       ledger.reserved -= reserve;
-      if (r.inputTokens === null || r.outputTokens === null) {
+      if (Number.isSafeInteger(r.inputTokens) && Number.isSafeInteger(r.outputTokens))
+        ledger.observedTokens += r.inputTokens + r.outputTokens;
+      else if (r.observedUsage) {
+        ledger.observedTokens += r.observedUsage.inputTokens + r.observedUsage.outputTokens;
+        report.inferenceObserved ||=
+          !injectedTools && r.observedUsage.inputTokens + r.observedUsage.outputTokens > 0;
+      }
+      if (!usageIsFinal(r)) {
         ledger.tokens = null;
-        stop('usage_unknown');
+        stop(r.reasonCode ?? 'usage_unknown');
       } else {
         if (ledger.tokens !== null) ledger.tokens += r.inputTokens + r.outputTokens;
         report.inferenceObserved ||= !injectedTools && r.inputTokens + r.outputTokens > 0;
@@ -442,6 +462,7 @@ export async function execute(id, injectedTools) {
         accepted =
           complete && protectedFiles && quality.passed && quality.tests === 50 && !ledger.paused;
       const calls = report.runs.filter((r) => r.method === method);
+      const usageComplete = calls.length > 0 && calls.every((r) => r.usageComplete);
       report.methods.push({
         method,
         accepted,
@@ -451,14 +472,24 @@ export async function execute(id, injectedTools) {
         operations,
         wallMs: Date.now() - start,
         sumAgentMs: calls.reduce((n, r) => n + (r.durationMs ?? 0), 0),
-        input: calls.reduce((n, r) => (r.input === null ? NaN : n + r.input), 0),
-        output: calls.reduce((n, r) => (r.output === null ? NaN : n + r.output), 0),
-        cached: calls.every((r) => r.cached !== null)
-          ? calls.reduce((n, r) => n + r.cached, 0)
-          : null,
-        uncachedInput: calls.every((r) => r.cached !== null && r.input !== null)
-          ? calls.reduce((n, r) => n + r.input - r.cached, 0)
-          : null,
+        usageComplete,
+        observedTokens: calls.reduce(
+          (n, r) =>
+            n +
+            (r.input ?? r.observedUsage?.inputTokens ?? 0) +
+            (r.output ?? r.observedUsage?.outputTokens ?? 0),
+          0,
+        ),
+        input: usageComplete ? calls.reduce((n, r) => n + r.input, 0) : null,
+        output: usageComplete ? calls.reduce((n, r) => n + r.output, 0) : null,
+        cached:
+          usageComplete && calls.every((r) => r.cached !== null)
+            ? calls.reduce((n, r) => n + r.cached, 0)
+            : null,
+        uncachedInput:
+          usageComplete && calls.every((r) => r.cached !== null && r.input !== null)
+            ? calls.reduce((n, r) => n + r.input - r.cached, 0)
+            : null,
         peakConcurrent: method === 'office-two-writers' ? peak : 1,
       });
       save();

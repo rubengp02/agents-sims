@@ -23,14 +23,28 @@ export function verifiedWorkspace(value: OwnedWorkspace): void {
     throw new ExecutionBlocked('workspace_unowned', 'Espacio no acreditado por el gestor local.');
   const common = (p: string) =>
     realpathSync(git(p, ['rev-parse', '--path-format=absolute', '--git-common-dir']).trim());
+  // One fresh Git process can report all three identities. Do not cache these:
+  // replacing a worktree or changing HEAD must still invalidate its capability.
+  const [directory, commonDirectory, head, ...extra] = git(value.path, [
+    'rev-parse',
+    '--path-format=absolute',
+    '--git-dir',
+    '--git-common-dir',
+    'HEAD',
+  ])
+    .trim()
+    .split(/\r?\n/);
   if (
+    extra.length ||
+    !directory ||
+    !commonDirectory ||
+    !head ||
     realpathSync(value.path) !== value.path ||
     realpathSync(value.project) !== value.project ||
-    realpathSync(git(value.path, ['rev-parse', '--path-format=absolute', '--git-dir']).trim()) !==
-      handles.get(value) ||
+    realpathSync(directory) !== handles.get(value) ||
     realpathSync(value.path) === realpathSync(value.project) ||
-    common(value.path) !== common(value.project) ||
-    git(value.path, ['rev-parse', 'HEAD']).trim() !== value.baseSHA
+    realpathSync(commonDirectory) !== common(value.project) ||
+    head !== value.baseSHA
   )
     throw new ExecutionBlocked('workspace_changed_base', 'La identidad o base del espacio cambió.');
 }

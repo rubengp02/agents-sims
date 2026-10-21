@@ -136,6 +136,16 @@ describe('restricted Agent Orchestrator boundary (simulated provider)', () => {
       usageEvents: 1,
     });
   });
+  it('preserves interim usage separately when a budget stop prevents a clean completion', async () => {
+    const h = fixture();
+    const r = await h.executor.execute({ project: h.project, prompt: 'x', maxReportedTokens: 50 });
+    expect(r.status).toBe('paused');
+    expect(r.reasonCode).toBe('token_budget');
+    expect(r.inputTokens).toBeNull();
+    expect(r.outputTokens).toBeNull();
+    expect(r.cachedInputTokens).toBeNull();
+    expect(r.observedUsage).toEqual({ inputTokens: 100, outputTokens: 20, cachedInputTokens: 40 });
+  });
   it('a character alone does not continue a session', async () => {
     const h = fixture();
     await h.executor.execute({ project: h.project, prompt: 'x', officeRole: 'architect' });
