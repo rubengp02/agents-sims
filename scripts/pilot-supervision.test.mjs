@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import test from 'node:test';
 import {
   alive,
@@ -13,6 +15,7 @@ import {
   reconcileSupervision,
   supervisionValidator,
   saveSupervisionIncident,
+  supervisionPulse,
 } from './pilot-supervision.mjs';
 import { root } from './optimization-tools.mjs';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -40,6 +43,55 @@ const report = (h) => readJson(path.join(h.reports, 'RESULTADO.json'));
 const owner = (h) => readJson(path.join(h.privateDir, 'supervision/owner.json'));
 const guard = (h) => readJson(path.join(h.privateDir, 'supervision/guard.json'));
 const lease = (h) => readJson(path.join(h.privateDir, 'supervision/controller.json'));
+
+test('termination during an atomic journal write retains the previous committed state', () => {
+  const h = fixture(),
+    file = path.join(h.privateDir, 'atomic.json');
+  writeJson(file, { attempts: 2, tokens: 25, paused: true });
+  const code = `import fs from 'node:fs';import {writeJson} from ${JSON.stringify(pathToFileURL(path.join(root, 'scripts/pilot-supervision.mjs')).href)};const write=fs.writeFileSync;fs.writeFileSync=(file,bytes,options)=>{write(file,bytes.slice(0,5),options);process.exit(7);};writeJson(process.argv[1],{attempts:0,tokens:0});`;
+  assert.throws(
+    () =>
+      execFileSync(process.execPath, ['--input-type=module', '-e', code, file], {
+        windowsHide: true,
+        stdio: 'pipe',
+      }),
+    { status: 7 },
+  );
+  assert.deepEqual(readJson(file), { attempts: 2, tokens: 25, paused: true });
+  assert(fs.readdirSync(h.privateDir).some((name) => name.endsWith('.tmp')));
+  writeJson(file, { attempts: 2, tokens: 25, paused: true, closed: true });
+  assert.equal(readJson(file).tokens, 25);
+});
+
+test('heartbeat read and write failures retain their exact stage and always request shutdown', () => {
+  for (const stage of ['validation', 'heartbeat_write']) {
+    const h = fixture();
+    let stopped = false;
+    const fail = () => {
+      throw Object.assign(new Error('private raw data'), { code: 'EPERM' });
+    };
+    assert.equal(
+      supervisionPulse(
+        stage === 'validation' ? fail : () => {},
+        stage === 'heartbeat_write' ? fail : () => {},
+        (error, origin) => {
+          const r = saveSupervisionIncident(h.privateDir, error, origin, {
+            phase: 'model',
+            heartbeatAt: Date.now() - 25,
+            worker: { pid: process.pid, started: 'fixture-birth' },
+          });
+          assert.equal(r.stage, stage);
+          assert.equal(r.detail, 'EPERM');
+          assert.equal(r.phase, 'model');
+          assert(r.heartbeatAgeMs >= 25);
+          stopped = true;
+        },
+      ),
+      false,
+    );
+    assert(stopped);
+  }
+});
 
 test('supervision validates both monitors and identifies stale, lost and unreadable state', () => {
   const spec = { privateDir: 'fixture', nonce: 'test-only', staleMs: 12000 };
@@ -134,6 +186,23 @@ test('hidden supervisor survives an exited launcher and completes without termin
     (p) => !p,
   );
 });
+test('four sequential local workers persist starts, receipts and closure without any model', async () => {
+  const h = fixture();
+  const id = launchSupervised({ ...h, fixture: 'cycle' });
+  const end = await until(
+    () => ledger(h),
+    (l) => l?.closed,
+  );
+  assert.equal(end.attempts, 4);
+  assert.equal(end.paused, false);
+  assert.equal(end.tokens, 8);
+  assert.equal(report(h).runs.length, 4);
+  assert.equal(report(h).inferenceObserved, false);
+  await until(
+    () => alive(id.pid),
+    (p) => !p,
+  );
+});
 test('lost controller closes unknown usage and reaps its orphan worker without retrying', async () => {
   const h = fixture();
   launchSupervised({ ...h, fixture: 'controller-loss' });
@@ -206,6 +275,24 @@ test('a reused PID identity is never terminated', async () => {
   } finally {
     await stopOwned(identity);
   }
+});
+
+test('a lost descendant without a receipt pauses with unknown consumption', async () => {
+  const h = fixture();
+  launchSupervised({ ...h, fixture: 'hang' });
+  await until(
+    () => lease(h),
+    (s) => s?.worker,
+  );
+  await stopOwned(lease(h).worker);
+  await until(
+    () => ledger(h),
+    (l) => l?.closed,
+  );
+  assert.equal(report(h).reason, 'execution_worker_lost');
+  assert.equal(ledger(h).tokens, null);
+  assert.equal(report(h).recovery.noAutomaticRetry, true);
+  assert(!alive(owner(h).controller.pid));
 });
 test('reconciliation after loss of both monitors closes unknown usage and never restarts', async () => {
   const h = fixture(),

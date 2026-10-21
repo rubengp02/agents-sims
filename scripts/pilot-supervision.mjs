@@ -127,6 +127,21 @@ const files = (privateDir) => ({
   guard: path.join(privateDir, 'supervision/guard.json'),
   lease: path.join(privateDir, 'supervision/controller.json'),
 });
+function monitoredRead(file, component) {
+  try {
+    return readJson(file);
+  } catch (error) {
+    throw Object.assign(new Error('Supervision state cannot be read.'), {
+      code: 'supervision_read_failed',
+      component,
+      detail: ['EACCES', 'EPERM', 'EBUSY', 'EIO', 'ENOENT'].includes(error.code)
+        ? error.code
+        : error instanceof SyntaxError
+          ? 'invalid_json'
+          : 'unclassified',
+    });
+  }
+}
 
 export function launchSupervised({ privateDir, reports, attempt, fixture = null }) {
   const f = files(privateDir),
@@ -248,17 +263,34 @@ async function supervise(specFile) {
   let recovering = false,
     recoveryPromise;
   const heartbeat = setInterval(() => {
-    owner.heartbeatAt = Date.now();
-    writeJson(f.owner, owner);
-    const guard = readJson(f.guard);
-    if (
-      !recovering &&
-      guard &&
-      (!alive(guard.identity.pid) || Date.now() - guard.heartbeatAt > spec.staleMs)
-    ) {
-      recovering = true;
-      recoveryPromise = recover(spec, 'guardian_lost');
-    }
+    supervisionPulse(
+      () => {
+        const guard = monitoredRead(f.guard, 'guardian');
+        if (guard && (!alive(guard.identity.pid) || Date.now() - guard.heartbeatAt > spec.staleMs))
+          throw Object.assign(new Error('Guardian unavailable'), {
+            code: 'supervision_invalid',
+            component: 'guardian',
+            detail: !alive(guard.identity.pid) ? 'process_absent' : 'heartbeat_expired',
+          });
+      },
+      () => {
+        owner.heartbeatAt = Date.now();
+        writeJson(f.owner, owner);
+      },
+      (error, stage) => {
+        if (recovering) return;
+        recovering = true;
+        try {
+          saveSupervisionIncident(spec.privateDir, error, stage);
+        } catch {}
+        recoveryPromise = recover(
+          spec,
+          error.component === 'guardian' ? 'guardian_lost' : 'supervisor_state_failed',
+        );
+        // Awaited again on controller exit; prevent an unhandled rejection if storage fails.
+        void recoveryPromise.catch(() => {});
+      },
+    );
   }, spec.heartbeatMs);
   let child;
   try {
@@ -295,37 +327,71 @@ async function watch(specFile) {
     f = files(spec.privateDir);
   const guard = { nonce: spec.nonce, identity: identityOf(), heartbeatAt: Date.now() };
   writeJson(f.guard, guard, true);
+  let missingWorker = null;
   while (true) {
-    guard.heartbeatAt = Date.now();
-    writeJson(f.guard, guard);
-    const owner = readJson(f.owner),
-      lease = readJson(f.lease),
-      ledger = readJson(path.join(spec.privateDir, 'ledger.json'));
-    if (ledger?.closed) {
-      await stopOwned(lease?.nonce === spec.nonce ? lease.worker : null);
+    let stage = 'heartbeat_write';
+    try {
+      guard.heartbeatAt = Date.now();
+      writeJson(f.guard, guard);
+      stage = 'validation';
+      const owner = monitoredRead(f.owner, 'supervisor'),
+        lease = monitoredRead(f.lease, 'controller'),
+        ledger = monitoredRead(path.join(spec.privateDir, 'ledger.json'), 'controller');
+      if (ledger?.closed) {
+        await stopOwned(lease?.nonce === spec.nonce ? lease.worker : null);
+        return;
+      }
+      const now = Date.now();
+      let reason;
+      if (!owner || owner.nonce !== spec.nonce) reason = 'supervision_ownership_lost';
+      else if (!alive(owner.supervisor.pid) || now - owner.heartbeatAt > spec.staleMs)
+        reason = 'supervisor_lost';
+      else if (now - spec.startedAt >= spec.limits.totalMs) reason = 'total_time_budget';
+      else if (owner.controller && !alive(owner.controller.pid))
+        reason = 'execution_controller_lost';
+      else if (
+        lease?.phase === 'model' &&
+        lease.worker &&
+        !lease.record &&
+        !alive(lease.worker.pid)
+      ) {
+        // Normal exit can precede receipt persistence by one event-loop turn.
+        // Observe twice without extending any existing deadline.
+        if (missingWorker === lease.worker.pid) reason = 'execution_worker_lost';
+        missingWorker = lease.worker.pid;
+      } else if (
+        now - spec.startedAt > spec.bootMs &&
+        (!lease || now - lease.heartbeatAt > spec.staleMs)
+      )
+        reason = 'controller_heartbeat_lost';
+      else if (lease?.phase === 'model' && now - lease.modelStartedAt >= spec.limits.perRunMs)
+        reason = 'model_time_budget';
+      else if (lease?.armStartedAt && now - lease.armStartedAt >= spec.limits.perArmMs)
+        reason = 'arm_time_budget';
+      if (reason) {
+        if (reason === 'execution_worker_lost') {
+          try {
+            saveSupervisionIncident(
+              spec.privateDir,
+              { code: 'supervision_invalid', component: 'controller', detail: 'process_absent' },
+              'validation',
+              lease,
+            );
+          } catch {}
+        }
+        await recover(spec, reason);
+        return;
+      }
+      await sleep(Math.min(spec.heartbeatMs, 1000));
+    } catch (error) {
+      try {
+        saveSupervisionIncident(spec.privateDir, error, stage);
+      } catch {}
+      // A damaged journal cannot be silently treated as a healthy monitor.
+      // The supervisor/controller also fail closed if recovery cannot persist.
+      await recover(spec, 'guardian_state_failed');
       return;
     }
-    const now = Date.now();
-    let reason;
-    if (!owner || owner.nonce !== spec.nonce) reason = 'supervision_ownership_lost';
-    else if (!alive(owner.supervisor.pid) || now - owner.heartbeatAt > spec.staleMs)
-      reason = 'supervisor_lost';
-    else if (now - spec.startedAt >= spec.limits.totalMs) reason = 'total_time_budget';
-    else if (owner.controller && !alive(owner.controller.pid)) reason = 'execution_controller_lost';
-    else if (
-      now - spec.startedAt > spec.bootMs &&
-      (!lease || now - lease.heartbeatAt > spec.staleMs)
-    )
-      reason = 'controller_heartbeat_lost';
-    else if (lease?.phase === 'model' && now - lease.modelStartedAt >= spec.limits.perRunMs)
-      reason = 'model_time_budget';
-    else if (lease?.armStartedAt && now - lease.armStartedAt >= spec.limits.perArmMs)
-      reason = 'arm_time_budget';
-    if (reason) {
-      await recover(spec, reason);
-      return;
-    }
-    await sleep(Math.min(spec.heartbeatMs, 1000));
   }
 }
 
@@ -368,7 +434,7 @@ export function supervisionValidator(spec, read = readJson, isAlive = alive, now
   };
 }
 
-export function saveSupervisionIncident(privateDir, error, stage) {
+export function saveSupervisionIncident(privateDir, error, stage, state = null) {
   const allowed = [
     'missing',
     'ownership',
@@ -388,16 +454,42 @@ export function saveSupervisionIncident(privateDir, error, stage) {
     code: ['supervision_read_failed', 'supervision_invalid'].includes(error.code)
       ? error.code
       : 'supervision_state_write_failed',
-    component: ['guardian', 'supervisor'].includes(error.component)
+    component: ['guardian', 'supervisor', 'controller'].includes(error.component)
       ? error.component
       : 'controller',
     detail: allowed.includes(error.detail ?? error.code)
       ? (error.detail ?? error.code)
       : 'unclassified',
     noAutomaticRetry: true,
+    phase: ['startup', 'arm', 'model', 'checks', 'between-arms'].includes(state?.phase)
+      ? state.phase
+      : null,
+    heartbeatAgeMs: Number.isFinite(state?.heartbeatAt)
+      ? Math.max(0, Date.now() - state.heartbeatAt)
+      : null,
+    worker:
+      state?.worker &&
+      Number.isSafeInteger(state.worker.pid) &&
+      typeof state.worker.started === 'string'
+        ? { pid: state.worker.pid, started: state.worker.started }
+        : null,
   };
   writeJson(path.join(privateDir, 'supervision/INCIDENCIA.json'), incident, true);
   return incident;
+}
+
+/** A diagnostic failure must never suppress shutdown or replace the first cause. */
+export function supervisionPulse(validate, persist, onFailure) {
+  let stage = 'validation';
+  try {
+    validate();
+    stage = 'heartbeat_write';
+    persist();
+    return true;
+  } catch (error) {
+    onFailure(error, stage);
+    return false;
+  }
 }
 
 /** The controller cannot dispatch until an independent guardian is alive. */
@@ -432,22 +524,17 @@ export async function attachSupervision(privateDir) {
   let lostCallback = () => {},
     lost = false;
   const heartbeat = setInterval(() => {
-    let stage = 'validation';
-    try {
-      validate();
-      stage = 'heartbeat_write';
-      persist();
-    } catch (error) {
+    supervisionPulse(validate, persist, (error, stage) => {
       if (!lost) {
         lost = true;
         try {
-          saveSupervisionIncident(privateDir, error, stage);
+          saveSupervisionIncident(privateDir, error, stage, state);
         } catch {
           // A failed diagnostic write never prevents the mandatory pause.
         }
         lostCallback();
       }
-    }
+    });
   }, spec.heartbeatMs);
   return {
     startedAt: spec.startedAt,
@@ -476,15 +563,9 @@ export async function attachSupervision(privateDir) {
         assert(state.worker);
         persist();
       } catch (error) {
-        if (child.pid) {
-          try {
-            execFileSync(
-              path.join(process.env.SYSTEMROOT ?? 'C:\\Windows', 'System32/taskkill.exe'),
-              ['/pid', String(child.pid), '/t', '/f'],
-              { stdio: 'ignore', windowsHide: true, timeout: 5000 },
-            );
-          } catch {}
-        }
+        // Never terminate a PID whose creation time could not be established.
+        // Recovery retains an unverified-cleanup diagnosis for operator review.
+        if (state.worker) void stopOwned(state.worker).catch(() => {});
         throw error;
       }
     },
