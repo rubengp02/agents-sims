@@ -1,0 +1,58 @@
+{
+  "id": "controlled-fixed-v1",
+  "attempt": "parallel-dccc1111",
+  "status": "prepared-not-authorized",
+  "realProviderEnabled": true,
+  "sourceFingerprint": "71ac72ed83467a2b1e5d2d700dfab5957ae8ac1fc44c1beac01038a11700ba5f",
+  "limits": {
+    "maxRuns": 3,
+    "maxTokens": 200000,
+    "totalMs": 720000,
+    "maxParallel": 2,
+    "perRunMs": 180000,
+    "directTokens": 80000,
+    "workerTokens": 60000,
+    "officeMs": 480000,
+    "maxRepairs": 0
+  },
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "sessionMode": "fresh",
+  "task": "csv-and-dag-import-pipeline-v1",
+  "objective": "Implementa parseCsv en csv.mjs y planJobs en graph.mjs para el pipeline de importación, sin modificar contratos ni pruebas.",
+  "ownedFiles": [
+    "csv.mjs",
+    "graph.mjs"
+  ],
+  "checks": {
+    "initial": {
+      "passed": false,
+      "tests": 50,
+      "failures": 48
+    },
+    "reference": {
+      "passed": true,
+      "tests": 50,
+      "failures": 0
+    },
+    "partialRejected": true
+  },
+  "initialHash": "1c9d2d43040bd58295931175f25108073cfe22716b65c8b773e76ca9086d35ad",
+  "arms": [
+    "codex-individual-strict",
+    "office-two-writers"
+  ],
+  "order": "direct-first; single pair, exploratory; cache/order bias not eliminated",
+  "chief": "local deterministic routing from explicit disjoint contracts; no AI planning",
+  "review": "immutable local acceptance; low-risk isolated exercise; no AI reviewer or repair",
+  "estimates": "Human approval required: 80k direct, 60k per worker; 180s per call; 20s preparation and integration each. These are conservative caps, not measured parallel speedups.",
+  "tokenCeiling": "Observed usage at turn completion; CLI does not guarantee a hard token generation cap.",
+  "limitations": [
+    "One separable task; not coupled tasks or statistical proof",
+    "Different native engines: Codex CLI versus optional AO; whole-product comparison",
+    "No historical baseline matches this task",
+    "No automatic budget increases or retries"
+  ],
+  "preparedAt": "2026-10-21T23:17:04.034Z",
+  "inferenceCalls": 0
+}
