@@ -88,6 +88,16 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
       team.approve(String(object(request.body).id));
       return team.snapshot();
     });
+    routes.post('/api/team/budget-review', async (request) => {
+      const body = object(request.body);
+      team.reviewBudget(
+        String(body.id),
+        body.tokens as number,
+        body.durationMs as number,
+        body.maxContextCharacters as number,
+      );
+      return team.snapshot();
+    });
     routes.post('/api/team/start', async () => {
       await team.start();
       return team.snapshot();
@@ -124,7 +134,17 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
       planning = true;
       planError = null;
       void team
-        .plan(body.project, body.goal, body.allowWrites === true)
+        .plan(
+          body.project,
+          body.goal,
+          body.allowWrites === true,
+          body.context && body.assessment
+            ? {
+                context: body.context as TaskContext,
+                assessment: body.assessment as TaskAssessment,
+              }
+            : undefined,
+        )
         .catch((error) => {
           planError = {
             code: error instanceof ExecutionBlocked ? error.code : 'planning_failed',

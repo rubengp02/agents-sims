@@ -81,6 +81,7 @@ export interface ExecuteOptions {
 /** Only local official CLIs may implement this contract. No Google client exists. */
 export interface OfficialExecutor {
   readonly provider: ProviderId;
+  readonly engine?: 'codex-cli' | 'agent-orchestrator';
   readonly maxConcurrentReadOnly?: 1 | 2;
   diagnose(): Promise<SubscriptionEvidence>;
   execute(options: ExecuteOptions): Promise<RunRecord>;

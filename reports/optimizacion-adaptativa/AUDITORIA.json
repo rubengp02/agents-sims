@@ -1,0 +1,85 @@
+{
+  "schema_version": "ecc.agent-architecture-audit.report.v1",
+  "executive_verdict": {
+    "overall_health": "high_risk_for_efficiency_claims",
+    "primary_failure_mode": "El reparto y la asignación actuales no optimizan el coste del flujo completo; las reservas no predicen el consumo del turno.",
+    "most_urgent_fix": "Estimación histórica conservadora con incertidumbre explícita y reserva de los pasos obligatorios del plan."
+  },
+  "scope": {
+    "target_name": "Agents Sims, propuesta de estrategia adaptativa",
+    "model_stack": ["Codex CLI con suscripción ChatGPT", "Agent Orchestrator opcional"],
+    "layers_to_audit": ["prompt", "history", "handoffs", "routing", "execution", "interpretation", "transport", "persistence"],
+    "runtime_changes": false,
+    "real_inference_calls": 0
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "title": "Reservas insuficientes y sin previsión de todo el flujo",
+      "mechanism": "Reserva fija o máximo de entrada de la sesión, sin estimación de entrada más salida por clase de turno.",
+      "source_layer": "execution",
+      "root_cause": "No existe historial agregado por modelo, esfuerzo, motor y tarea ni reserva de pasos futuros imprescindibles.",
+      "evidence_refs": ["server/src/execution/teamCoordinator.ts:478", "reports/agent-orchestrator/revalidacion-20261021-c/PILOTO_REAL.json"],
+      "confidence": 1.0,
+      "recommended_fix": "Estimador histórico, confianza explícita y pausa humana cuando falte una cota defendible; no prometer techo de generación exacto."
+    },
+    {
+      "severity": "high",
+      "title": "Plan del Jefe sin modelo, esfuerzo ni contrato de aceptación por tarea",
+      "mechanism": "El plan solo entrega tareas y dependencias; otra política elige modelos a partir de la petición.",
+      "source_layer": "routing",
+      "root_cause": "El contrato del plan no representa decisiones completas del orquestador.",
+      "evidence_refs": ["server/src/execution/workflowPlan.ts:5", "server/src/execution/teamCoordinator.ts:858", "server/src/execution/teamPolicy.ts:65"],
+      "confidence": 1.0,
+      "recommended_fix": "Plan tipado con propuestas y razones, validado por código contra permisos, catálogo, calidad y presupuesto."
+    },
+    {
+      "severity": "high",
+      "title": "Varios módulos implican automáticamente tres especialistas",
+      "mechanism": "Alcance cross-module produce dificultad complex y añade arquitectura y revisión aunque riesgo e incertidumbre sean bajos.",
+      "source_layer": "routing",
+      "root_cause": "Alcance y dificultad no se evalúan separadamente.",
+      "evidence_refs": ["server/src/execution/taskAssessment.ts:45", "reports/optimizacion-adaptativa/DIAGNOSTICO.json"],
+      "confidence": 1.0,
+      "recommended_fix": "Clasificación multidimensional, aceptación suficiente acreditada y selección local mínima sin retirar revisiones de riesgo."
+    },
+    {
+      "severity": "high",
+      "title": "No hay ejecución paralela de varios Programadores ni integración de worktrees",
+      "mechanism": "Exclusividad por rol y escritura, bloqueo de varias carpetas dependientes y lease global exclusivo.",
+      "source_layer": "execution",
+      "root_cause": "El scheduler original modela una fase de implementación única.",
+      "evidence_refs": ["server/src/execution/teamCoordinator.ts:508", "server/src/execution/teamCoordinator.ts:663", "server/src/execution/executionLease.ts:15"],
+      "confidence": 1.0,
+      "recommended_fix": "Diseñar propiedad por tarea, dos espacios independientes y fase de integración; mantenerlo desactivado hasta verificar conflictos y aceptación conjunta."
+    },
+    {
+      "severity": "medium",
+      "title": "La revisión carece de paquete de diff y pruebas vinculadas",
+      "mechanism": "Traspasa prosa truncada y el mismo contexto general, mientras el modelo y la aplicación pueden repetir comprobaciones.",
+      "source_layer": "handoffs",
+      "root_cause": "No existe un artefacto de revisión con base, candidato, resultados y contratos necesarios.",
+      "evidence_refs": ["server/src/execution/taskContext.ts:42", "server/src/execution/teamCoordinator.ts:739", "server/src/execution/roleProfiles.ts"],
+      "confidence": 0.98,
+      "recommended_fix": "Paquete verificado de revisión, sesión independiente de solo lectura, evidencia de hallazgos y profundidad proporcional al riesgo."
+    },
+    {
+      "severity": "medium",
+      "title": "Disponibilidad de modelos sin prueba de eficiencia por tarea",
+      "mechanism": "El CLI anuncia modelos ligeros, pero los resultados comparables de esta tarea corresponden a Sol medium.",
+      "source_layer": "interpretation",
+      "root_cause": "No hay evaluación controlada suficiente para promocionar otras combinaciones.",
+      "evidence_refs": ["reports/optimizacion-adaptativa/DIAGNOSTICO.json", "server/src/execution/teamPolicy.ts:65"],
+      "confidence": 1.0,
+      "recommended_fix": "Tratar Luna low y Sol low como candidatos; exigir aceptación, defectos, reparaciones y consumo antes de habilitarlos como optimización probada."
+    }
+  ],
+  "ordered_fix_plan": [
+    {"order": 0, "goal": "Historial y presupuesto", "why_now": "Evitar nuevos turnos sin margen defendible.", "expected_effect": "Menos excesos; no garantiza ahorro ni corte exacto del proveedor."},
+    {"order": 1, "goal": "Jefe adaptativo local primero", "why_now": "Evitar especialistas innecesarios.", "expected_effect": "Menos llamadas cuando la calidad requerida está cubierta."},
+    {"order": 2, "goal": "Contexto y revisión verificables", "why_now": "Reducir trabajo repetido manteniendo independencia.", "expected_effect": "Menor contexto relevante y hallazgos comprobables."},
+    {"order": 3, "goal": "Evaluación comparativa", "why_now": "No promocionar modelos o políticas por intuición.", "expected_effect": "Evidencia para seleccionar combinaciones aceptadas."},
+    {"order": 4, "goal": "Continuación explícita", "why_now": "Medir reutilización del mismo trabajador.", "expected_effect": "Ventaja posible, todavía no medida."},
+    {"order": 5, "goal": "Programadores aislados e integración", "why_now": "Requiere garantías adicionales antes del paralelismo.", "expected_effect": "Menor camino de espera solo en tareas separables; coste de integración incluido."}
+  ]
+}

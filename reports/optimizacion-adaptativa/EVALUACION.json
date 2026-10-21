@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "status": "specification-pending-implementation",
+  "realInferenceAuthorized": false,
+  "inferenceCalls": 0,
+  "catalogEvidence": "DIAGNOSTICO.json",
+  "historicalReference": "../agent-orchestrator/revalidacion-20261021-c/RESULTADO.md",
+  "variants": [
+    {
+      "id": "codex-individual",
+      "engine": "codex-cli",
+      "controller": "none",
+      "roles": ["developer"],
+      "candidateModel": "gpt-6.1-sol",
+      "candidateEffort": "medium",
+      "localAcceptance": "required",
+      "aiReview": "none"
+    },
+    {
+      "id": "light-local",
+      "engine": "agent-orchestrator",
+      "controller": "local",
+      "roles": ["developer"],
+      "candidateModel": "gpt-6-luna",
+      "candidateEffort": "low",
+      "localAcceptance": "required",
+      "aiReview": "none",
+      "promotionRequiresQualityAndUsageEvidence": true
+    },
+    {
+      "id": "balanced-local",
+      "engine": "agent-orchestrator",
+      "controller": "local",
+      "roles": ["developer"],
+      "candidateModel": "gpt-6.1-sol",
+      "candidateEffort": "low",
+      "localAcceptance": "required",
+      "aiReview": "none"
+    },
+    {
+      "id": "selective-review",
+      "engine": "agent-orchestrator",
+      "controller": "local",
+      "roles": ["developer", "conditional-tester"],
+      "candidateModel": "gpt-6.1-sol",
+      "candidateEffort": "low",
+      "reviewCandidateModel": "gpt-6-luna",
+      "reviewCandidateEffort": "low",
+      "localAcceptance": "required",
+      "aiReview": "risk-triggered-read-only-fresh-session",
+      "deepReview": "retain-for-sensitive-tasks",
+      "reviewModelPromotionRequiresEvidence": true
+    },
+    {
+      "id": "full-team-control",
+      "engine": "agent-orchestrator",
+      "controller": "ai-chief",
+      "roles": ["chief", "architect", "developer", "tester"],
+      "candidateModel": "gpt-6.1-sol",
+      "candidateEffort": "medium",
+      "localAcceptance": "required",
+      "aiReview": "required-independent-read-only",
+      "purpose": "cost-and-quality-control-not-production-default"
+    },
+    {
+      "id": "adaptive-office",
+      "engine": "agent-orchestrator",
+      "controller": "local-first-conditional-ai-chief",
+      "roles": "validated-plan-with-minimum-necessary-specialists",
+      "candidateModel": "catalog-and-evidence-based-per-task",
+      "candidateEffort": "evidence-based-per-task",
+      "localAcceptance": "required",
+      "aiReview": "risk-and-coverage-based",
+      "parallelWriters": "disabled-until-isolation-and-integration-tests-pass"
+    }
+  ],
+  "experimentLayers": [
+    "whole-product-comparison",
+    "same-engine-model-and-effort-ablation",
+    "same-model-context-and-routing-ablation",
+    "same-worker-new-session-versus-explicit-continuation"
+  ],
+  "caseFamilies": [
+    "easy-known-contract",
+    "medium-known-cross-module-contract",
+    "hard-concurrency",
+    "security-sensitive",
+    "missing-or-weak-acceptance",
+    "misleading-keywords-and-contradictory-evidence",
+    "independent-worktrees",
+    "overlapping-ownership-and-integration-conflicts"
+  ],
+  "offlineRequirements": [
+    "independent-oracles-reject-initial-and-mutant-code-and-accept-reference",
+    "versioned-blind-routing-corpus",
+    "chronological-estimation-no-future-leakage",
+    "unknown-or-censored-usage-not-treated-as-zero",
+    "budget-reserves-entire-required-workflow-including-chief",
+    "atomic-reservations-and-restart-accounting",
+    "review-findings-have-verifiable-evidence",
+    "protected-files-and-artifact-hashes-checked",
+    "windows-path-length-and-line-ending-regressions",
+    "no-hidden-retry-or-provider-fallback",
+    "subscription-catalog-and-permissions-rechecked-before-each-real-turn"
+  ],
+  "futureRealTrialRequirements": {
+    "requiresNewExplicitAuthorization": true,
+    "limits": null,
+    "equalTotalLimitsAcrossStrategies": true,
+    "countChiefIntegrationRepairsAndFailures": true,
+    "alternateOrderAndRepeatWithinAuthorizedLimits": true,
+    "historicalBaselinesLabeledAndNeverSilentlyRerun": true,
+    "noAutomaticBudgetIncrease": true,
+    "unknownUsageOrInsufficientPrediction": "pause-for-human-review"
+  },
+  "metrics": [
+    "accepted-or-not-with-reasons",
+    "independent-acceptance-tests-passed",
+    "defects-found-and-escaped-by-severity",
+    "repair-count-and-cost",
+    "end-to-end-duration-and-critical-path",
+    "input-tokens",
+    "cached-input-tokens-subset-of-input",
+    "uncached-input-tokens",
+    "output-tokens",
+    "subscription-quota-snapshots-with-external-usage-confounding",
+    "estimate-versus-actual-and-sample-confidence",
+    "new-or-resumed-session"
+  ],
+  "promotionRules": [
+    "all-required-acceptance-and-scope-checks-pass",
+    "no-budget-violation-or-unknown-usage",
+    "no-removal-of-mandatory-sensitive-review",
+    "no-quality-regression-on-versioned-holdout-cases",
+    "compare-efficiency-only-between-equally-accepted-results",
+    "no-general-savings-claim-from-one-case-or-simulated-counters",
+    "availability-is-not-a-model-efficiency-ranking"
+  ]
+}

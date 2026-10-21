@@ -30,6 +30,8 @@ export interface TaskAssessment {
   modules: string[];
   tests: 'available' | 'missing' | 'unknown';
   visualDecision?: boolean;
+  /** Claims are verified against the locally configured acceptance registry. */
+  acceptanceCoverage?: 'complete' | 'partial' | 'unknown';
 }
 export interface TaskContext {
   objective: string;
@@ -45,6 +47,30 @@ export interface TeamTask {
   prompt: string;
   context?: TaskContext;
   assessment?: TaskAssessment;
+  proposedChoice?: TeamChoice;
+  reviewMode?: 'none' | 'focused' | 'deep';
+  checkedRevision?: string;
+  reviewFindings?: Array<{
+    file: string;
+    line: number;
+    severity: 'low' | 'medium' | 'high';
+    criterion: string;
+    evidence: string;
+  }>;
+  /** Explicit human estimate, bound to the selected execution profile. */
+  budgetReview?: {
+    choiceKey: string;
+    tokens: number;
+    durationMs: number;
+    maxContextCharacters: number;
+  };
+  estimate?: {
+    tokens: number | null;
+    durationMs: number | null;
+    confidence: string;
+    samples: number;
+    reason: string;
+  };
   localChecks?: Array<{ id: string; exitCode: number | null; durationMs: number; passed: boolean }>;
   project: string;
   executionProject?: string;
@@ -89,5 +115,7 @@ export interface TeamSnapshot {
   running: boolean;
   runsUsed: number;
   tokensUsed: number;
+  /** Conservative sum of dispatched work durations, including planning/checks. */
+  timeUsedMs?: number;
   budgetReason: string | null;
 }

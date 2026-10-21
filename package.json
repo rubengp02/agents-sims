@@ -139,7 +139,10 @@
     "engine:test": "node scripts/test-orchestrator-runtime.mjs",
     "engine:verify": "node scripts/verify-orchestrator.mjs",
     "engine:pilot:prepare": "node scripts/orchestrator-pilot.mjs prepare",
-    "engine:pilot": "node scripts/orchestrator-pilot.mjs execute"
+    "engine:pilot": "node scripts/orchestrator-pilot.mjs execute",
+    "adaptive:history": "node scripts/adaptive-history.mjs",
+    "adaptive:evaluate": "node scripts/adaptive-evaluation.mjs",
+    "adaptive:verify": "node scripts/verify-adaptive.mjs"
   },
   "devDependencies": {
     "@asyncapi/modelina": "^5.10.1",

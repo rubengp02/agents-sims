@@ -21,12 +21,15 @@ import {
 import type { AssetCache, ReloadAssetsSideEffect } from './clientMessageHandler.js';
 import { readConfig } from './configPersistence.js';
 import { MAX_PORT, MIN_PORT } from './constants.js';
+import { AdaptiveRuntime } from './execution/adaptiveRuntime.js';
+import { adaptiveStateDirectory } from './execution/adaptiveState.js';
 import { ClaudeExecutor } from './execution/claudeExecutor.js';
 import { createOfficeExecutor } from './execution/engine.js';
 import { pixelOfficeChecks } from './execution/localChecks.js';
 import { OfficeSessionFilter } from './execution/officeSessionFilter.js';
 import { TeamCoordinator } from './execution/teamCoordinator.js';
 import { TeamOfficeBridge } from './execution/teamOfficeBridge.js';
+import { UsageHistory } from './execution/usageHistory.js';
 import { FileStateAdapter } from './fileStateAdapter.js';
 import { copyHermesPlugin } from './providers/hook/hermes/hermesHookInstaller.js';
 import {
@@ -158,6 +161,7 @@ async function main(): Promise<void> {
       ignoreObservedSession: (provider, session, transcript) =>
         officeSessions.shouldIgnore(provider, session, transcript),
     });
+    const adaptiveState = adaptiveStateDirectory(process.cwd());
     const team: TeamCoordinator = new TeamCoordinator(
       {
         codex: createOfficeExecutor(process.cwd(), executionDirectory),
@@ -168,6 +172,10 @@ async function main(): Promise<void> {
       pixelOfficeChecks(process.cwd()),
       undefined,
       path.resolve('.local-office', 'team-checkpoint.json'),
+      new AdaptiveRuntime(
+        new UsageHistory(path.join(adaptiveState, 'usage-history.json')),
+        path.join(adaptiveState, 'task-artifacts'),
+      ),
     );
     console.log(`[Pixel Agents] Enabled providers: ${providers.map((p) => p.id).join(', ')}`);
 

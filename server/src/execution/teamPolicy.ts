@@ -37,7 +37,7 @@ export function validateSettings(value: TeamSettings): TeamSettings {
 
 /** Routing is bounded and free of extra model calls. API price is not subscription quota. */
 export function chooseModel(
-  task: Pick<TeamTask, 'prompt' | 'role' | 'override' | 'assessment'>,
+  task: Pick<TeamTask, 'prompt' | 'role' | 'override' | 'assessment' | 'proposedChoice'>,
   evidence: SubscriptionEvidence,
 ): {
   choice: TeamChoice;
@@ -59,6 +59,31 @@ export function chooseModel(
       choice: { ...task.override },
       difficulty,
       explanation: 'Elección manual; catálogo y suscripción se verifican antes de ejecutar.',
+    };
+  }
+  if (task.proposedChoice) {
+    const proposed = task.proposedChoice;
+    const allowed =
+      proposed.provider === 'codex' &&
+      ((proposed.model === 'gpt-6-luna' && proposed.effort === 'low' && !complex) ||
+        (proposed.model === 'gpt-6.1-sol' && ['low', 'medium', 'high'].includes(proposed.effort)));
+    if (
+      !allowed ||
+      !evidence.models.some((m) => m.id === proposed.model && m.efforts.includes(proposed.effort))
+    )
+      throw new ExecutionBlocked(
+        'plan_choice_unavailable',
+        'La propuesta del Jefe no pertenece al catálogo automático permitido.',
+      );
+    if (complex && proposed.effort === 'low')
+      throw new ExecutionBlocked(
+        'reasoning_review_required',
+        'Un trabajo de alto riesgo necesita revisar su razonamiento.',
+      );
+    return {
+      choice: { ...proposed },
+      difficulty,
+      explanation: `${assessment.reason} Asignación propuesta por el Jefe, validada por la aplicación; eficiencia aún no demostrada.`,
     };
   }
   // Curated automatic set. Never silently expand to old or high consumption models.

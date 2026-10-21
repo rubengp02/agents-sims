@@ -10,6 +10,7 @@ import { ExecutionBlocked } from './types.js';
 export interface CheckRunner {
   has(id: string): boolean;
   hasAcceptance(ids: string[]): boolean;
+  covers?(ids: string[], criteria: string[]): boolean;
   run(
     ids: string[],
     project: string,
@@ -21,6 +22,8 @@ export interface LocalCheckCommand {
   args: string[];
   timeoutMs: number;
   acceptance?: boolean;
+  /** Exact criteria covered, supplied by local code, never by an LLM/HTTP body. */
+  criteria?: string[];
 }
 
 /** Registry is supplied by local application code, never by a task/model/HTTP request. */
@@ -38,6 +41,14 @@ export class LocalChecks implements CheckRunner {
   }
   hasAcceptance(ids: string[]) {
     return ids.some((id) => this.has(id) && this.commands[id].acceptance === true);
+  }
+  covers(ids: string[], criteria: string[]) {
+    const covered = new Set(
+      ids.flatMap((id) =>
+        this.commands[id]?.acceptance ? (this.commands[id].criteria ?? []) : [],
+      ),
+    );
+    return criteria.length > 0 && criteria.every((criterion) => covered.has(criterion));
   }
   async run(ids: string[], project: string, signal: AbortSignal) {
     if (this.allowedProject && realpathSync(project) !== realpathSync(this.allowedProject)) {

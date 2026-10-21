@@ -83,6 +83,7 @@ interface Dependencies {
 
 /** Two independent readers or one exclusive run; no account/payment fallback. */
 export class CodexExecutor implements OfficialExecutor {
+  readonly engine = 'codex-cli' as const;
   readonly provider = 'codex' as const;
   readonly maxConcurrentReadOnly = 2 as const;
   private readonly env: NodeJS.ProcessEnv;

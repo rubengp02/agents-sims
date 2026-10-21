@@ -47,6 +47,7 @@ interface Dependencies {
 
 /** AO supplies native session/worktree infrastructure. Office policy owns all starts. */
 export class OrchestratorExecutor implements OfficialExecutor {
+  readonly engine = 'agent-orchestrator' as const;
   readonly provider = 'codex' as const;
   readonly maxConcurrentReadOnly = 2 as const;
   private readonly metadata: OfficialExecutor;

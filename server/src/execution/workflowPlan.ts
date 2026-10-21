@@ -1,5 +1,7 @@
-import type { TeamRole } from '../../../core/src/team.js';
+import type { TaskAssessment, TaskContext, TeamChoice, TeamRole } from '../../../core/src/team.js';
 import { object } from './subscriptionPolicy.js';
+import { validateAssessment } from './taskAssessment.js';
+import { validateContext } from './taskContext.js';
 import { ExecutionBlocked } from './types.js';
 
 export interface WorkflowTask {
@@ -8,6 +10,10 @@ export interface WorkflowTask {
   prompt: string;
   dependsOn: number[];
   parallelSafe: boolean;
+  proposedChoice?: TeamChoice;
+  assessment?: TaskAssessment;
+  context?: TaskContext;
+  reviewMode?: 'none' | 'focused' | 'deep';
 }
 
 /** Validate all tasks before creation, inject phase barriers, then topologically order. */
@@ -35,12 +41,44 @@ export function normalizeWorkflowPlan(raw: unknown): WorkflowTask[] {
       (item.parallelSafe !== undefined && typeof item.parallelSafe !== 'boolean')
     )
       throw invalid();
+    if (
+      ['allowWrites', 'budgetReview', 'maxTokens', 'provider', 'continueTaskId'].some((key) =>
+        Object.hasOwn(item, key),
+      )
+    )
+      throw invalid();
+    let choice: TeamChoice | undefined;
+    if (item.choice !== undefined) {
+      const proposed = object(item.choice);
+      if (
+        proposed.provider !== 'codex' ||
+        !['gpt-6-luna', 'gpt-6.1-sol'].includes(String(proposed.model)) ||
+        !['low', 'medium', 'high'].includes(String(proposed.effort))
+      )
+        throw invalid();
+      choice = {
+        provider: 'codex',
+        model: proposed.model as string,
+        effort: proposed.effort as string,
+      };
+    }
+    if (
+      item.reviewMode !== undefined &&
+      !['none', 'focused', 'deep'].includes(String(item.reviewMode))
+    )
+      throw invalid();
     return {
       role: item.role as WorkflowTask['role'],
       title: item.title,
       prompt: item.prompt,
       dependsOn: [...new Set(item.dependsOn as number[])],
       parallelSafe: item.parallelSafe === true,
+      ...(choice ? { proposedChoice: choice } : {}),
+      ...(item.assessment
+        ? { assessment: validateAssessment(item.assessment as TaskAssessment) }
+        : {}),
+      ...(item.context ? { context: validateContext(item.context as TaskContext) } : {}),
+      ...(item.reviewMode ? { reviewMode: item.reviewMode as WorkflowTask['reviewMode'] } : {}),
     };
   });
   for (const task of tasks) {

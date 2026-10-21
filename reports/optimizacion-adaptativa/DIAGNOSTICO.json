@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-21T13:52:01.030Z",
+  "sourceCommit": "cd9f03b982093c2245790f94770af91a5ce7b189",
+  "sourceFingerprint": "87f50803142f1115a16ec7384816430f7d7a640579cad02e2cc143a5e7a1811f",
+  "inferenceCalls": 0,
+  "metadataOnly": true,
+  "catalog": {
+    "checkedAt": "2026-10-21T13:52:00.890Z",
+    "plan": "plus",
+    "models": [
+      {
+        "id": "gpt-6.1-sol",
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      },
+      {
+        "id": "gpt-6-astra",
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      },
+      {
+        "id": "gpt-6-sol",
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      },
+      {
+        "id": "gpt-6-luna",
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ]
+      },
+      {
+        "id": "gpt-5.6-sol",
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      },
+      {
+        "id": "gpt-5.6-terra",
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      },
+      {
+        "id": "gpt-5.6-luna",
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ]
+      }
+    ],
+    "additionalUsage": "rejected unless absent by existing subscription policy",
+    "inferenceAvailabilityOrSavingsProven": false
+  },
+  "historicalSource": {
+    "file": "reports/agent-orchestrator/revalidacion-20261021-c/PILOTO_REAL.json",
+    "sha256": "014715aa7cd64817853d5c8c6e69cd56dc5798a9216096c5cd8b95a167574b86"
+  },
+  "historicalRuns": [
+    {
+      "method": "office",
+      "role": "architect",
+      "status": "completed",
+      "reason": null,
+      "inputTokens": 57913,
+      "outputTokens": 1140,
+      "cachedInputTokens": 41728,
+      "durationMs": 44606,
+      "sessionMode": "new",
+      "subscriptionVerified": true,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "uncachedInputTokens": 16185,
+      "totalTokens": 59053
+    },
+    {
+      "method": "office",
+      "role": "developer",
+      "status": "completed",
+      "reason": null,
+      "inputTokens": 95800,
+      "outputTokens": 2263,
+      "cachedInputTokens": 54912,
+      "durationMs": 68652,
+      "sessionMode": "new",
+      "subscriptionVerified": true,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "uncachedInputTokens": 40888,
+      "totalTokens": 98063
+    },
+    {
+      "method": "office",
+      "role": "tester",
+      "status": "paused",
+      "reason": "token_budget",
+      "inputTokens": 50177,
+      "outputTokens": 2344,
+      "cachedInputTokens": 34944,
+      "durationMs": 73252,
+      "sessionMode": "new",
+      "subscriptionVerified": true,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "uncachedInputTokens": 15233,
+      "totalTokens": 52521
+    }
+  ],
+  "directReference": {
+    "inputTokens": 58064,
+    "outputTokens": 2277,
+    "cachedInputTokens": 45184,
+    "uncachedInputTokens": 12880,
+    "totalTokens": 60341,
+    "durationMs": 71676
+  },
+  "currentRouting": [
+    {
+      "id": "bounded-tested",
+      "prompt": "Corrige el redondeo",
+      "assessment": {
+        "scope": "bounded",
+        "risk": "low",
+        "uncertainty": "low",
+        "modules": [
+          "money"
+        ],
+        "tests": "available"
+      },
+      "result": {
+        "difficulty": "normal",
+        "roles": [
+          "developer"
+        ],
+        "reason": "Alcance: bounded; riesgo: low; incertidumbre: low; módulos: 1; pruebas: available. Aceptación mecánica local requerida."
+      }
+    },
+    {
+      "id": "two-modules-known-contract",
+      "prompt": "Implementa factura con contrato y aceptación independientes",
+      "assessment": {
+        "scope": "cross-module",
+        "risk": "low",
+        "uncertainty": "low",
+        "modules": [
+          "money",
+          "invoice"
+        ],
+        "tests": "available"
+      },
+      "result": {
+        "difficulty": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "reason": "Alcance: cross-module; riesgo: low; incertidumbre: low; módulos: 2; pruebas: available. Mantener revisión independiente."
+      }
+    },
+    {
+      "id": "security-sensitive",
+      "prompt": "Modifica la autorización por roles",
+      "assessment": {
+        "scope": "bounded",
+        "risk": "high",
+        "uncertainty": "low",
+        "modules": [
+          "auth"
+        ],
+        "tests": "available"
+      },
+      "result": {
+        "difficulty": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "reason": "Alcance: bounded; riesgo: high; incertidumbre: low; módulos: 1; pruebas: available. Mantener revisión independiente."
+      }
+    },
+    {
+      "id": "unknown-evidence",
+      "prompt": "Implementa la petición",
+      "result": {
+        "difficulty": "normal",
+        "roles": [
+          "developer",
+          "tester"
+        ],
+        "reason": "Alcance: unknown; riesgo: unknown; incertidumbre: unknown; módulos: unknown; pruebas: unknown. Mantener revisión independiente."
+      }
+    },
+    {
+      "id": "investigation",
+      "prompt": "Investiga un fallo intermitente",
+      "assessment": {
+        "scope": "bounded",
+        "risk": "unknown",
+        "uncertainty": "high",
+        "modules": [
+          "runtime"
+        ],
+        "tests": "unknown"
+      },
+      "result": {
+        "difficulty": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "reason": "Alcance: bounded; riesgo: unknown; incertidumbre: high; módulos: 1; pruebas: unknown. Mantener revisión independiente."
+      }
+    }
+  ],
+  "localTests": {
+    "command": "npx vitest run __tests__/taskOptimization.test.ts __tests__/workflowPlan.test.ts __tests__/teamCoordinator.test.ts __tests__/subscriptionPolicy.test.ts",
+    "testFiles": 4,
+    "passed": 123,
+    "failed": 0,
+    "mode": "offline fixtures",
+    "newModelEvaluations": 0
+  }
+}

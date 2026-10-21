@@ -11,7 +11,9 @@ export function validateAssessment(value: TaskAssessment): TaskAssessment {
     !Array.isArray(value.modules) ||
     value.modules.length > 20 ||
     value.modules.some((item) => typeof item !== 'string' || !item.trim() || item.length > 160) ||
-    (value.visualDecision !== undefined && typeof value.visualDecision !== 'boolean')
+    (value.visualDecision !== undefined && typeof value.visualDecision !== 'boolean') ||
+    (value.acceptanceCoverage !== undefined &&
+      !['complete', 'partial', 'unknown'].includes(value.acceptanceCoverage))
   ) {
     throw new ExecutionBlocked(
       'invalid_assessment',
@@ -25,6 +27,7 @@ export function validateAssessment(value: TaskAssessment): TaskAssessment {
     tests: value.tests,
     modules: [...new Set(value.modules)],
     visualDecision: value.visualDecision === true,
+    ...(value.acceptanceCoverage ? { acceptanceCoverage: value.acceptanceCoverage } : {}),
   };
 }
 
@@ -45,6 +48,14 @@ export function assessTask(
   const highRisk = sensitive || assessment?.risk === 'high';
   const crossModule = assessment?.scope === 'cross-module' || (assessment?.modules.length ?? 0) > 1;
   const uncertain = assessment?.uncertainty === 'high';
+  const covered =
+    assessment?.acceptanceCoverage === 'complete' &&
+    assessment.risk === 'low' &&
+    assessment.uncertainty === 'low' &&
+    assessment.tests === 'available' &&
+    assessment.modules.length > 0 &&
+    !highRisk &&
+    !assessment.visualDecision;
   const simple =
     !highRisk &&
     !crossModule &&
@@ -52,27 +63,30 @@ export function assessTask(
     !assessment?.visualDecision &&
     ((assessment?.scope === 'explanation' && explanation) ||
       (!assessment && explanation && prompt.length < 800));
-  const roles: TeamRole[] = simple
+  const roles: TeamRole[] = covered
     ? ['developer']
-    : [
-        ...(highRisk || crossModule || uncertain ? ['architect' as const] : []),
-        ...(assessment?.visualDecision ? ['designer' as const] : []),
-        'developer',
-        // Only positive evidence can remove independent acceptance for code changes.
-        ...(!assessment ||
-        assessment.scope !== 'bounded' ||
-        assessment.modules.length !== 1 ||
-        highRisk ||
-        crossModule ||
-        uncertain ||
-        assessment.risk !== 'low' ||
-        assessment.uncertainty !== 'low' ||
-        assessment.tests !== 'available'
-          ? ['tester' as const]
-          : []),
-      ];
+    : simple
+      ? ['developer']
+      : [
+          ...(highRisk || crossModule || uncertain ? ['architect' as const] : []),
+          ...(assessment?.visualDecision ? ['designer' as const] : []),
+          'developer',
+          // Only positive evidence can remove independent acceptance for code changes.
+          ...(!assessment ||
+          assessment.scope !== 'bounded' ||
+          assessment.modules.length !== 1 ||
+          highRisk ||
+          crossModule ||
+          uncertain ||
+          assessment.risk !== 'low' ||
+          assessment.uncertainty !== 'low' ||
+          assessment.tests !== 'available'
+            ? ['tester' as const]
+            : []),
+        ];
   return {
-    difficulty: highRisk || crossModule || uncertain ? 'complex' : simple ? 'simple' : 'normal',
+    difficulty:
+      highRisk || uncertain || (crossModule && !covered) ? 'complex' : simple ? 'simple' : 'normal',
     roles,
     reason: `Alcance: ${assessment?.scope ?? (simple ? 'explanation' : 'unknown')}; riesgo: ${highRisk ? 'high' : (assessment?.risk ?? 'unknown')}; incertidumbre: ${assessment?.uncertainty ?? 'unknown'}; módulos: ${assessment?.modules.length ?? 'unknown'}; pruebas: ${assessment?.tests ?? 'unknown'}. ${simple ? 'Respuesta directa.' : roles.includes('tester') ? 'Mantener revisión independiente.' : 'Aceptación mecánica local requerida.'}`,
   };
