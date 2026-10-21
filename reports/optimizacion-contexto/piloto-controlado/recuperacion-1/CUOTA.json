@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-21T16:49:57.313Z",
+  "plan": "plus",
+  "primaryUsedPercent": 99,
+  "primaryRemainingPercent": 1,
+  "primaryWindowMinutes": 300,
+  "primaryResetsAt": 1792606925,
+  "primaryResetMadrid": "21/10/26, 20:22:05",
+  "secondaryUsedPercent": 49,
+  "noAdditionalCredits": true,
+  "source": "official desktop read-only quota metadata",
+  "noAccountResetPerformed": true
+}

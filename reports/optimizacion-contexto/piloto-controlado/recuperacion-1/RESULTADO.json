@@ -1,0 +1,274 @@
+{
+  "protocol": "context-controlled-supervised-v2",
+  "mode": "real-pilot",
+  "planHash": "cd9e3886691e312d097e455eb44f38034f9c68c38e3182cb7db4f0e3de20f24f",
+  "sourceFingerprint": "674a962ee16d95cc121d008eb6f61ea8b7d04c627fb015762f0f74286fc37b59",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 480000,
+    "perRunTokens": 120000,
+    "totalMs": 960000,
+    "perArmMs": 220000,
+    "perRunMs": 180000,
+    "maxRepairs": 0
+  },
+  "runs": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "order": 0,
+      "status": "paused",
+      "reason": "quota_reserve",
+      "input": null,
+      "output": null,
+      "cached": null,
+      "durationMs": 1266,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "requestedEffort": "low",
+      "cliVersion": null,
+      "subscriptionVerified": false,
+      "sessionMode": "new",
+      "contextFingerprint": "95d0a9abcdc4c70b5c10aa15c8d617fe2bb41e2d5a513a3b185638cdb181ae51",
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+      "metrics": {
+        "version": 1,
+        "source": "codex-json",
+        "promptCharacters": 2762,
+        "promptUtf8Bytes": 2784,
+        "submittedCharacters": 2947,
+        "submittedUtf8Bytes": 2970,
+        "activityEvents": 0,
+        "completedToolEvents": 0,
+        "commandEvents": 0,
+        "fileChangeEvents": 0,
+        "observedToolOutputUtf8Bytes": 0,
+        "toolOutputMissing": 0,
+        "duplicateToolEvents": 0,
+        "counterSaturated": false,
+        "completedTurns": 0,
+        "failedTurns": 0,
+        "usageEvents": 0,
+        "fileReads": null,
+        "internalModelRequests": null
+      }
+    }
+  ],
+  "arms": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "order": 0,
+      "status": "not-accepted",
+      "fixtureHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": false
+          },
+          {
+            "id": "parse-overflow",
+            "passed": false
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": false
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": false
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": false
+          },
+          {
+            "id": "discount-type",
+            "passed": false
+          },
+          {
+            "id": "discount-range-0",
+            "passed": false
+          },
+          {
+            "id": "discount-range-1",
+            "passed": false
+          },
+          {
+            "id": "discount-range-2",
+            "passed": false
+          },
+          {
+            "id": "discount-range-3",
+            "passed": false
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": false
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "parse-invalid-0",
+          "parse-invalid-1",
+          "parse-invalid-2",
+          "parse-invalid-3",
+          "parse-invalid-4",
+          "parse-invalid-5",
+          "parse-invalid-6",
+          "parse-invalid-7",
+          "parse-invalid-8",
+          "parse-invalid-9",
+          "parse-invalid-10",
+          "parse-overflow",
+          "half-up",
+          "sum-overflow",
+          "quantity-type",
+          "quantity-range-0",
+          "quantity-range-1",
+          "quantity-range-2",
+          "quantity-range-3",
+          "quantity-range-4",
+          "discount-type",
+          "discount-range-0",
+          "discount-range-1",
+          "discount-range-2",
+          "discount-range-3",
+          "generated-integer-cases"
+        ],
+        "durationMs": 233
+      },
+      "changes": {
+        "changed": [],
+        "unexpected": [],
+        "passed": true
+      },
+      "gitUnchanged": true,
+      "mechanical": [],
+      "durationMs": 3191,
+      "tokens": null
+    }
+  ],
+  "status": "paused",
+  "inferenceObserved": null,
+  "automaticPromotion": false,
+  "reason": "usage_unknown",
+  "durationMs": 12789,
+  "skipped": [
+    {
+      "method": "office",
+      "variant": "standard"
+    },
+    {
+      "method": "office",
+      "variant": "canonical"
+    },
+    {
+      "method": "direct",
+      "variant": "canonical"
+    }
+  ],
+  "observedTokens": null
+}

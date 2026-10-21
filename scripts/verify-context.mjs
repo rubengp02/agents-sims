@@ -46,6 +46,11 @@ const extra = new tools.LocalChecks(
       args: ['scripts/test-orchestrator-runtime.mjs'],
       timeoutMs: 60000,
     },
+    supervision: {
+      executable: process.execPath,
+      args: ['--test', 'scripts/pilot-supervision.test.mjs'],
+      timeoutMs: 120000,
+    },
     context: {
       executable: process.execPath,
       args: ['scripts/context-audit.mjs', name + '-comparacion'],
@@ -70,6 +75,7 @@ try {
     [standard, 'test'],
     [extra, 'policies'],
     [extra, 'native'],
+    [extra, 'supervision'],
     [extra, 'context'],
     [standard, 'package'],
   ]) {
@@ -84,7 +90,7 @@ try {
   report.historicalReportsUnchanged = JSON.stringify(previous) === JSON.stringify(hashes());
   report.historicalReportCount = oldReports.length;
   report.passed =
-    report.results.length === 7 &&
+    report.results.length === 8 &&
     report.results.every((r) => r.passed) &&
     report.sourceUnchanged &&
     report.historicalReportsUnchanged;

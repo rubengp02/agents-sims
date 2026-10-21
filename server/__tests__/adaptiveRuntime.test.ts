@@ -201,7 +201,9 @@ function harness(
   return { team, calls, add, adaptive, history, dir, executor };
 }
 async function done(team: TeamCoordinator) {
-  await vi.waitFor(() => expect(team.snapshot().running).toBe(false));
+  // Local process checks may need more than Vitest's 1 s default on a busy host.
+  // This only waits for quiescence; all budget, call-count and status assertions remain.
+  await vi.waitFor(() => expect(team.snapshot().running).toBe(false), { timeout: 5000 });
 }
 
 describe('historical budget, no inference', () => {

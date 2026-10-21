@@ -1,0 +1,60 @@
+{
+  "protocol": "context-controlled-supervised-v2",
+  "attempt": "recuperacion-1",
+  "supervisionRequired": true,
+  "status": "prepared-awaiting-exact-limit-approval",
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "engine": "codex-cli",
+  "caseId": "medium",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 480000,
+    "perRunTokens": 120000,
+    "totalMs": 960000,
+    "perArmMs": 220000,
+    "perRunMs": 180000,
+    "maxRepairs": 0
+  },
+  "sourceFingerprint": "674a962ee16d95cc121d008eb6f61ea8b7d04c627fb015762f0f74286fc37b59",
+  "fixtureHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+  "acceptanceHash": "da82e45458775c295d74b7ee03f44340ce82c6608ec51faea7f2d4a15b4e968d",
+  "arms": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6"
+    },
+    {
+      "method": "office",
+      "variant": "standard",
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6"
+    },
+    {
+      "method": "office",
+      "variant": "canonical",
+      "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f"
+    },
+    {
+      "method": "direct",
+      "variant": "canonical",
+      "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f"
+    }
+  ],
+  "preflight": {
+    "rejectsInitial": true,
+    "acceptsReference": true,
+    "independentChecks": 36
+  },
+  "protocolNotes": [
+    "same CLI, configuration, effort, permissions and fixture in all four arms",
+    "same submitted prompt for direct and office within each variant",
+    "one pair per variant, reversed method order; exploratory, no automatic promotion",
+    "local checks, independent acceptance and scope validation required for every arm",
+    "unknown usage, subscription loss, failed acceptance or a limit pauses the whole pilot",
+    "cache observed, not manipulated; new sessions; no additional providers",
+    "all remaining calls reserve their full per-run token and time bounds before dispatch"
+  ],
+  "observedLimit": "Tokens may be reported at completion; observed bounds do not guarantee an exact generation ceiling.",
+  "inferenceCalls": 0
+}

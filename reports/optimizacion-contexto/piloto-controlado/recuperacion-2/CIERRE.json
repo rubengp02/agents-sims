@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-21T19:27:50.878Z",
+  "sourceUnchanged": true,
+  "previousReportsUnchanged": true,
+  "previousReportCount": 109,
+  "priorLedgersUnchanged": true,
+  "priorLedgerCount": 2,
+  "allOwnedProcessesStopped": true,
+  "closed": true,
+  "reason": "supervision_lost",
+  "completeReceipts": 3,
+  "partialObservedTokens": 174196,
+  "totalUsageKnown": false,
+  "acceptance": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "independentPassed": 36,
+      "independentTotal": 36,
+      "accepted": true,
+      "mechanical": [
+        true,
+        true
+      ]
+    },
+    {
+      "method": "office",
+      "variant": "standard",
+      "independentPassed": 36,
+      "independentTotal": 36,
+      "accepted": true,
+      "mechanical": [
+        true,
+        true
+      ]
+    },
+    {
+      "method": "office",
+      "variant": "canonical",
+      "independentPassed": 36,
+      "independentTotal": 36,
+      "accepted": true,
+      "mechanical": [
+        true,
+        true
+      ]
+    },
+    {
+      "method": "direct",
+      "variant": "canonical",
+      "independentPassed": 36,
+      "independentTotal": 36,
+      "accepted": false,
+      "mechanical": []
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 // Explicitly gated real pilot. Preparation and injected-fixture tests never start a model.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,6 +10,12 @@ import { materialize, acceptance, inspectChanges } from './benchmark/kit.mjs';
 import { fixtureFiles } from './benchmark/cases.mjs';
 import { contextVariants, digest, verifyCanonicalFiles } from './context-experiment.mjs';
 import { loadTools, root, sourceFingerprint } from './optimization-tools.mjs';
+import {
+  attachSupervision,
+  launchSupervised,
+  reconcileSupervision,
+  writeJson,
+} from './pilot-supervision.mjs';
 
 export const LIMITS = Object.freeze({
   maxRuns: 4,
@@ -29,13 +35,16 @@ export const ARMS = Object.freeze([
 const item = cases.find((c) => c.id === 'medium');
 const defaultPrivate = path.join(root, '.local-office/context-pilot');
 const defaultReports = path.join(root, 'reports/optimizacion-contexto/piloto-controlado');
-const write = (file, value, exclusive = false) => {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', {
-    mode: 0o600,
-    flag: exclusive ? 'wx' : 'w',
-  });
-};
+export function pilotPaths(attempt) {
+  if (attempt === undefined) return { privateDir: defaultPrivate, reports: defaultReports };
+  assert.match(attempt, /^[a-z][a-z0-9-]{0,47}$/);
+  return {
+    privateDir: path.join(defaultPrivate, attempt),
+    reports: path.join(defaultReports, attempt),
+    attempt,
+  };
+}
+const write = writeJson;
 function fixtureSnapshot(project) {
   const files = {};
   function visit(relative = '') {
@@ -71,7 +80,13 @@ export function verifyAuthorization(authorization, plan, now = Date.now()) {
   assert(authorization.authorizationNote.trim());
   const expiry = Date.parse(authorization.expiresAt);
   assert(Number.isFinite(expiry) && expiry > now && expiry <= now + 86400000);
-  assert.equal(plan.protocol, 'context-controlled-real-v1');
+  assert(
+    ['context-controlled-real-v1', 'context-controlled-supervised-v2'].includes(plan.protocol),
+  );
+  if (plan.protocol === 'context-controlled-supervised-v2') {
+    assert.equal(plan.supervisionRequired, true);
+    assert.match(plan.attempt, /^[a-z][a-z0-9-]{0,47}$/);
+  }
   assert.equal(plan.model, 'gpt-6.1-sol');
   assert.equal(plan.effort, 'low');
   assert.equal(plan.engine, 'codex-cli');
@@ -103,7 +118,8 @@ export async function prepareContextPilot(options = {}) {
   assert(!a.passed && b.passed);
   assert.equal(b.tests.length, 36);
   const plan = {
-    protocol: 'context-controlled-real-v1',
+    protocol: options.attempt ? 'context-controlled-supervised-v2' : 'context-controlled-real-v1',
+    ...(options.attempt ? { attempt: options.attempt, supervisionRequired: true } : {}),
     status: 'prepared-awaiting-exact-limit-approval',
     model: 'gpt-6.1-sol',
     effort: 'low',
@@ -155,9 +171,14 @@ export async function executeContextPilot(deps = {}) {
   const authorization = JSON.parse(fs.readFileSync(path.join(privateDir, 'authorization.json')));
   verifyAuthorization(authorization, plan);
   assert.equal(plan.sourceFingerprint, sourceFingerprint(), 'Código distinto al preparado.');
+  if (plan.supervisionRequired) {
+    assert.equal(plan.attempt, deps.attempt, 'La autorización pertenece a otro intento.');
+    assert(deps.supervision, 'Este intento necesita controlador y vigilante independientes.');
+    deps.supervision.validate();
+  }
   const ledgerFile = path.join(privateDir, 'ledger.json');
   const ledger = {
-    startedAt: Date.now(),
+    startedAt: deps.supervision?.startedAt ?? Date.now(),
     attempts: 0,
     tokens: 0,
     closed: false,
@@ -193,7 +214,11 @@ export async function executeContextPilot(deps = {}) {
     team?.pause(reason);
     save();
   };
-  const timer = setTimeout(() => pause('total_time_budget'), LIMITS.totalMs);
+  deps.supervision?.onLost(() => pause('supervision_lost'));
+  const timer = setTimeout(
+    () => pause('total_time_budget'),
+    Math.max(1, LIMITS.totalMs - (Date.now() - ledger.startedAt)),
+  );
   save();
   try {
     const tools = await loadTools(),
@@ -214,6 +239,7 @@ export async function executeContextPilot(deps = {}) {
       );
       const arm = ARMS[i],
         startedAt = Date.now();
+      deps.supervision?.arm();
       active = `${arm.method}-${arm.variant}`;
       const dir = path.join(root, '.local-office', 'cx-' + randomUUID().slice(0, 8));
       fs.mkdirSync(dir);
@@ -257,7 +283,23 @@ export async function executeContextPilot(deps = {}) {
       );
       const executor = deps.executorFactory
         ? deps.executorFactory({ project, item, arm })
-        : new tools.CodexExecutor(path.join(dir, 'receipts'), { discover: async () => runtime });
+        : new tools.CodexExecutor(path.join(dir, 'receipts'), {
+            discover: async () => runtime,
+            ...(deps.supervision
+              ? {
+                  launch: (selectedRuntime, args, env) => {
+                    const child = spawn(selectedRuntime.executable, args, {
+                      cwd: project,
+                      env,
+                      windowsHide: true,
+                      stdio: 'pipe',
+                    });
+                    deps.supervision.launched(child);
+                    return child;
+                  },
+                }
+              : {}),
+          });
       let calls = 0,
         output = '',
         record;
@@ -286,6 +328,7 @@ export async function executeContextPilot(deps = {}) {
           calls++;
           ledger.attempts++;
           phase = 'model';
+          deps.supervision?.model();
           save();
           record = await executor.execute({
             ...options,
@@ -305,7 +348,12 @@ export async function executeContextPilot(deps = {}) {
               output = (output + text).slice(-2048);
               options.onOutput?.(text);
             },
+            onState: (state) => {
+              deps.supervision?.record(state);
+              options.onState?.(state);
+            },
           });
+          deps.supervision?.endModel();
           const known = [record.inputTokens, record.outputTokens].every(
             (n) => Number.isSafeInteger(n) && n >= 0,
           );
@@ -443,6 +491,7 @@ export async function executeContextPilot(deps = {}) {
       team = undefined;
       if (!passed) pause('acceptance_failed');
       if (Date.now() - startedAt > LIMITS.perArmMs) pause('arm_time_budget');
+      deps.supervision?.endArm();
       save();
     }
     report.status =
@@ -478,13 +527,42 @@ export async function executeContextPilot(deps = {}) {
   return report;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  assert.equal(process.argv.length, 3);
+  assert(process.argv.length >= 3 && process.argv.length <= 4);
   const action = process.argv[2];
+  const locations = pilotPaths(process.argv[3]);
   if (action === 'prepare') {
-    const p = await prepareContextPilot();
+    const p = await prepareContextPilot(locations);
     console.log(JSON.stringify({ status: p.status, limits: p.limits, inferenceCalls: 0 }));
-  } else if (action === 'execute') {
-    const r = await executeContextPilot();
+  } else if (action === 'launch') {
+    assert(locations.attempt);
+    const p = JSON.parse(fs.readFileSync(path.join(locations.reports, 'PLAN.json')));
+    const a = JSON.parse(fs.readFileSync(path.join(locations.privateDir, 'authorization.json')));
+    verifyAuthorization(a, p);
+    assert.equal(p.attempt, locations.attempt);
+    assert.equal(p.sourceFingerprint, sourceFingerprint());
+    assert.equal(p.supervisionRequired, true);
+    const owner = launchSupervised(locations);
+    console.log(JSON.stringify({ launched: true, supervisorPid: owner.pid, limits: p.limits }));
+  } else if (action === 'inspect') {
+    const current = await reconcileSupervision(locations.privateDir);
+    console.log(
+      JSON.stringify({
+        status: current.report?.status,
+        closed: current.ledger?.closed,
+        reason: current.ledger?.reason,
+        tokens: current.ledger?.tokens,
+        attempts: current.ledger?.attempts,
+      }),
+    );
+  } else if (action === 'execute' || action === 'execute-supervised') {
+    const supervision =
+      action === 'execute-supervised' ? await attachSupervision(locations.privateDir) : null;
+    let r;
+    try {
+      r = await executeContextPilot({ ...locations, supervision });
+    } finally {
+      supervision?.close();
+    }
     console.log(
       JSON.stringify({
         status: r.status,

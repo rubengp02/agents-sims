@@ -1,0 +1,28 @@
+{
+  "sourceFingerprint": "2d850f06e4c545fac40111e745355305945c75c29e9d265422a83d889bb198f0",
+  "inferenceCalls": 0,
+  "results": [
+    {
+      "id": "check-types",
+      "exitCode": 0,
+      "durationMs": 12535,
+      "passed": true
+    },
+    {
+      "id": "lint",
+      "exitCode": 0,
+      "durationMs": 26431,
+      "passed": true
+    },
+    {
+      "id": "test",
+      "exitCode": 1,
+      "durationMs": 57802,
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "sourceUnchanged": true,
+  "historicalReportsUnchanged": true,
+  "historicalReportCount": 98
+}

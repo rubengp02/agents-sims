@@ -102,6 +102,30 @@ test('exact plan and aggregate bounds are required before constructing any provi
   ])
     assert.throws(() => verifyAuthorization(changed, h.plan));
 });
+test('a supervised attempt rejects a direct or copied dispatch before constructing a provider', async () => {
+  const h = await fixture();
+  h.plan.protocol = 'context-controlled-supervised-v2';
+  h.plan.supervisionRequired = true;
+  h.plan.attempt = 'fixture-attempt';
+  h.authorization.protocol = h.plan.protocol;
+  h.authorization.planHash = digest(JSON.stringify(h.plan));
+  fs.writeFileSync(path.join(h.reports, 'PLAN.json'), JSON.stringify(h.plan));
+  fs.writeFileSync(path.join(h.privateDir, 'authorization.json'), JSON.stringify(h.authorization));
+  await assert.rejects(executeContextPilot({ ...h, attempt: 'fixture-attempt' }));
+  await assert.rejects(
+    executeContextPilot({
+      ...h,
+      attempt: 'copied-attempt',
+      supervision: {
+        validate() {
+          throw new Error('must not be reached');
+        },
+      },
+    }),
+  );
+  assert.equal(h.factories(), 0);
+  assert(!fs.existsSync(path.join(h.privateDir, 'ledger.json')));
+});
 test('the four real-run paths pass locally with a fake provider and identical paired prompts', async () => {
   const h = await fixture();
   const r = await executeContextPilot(h);

@@ -1,0 +1,909 @@
+{
+  "protocol": "context-controlled-supervised-v2",
+  "mode": "real-pilot",
+  "planHash": "d836d0955fd4f17c55edb4398552c774d83248da440c9c67bfd5151026a25631",
+  "sourceFingerprint": "674a962ee16d95cc121d008eb6f61ea8b7d04c627fb015762f0f74286fc37b59",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 480000,
+    "perRunTokens": 120000,
+    "totalMs": 960000,
+    "perArmMs": 220000,
+    "perRunMs": 180000,
+    "maxRepairs": 0
+  },
+  "runs": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "order": 0,
+      "status": "completed",
+      "reason": null,
+      "input": 56601,
+      "output": 1662,
+      "cached": 42112,
+      "durationMs": 48990,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "requestedEffort": "low",
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "contextFingerprint": "95d0a9abcdc4c70b5c10aa15c8d617fe2bb41e2d5a513a3b185638cdb181ae51",
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+      "metrics": {
+        "version": 1,
+        "source": "codex-json",
+        "promptCharacters": 2762,
+        "promptUtf8Bytes": 2784,
+        "submittedCharacters": 2947,
+        "submittedUtf8Bytes": 2970,
+        "activityEvents": 5,
+        "completedToolEvents": 5,
+        "commandEvents": 3,
+        "fileChangeEvents": 2,
+        "observedToolOutputUtf8Bytes": 3045,
+        "toolOutputMissing": 0,
+        "duplicateToolEvents": 0,
+        "counterSaturated": false,
+        "completedTurns": 1,
+        "failedTurns": 0,
+        "usageEvents": 1,
+        "fileReads": null,
+        "internalModelRequests": null
+      }
+    },
+    {
+      "method": "office",
+      "variant": "standard",
+      "order": 1,
+      "status": "completed",
+      "reason": null,
+      "input": 56991,
+      "output": 1780,
+      "cached": 28288,
+      "durationMs": 40883,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "requestedEffort": "low",
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "contextFingerprint": "95d0a9abcdc4c70b5c10aa15c8d617fe2bb41e2d5a513a3b185638cdb181ae51",
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+      "metrics": {
+        "version": 1,
+        "source": "codex-json",
+        "promptCharacters": 2762,
+        "promptUtf8Bytes": 2784,
+        "submittedCharacters": 2947,
+        "submittedUtf8Bytes": 2970,
+        "activityEvents": 4,
+        "completedToolEvents": 4,
+        "commandEvents": 3,
+        "fileChangeEvents": 1,
+        "observedToolOutputUtf8Bytes": 3100,
+        "toolOutputMissing": 0,
+        "duplicateToolEvents": 0,
+        "counterSaturated": false,
+        "completedTurns": 1,
+        "failedTurns": 0,
+        "usageEvents": 1,
+        "fileReads": null,
+        "internalModelRequests": null
+      }
+    },
+    {
+      "method": "office",
+      "variant": "canonical",
+      "order": 2,
+      "status": "completed",
+      "reason": null,
+      "input": 55392,
+      "output": 1770,
+      "cached": 39552,
+      "durationMs": 47563,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "requestedEffort": "low",
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "contextFingerprint": "7ffc440b1c9e5adb65b32531d05abc06a2e5310816c5b2f73fcc564f86847b19",
+      "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f",
+      "metrics": {
+        "version": 1,
+        "source": "codex-json",
+        "promptCharacters": 1420,
+        "promptUtf8Bytes": 1434,
+        "submittedCharacters": 1605,
+        "submittedUtf8Bytes": 1620,
+        "activityEvents": 5,
+        "completedToolEvents": 5,
+        "commandEvents": 3,
+        "fileChangeEvents": 2,
+        "observedToolOutputUtf8Bytes": 3046,
+        "toolOutputMissing": 0,
+        "duplicateToolEvents": 0,
+        "counterSaturated": false,
+        "completedTurns": 1,
+        "failedTurns": 0,
+        "usageEvents": 1,
+        "fileReads": null,
+        "internalModelRequests": null
+      }
+    },
+    {
+      "method": "direct",
+      "variant": "canonical",
+      "order": 3,
+      "status": "cancelled",
+      "reason": "cancelled_by_user",
+      "input": null,
+      "output": null,
+      "cached": null,
+      "durationMs": 44851,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "requestedEffort": "low",
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "contextFingerprint": "7ffc440b1c9e5adb65b32531d05abc06a2e5310816c5b2f73fcc564f86847b19",
+      "submittedPromptHash": "1674b9cbde4364443d6891eafa9ac1a3040168459c12e1d9728d65f13ffe800f",
+      "metrics": {
+        "version": 1,
+        "source": "codex-json",
+        "promptCharacters": 1420,
+        "promptUtf8Bytes": 1434,
+        "submittedCharacters": 1605,
+        "submittedUtf8Bytes": 1620,
+        "activityEvents": 4,
+        "completedToolEvents": 4,
+        "commandEvents": 3,
+        "fileChangeEvents": 1,
+        "observedToolOutputUtf8Bytes": 3098,
+        "toolOutputMissing": 0,
+        "duplicateToolEvents": 0,
+        "counterSaturated": false,
+        "completedTurns": 0,
+        "failedTurns": 0,
+        "usageEvents": 0,
+        "fileReads": null,
+        "internalModelRequests": null
+      }
+    }
+  ],
+  "arms": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "order": 0,
+      "status": "accepted",
+      "fixtureHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 76
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "gitUnchanged": true,
+      "mechanical": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 133,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 59,
+          "passed": true
+        }
+      ],
+      "durationMs": 49976,
+      "tokens": 58263
+    },
+    {
+      "method": "office",
+      "variant": "standard",
+      "order": 1,
+      "status": "accepted",
+      "fixtureHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 76
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "gitUnchanged": true,
+      "mechanical": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 132,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 60,
+          "passed": true
+        }
+      ],
+      "durationMs": 46222,
+      "tokens": 58771
+    },
+    {
+      "method": "office",
+      "variant": "canonical",
+      "order": 2,
+      "status": "accepted",
+      "fixtureHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 75
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "gitUnchanged": true,
+      "mechanical": [
+        {
+          "id": "public",
+          "exitCode": 0,
+          "durationMs": 129,
+          "passed": true
+        },
+        {
+          "id": "acceptance",
+          "exitCode": 0,
+          "durationMs": 62,
+          "passed": true
+        }
+      ],
+      "durationMs": 50499,
+      "tokens": 57162
+    },
+    {
+      "method": "direct",
+      "variant": "canonical",
+      "order": 3,
+      "status": "not-accepted",
+      "fixtureHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 79
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "gitUnchanged": true,
+      "mechanical": [],
+      "durationMs": 45865,
+      "tokens": null
+    }
+  ],
+  "status": "paused",
+  "inferenceObserved": null,
+  "automaticPromotion": false,
+  "reason": "supervision_lost",
+  "durationMs": 198848,
+  "skipped": [],
+  "observedTokens": null
+}

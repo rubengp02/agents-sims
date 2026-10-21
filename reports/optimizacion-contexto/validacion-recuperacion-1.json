@@ -1,0 +1,58 @@
+{
+  "sourceFingerprint": "d5e5633bcd1bbf823f5434f8d531845f491e019a7b3f97ef71401334a42eddf0",
+  "inferenceCalls": 0,
+  "results": [
+    {
+      "id": "check-types",
+      "exitCode": 0,
+      "durationMs": 6604,
+      "passed": true
+    },
+    {
+      "id": "lint",
+      "exitCode": 0,
+      "durationMs": 27274,
+      "passed": true
+    },
+    {
+      "id": "test",
+      "exitCode": 0,
+      "durationMs": 27072,
+      "passed": true
+    },
+    {
+      "id": "policies",
+      "exitCode": 0,
+      "durationMs": 17704,
+      "passed": true
+    },
+    {
+      "id": "native",
+      "exitCode": 0,
+      "durationMs": 11729,
+      "passed": true
+    },
+    {
+      "id": "supervision",
+      "exitCode": 0,
+      "durationMs": 53354,
+      "passed": true
+    },
+    {
+      "id": "context",
+      "exitCode": 0,
+      "durationMs": 2917,
+      "passed": true
+    },
+    {
+      "id": "package",
+      "exitCode": 0,
+      "durationMs": 59135,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "sourceUnchanged": true,
+  "historicalReportsUnchanged": true,
+  "historicalReportCount": 98
+}

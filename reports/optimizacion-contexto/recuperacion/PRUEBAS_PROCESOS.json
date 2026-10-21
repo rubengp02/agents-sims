@@ -1,0 +1,48 @@
+{
+  "inferenceCalls": 0,
+  "attempts": [
+    {
+      "id": "procesos-1",
+      "passed": false,
+      "tests": 6,
+      "passedTests": 1,
+      "failedTests": 5,
+      "durationMs": 55857.0291,
+      "failure": "PowerShell returned a PID but inherited/redirection pipe ownership kept spawnSync open until timeout.",
+      "repair": "Hidden Start-Process without inherited redirected pipes; supervisor and watchdog write structured journals directly."
+    },
+    {
+      "id": "procesos-2",
+      "passed": true,
+      "tests": 6,
+      "passedTests": 6,
+      "failedTests": 0,
+      "durationMs": 70077.8197,
+      "coverage": [
+        "launcher exit",
+        "controller loss and orphan worker cleanup",
+        "supervisor loss",
+        "guardian loss",
+        "independent model deadline",
+        "PID identity mismatch"
+      ]
+    },
+    {
+      "id": "validacion-recuperacion-2",
+      "passed": false,
+      "report": "../validacion-recuperacion-2.json",
+      "failure": "Existing adaptiveRuntime fixture waitFor default 1000 ms expired while local checks were still running on a busy host.",
+      "serverTests": {
+        "passed": 668,
+        "failed": 1
+      },
+      "webviewTests": {
+        "passed": 59,
+        "failed": 0
+      },
+      "packageTests": "not reached",
+      "repair": "Only the test quiescence wait was set to 5000 ms. All budget, status and call-count assertions remain. No production or real-pilot limit changed."
+    }
+  ],
+  "realModelResults": false
+}

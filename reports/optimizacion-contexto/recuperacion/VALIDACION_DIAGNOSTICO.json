@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-21T19:30:06.359Z",
+  "sourceFingerprint": "3217feaa5e0ce5312a5a2fee7a156528308b5e4afbc12c943129cec947a5d62c",
+  "sourceUnchanged": true,
+  "inferenceCalls": 0,
+  "tests": 0,
+  "passedTests": 0,
+  "failedTests": 0,
+  "exitCode": 0,
+  "durationMs": 58850,
+  "passed": false,
+  "scope": "Nine supervision and eight controlled-pilot tests; only local processes and simulated executors."
+}
