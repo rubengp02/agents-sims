@@ -1,4 +1,5 @@
 import { downloadAndUnzipVSCode } from '@vscode/test-electron';
+import { execFileSync } from 'node:child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -10,6 +11,25 @@ export const ALLURE_RESULTS_DIR = namespaceE2EPath(path.join(__dirname, '../allu
 const VSCODE_DOWNLOAD_LOCK_DIR = path.join(VSCODE_CACHE_DIR, 'download.lock');
 const VSCODE_DOWNLOAD_LOCK_TIMEOUT_MS = 10 * 60_000;
 const VSCODE_DOWNLOAD_LOCK_POLL_MS = 500;
+
+function resolveDownloadedExecutable(downloadedPath: string): string {
+  if (fs.existsSync(downloadedPath)) return downloadedPath;
+  if (process.platform === 'darwin') {
+    // The bundle manifest is authoritative when VS Code renames its binary.
+    const contents = path.dirname(path.dirname(downloadedPath));
+    const executable = execFileSync(
+      '/usr/bin/plutil',
+      ['-extract', 'CFBundleExecutable', 'raw', '-o', '-', path.join(contents, 'Info.plist')],
+      { encoding: 'utf8' },
+    ).trim();
+    if (!executable || path.basename(executable) !== executable) {
+      throw new Error('Invalid VS Code bundle executable');
+    }
+    const resolved = path.join(contents, 'MacOS', executable);
+    if (fs.existsSync(resolved)) return resolved;
+  }
+  throw new Error(`Downloaded VS Code executable not found: ${downloadedPath}`);
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -145,10 +165,12 @@ export default async function globalSetup(): Promise<void> {
       }
 
       console.log('[e2e] Ensuring VS Code is downloaded...');
-      const downloadedPath = await downloadAndUnzipVSCode({
-        version: 'stable',
-        cachePath: VSCODE_CACHE_DIR,
-      });
+      const downloadedPath = resolveDownloadedExecutable(
+        await downloadAndUnzipVSCode({
+          version: 'stable',
+          cachePath: VSCODE_CACHE_DIR,
+        }),
+      );
       console.log(`[e2e] VS Code executable: ${downloadedPath}`);
       patchProductJsonForWindows(downloadedPath);
       fs.writeFileSync(VSCODE_PATH_FILE, downloadedPath, 'utf8');
