@@ -18,10 +18,6 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, '..');
 const METADATA_FILE = 'package-metadata.json';
 const START_TIMEOUT_MS = 20_000;
 
-function npmCommand() {
-  return process.platform === 'win32' ? 'npm.cmd' : 'npm';
-}
-
 function parseArgs(argv) {
   let outputDir = null;
   let skipBuild = false;
@@ -40,7 +36,14 @@ function parseArgs(argv) {
 }
 
 async function execNpm(args, options = {}) {
-  return await execFileAsync(npmCommand(), args, {
+  // Windows cannot execFile a .cmd directly. Use npm's official JS entrypoint
+  // with structured arguments; paths containing spaces need no shell quoting.
+  const npmCli =
+    process.env.npm_execpath ??
+    path.join(path.dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
+  if (!path.isAbsolute(npmCli) || !fs.existsSync(npmCli))
+    throw new Error('Local npm CLI not found');
+  return await execFileAsync(process.execPath, [npmCli, ...args], {
     cwd: REPO_ROOT,
     env: { ...process.env, HUSKY: '0' },
     maxBuffer: 20 * 1024 * 1024,

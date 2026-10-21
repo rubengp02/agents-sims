@@ -1,0 +1,68 @@
+name: CI local Windows
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-windows
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verificacion local Windows (sin modelos)
+    if: github.repository == 'rubengp02/agents-sims' && github.event.repository.private && github.ref == 'refs/heads/main' && github.actor == github.repository_owner
+    runs-on: [self-hosted, Windows, X64, agents-sims-local]
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout del commit solicitado
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Node de la version del proyecto
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Instalar dependencias locales
+        run: npm ci
+      - name: Validar AsyncAPI
+        run: npm run asyncapi:validate
+      - name: Comprobar archivos generados
+        run: |
+          npm run asyncapi:generate
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run e2e:inventory
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- core/src/messages.ts e2e/README.md
+      - name: Comprobar formato
+        run: npm run format:check
+      - name: Preparar AO fijado (sin inferencia)
+        run: npm run engine:prepare
+      - name: Aplicacion, politicas, recuperacion, AO, matriz y navegador
+        run: npm run parallel:verify
+      - name: Comprobar paquete instalable
+        run: npm run verify:npm-package -- --skip-build
+      - name: Auditoria de dependencias (informativa, igual que CI existente)
+        run: npm audit --audit-level=moderate --workspaces --include-workspace-root
+        continue-on-error: true
+      - name: Analisis Knip (informativo, igual que CI existente)
+        run: npm run knip
+        continue-on-error: true
+      - name: Alcance de esta ejecucion
+        if: always()
+        run: |
+          @'
+          ## CI ejecutado en el ordenador de Ruben
+          - Windows; Node seleccionado por .nvmrc.
+          - Comprobaciones mecanicas y proveedores simulados. Sin pilotos de IA.
+          - Sin ejecutores alojados, caches o artefactos de pago.
+          - No valida macOS, Linux, Node 20 ni las pruebas de extension de VS Code del CI multiplataforma.
+          - El resultado no sustituye ni cambia las protecciones del CI multiplataforma.
+          '@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
