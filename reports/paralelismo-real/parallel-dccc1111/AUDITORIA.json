@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "rawReportSha256": "c76bc1b506442f35f5afce69cb38ecd666bb2d879fe6781309c30737f42cc84d",
+  "rawReportPreserved": true,
+  "sourceFingerprint": "71ac72ed83467a2b1e5d2d700dfab5957ae8ac1fc44c1beac01038a11700ba5f",
+  "realModelExecutions": 3,
+  "subscriptionVerifiedEveryExecution": true,
+  "requestedModel": "gpt-6.1-sol",
+  "requestedEffort": "low",
+  "actualModelConfirmed": false,
+  "cliVersions": [
+    "0.163.0-alpha.10.2"
+  ],
+  "newSessionsEveryExecution": true,
+  "finalTokenTotal": null,
+  "observedTokenLowerBound": 174726,
+  "direct": {
+    "accepted": true,
+    "tests": 50,
+    "input": 41948,
+    "output": 1415,
+    "cachedInput": 30848,
+    "uncachedInput": 11100,
+    "totalTokens": 43363,
+    "wallMs": 41246
+  },
+  "office": {
+    "accepted": false,
+    "integratedCandidateProduced": false,
+    "observedTokenLowerBound": 131363,
+    "finalTokens": null,
+    "wallMsUntilPause": 48878,
+    "dispatchOverlapMs": 36403,
+    "nativeReceiptOverlapMs": 33208,
+    "parallelCalls": 2,
+    "workers": [
+      {
+        "runId": "4a00d3d4-4915-407d-b31f-d26492ac7720",
+        "status": "cancelled",
+        "reason": "ao_usage_or_completion_unknown",
+        "observedInput": 54227,
+        "observedOutput": 772,
+        "observedCached": 33152,
+        "finalUsageKnown": false,
+        "ownedModule": "csv.mjs",
+        "independentChecks": {
+          "passed": true,
+          "count": 25
+        },
+        "protectedFilesIntact": true
+      },
+      {
+        "runId": "a217e344-714e-4777-9edd-12a6ea5cc332",
+        "status": "paused",
+        "reason": "token_budget",
+        "observedInput": 75463,
+        "observedOutput": 901,
+        "observedCached": 54784,
+        "finalUsageKnown": false,
+        "ownedModule": "graph.mjs",
+        "independentChecks": {
+          "passed": true,
+          "count": 23
+        },
+        "protectedFilesIntact": true
+      }
+    ]
+  },
+  "repairCalls": 0,
+  "stopReason": "worker_token_reserve_exceeded",
+  "exceededWorkerObservedTokens": 76364,
+  "workerReserve": 60000,
+  "globalTokenLimit": 200000,
+  "globalLimitNotExceededByKnownObservations": true,
+  "limitation": "Interrupted native turns did not report a clean completion. Numeric counters in the original report/ledger are partial observations, not a proven final total. The original office quality test ran against unchanged source because no integrated candidate existed; its failures do not prove the worker modules were incorrect."
+}
