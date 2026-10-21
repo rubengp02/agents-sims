@@ -65,7 +65,14 @@ const deps = {
     },
   },
   discover: async () => ({ executable: fake, version: 'fixture' }),
-  env: {},
+  // Go's exec.LookPath needs PATH on Unix; an empty environment only worked
+  // with Windows' executable lookup. Keep the fixture free of provider secrets.
+  env: {
+    PATH: process.env.PATH,
+    SystemRoot: process.env.SystemRoot,
+    TEMP: process.env.TEMP,
+    TMP: process.env.TMP,
+  },
 };
 const executor = () => new OrchestratorExecutor(root, path.join(testRoot, 'receipts'), deps);
 const report = {
