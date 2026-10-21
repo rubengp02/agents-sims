@@ -1,0 +1,39 @@
+{
+  "protocol": "ao-integration-pilot-v1",
+  "attempt": "revalidacion-20261021",
+  "sourceFingerprint": "cbf67cab9fb62d0691a23f78527202bd862a2b4faace7827b5345864597c953e",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 400000,
+    "perMethodTokens": 200000,
+    "perMethodMs": 240000,
+    "totalMs": 480000,
+    "perRunMs": 180000,
+    "minReserve": 20000
+  },
+  "realCase": "medium",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "checks": [
+    {
+      "caseId": "easy",
+      "rejectsInitial": true,
+      "acceptsReference": true,
+      "testCount": 15
+    },
+    {
+      "caseId": "medium",
+      "rejectsInitial": true,
+      "acceptsReference": true,
+      "testCount": 36
+    },
+    {
+      "caseId": "hard",
+      "rejectsInitial": true,
+      "acceptsReference": true,
+      "testCount": 16
+    }
+  ],
+  "inferenceCalls": 0,
+  "preparedAt": "2026-10-21T12:22:42.218Z"
+}

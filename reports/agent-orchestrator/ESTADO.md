@@ -2,6 +2,25 @@
 
 21 de octubre de 2026.
 
+Resultado más reciente: se ejecutó solo la oficina reutilizando la referencia
+directa aceptada, por indicación del usuario. La implementación supera 36/36,
+pero la oficina comunica 209.637 tokens frente a 60.341 de la referencia y tarda
+194,190 s frente a 71,676 s. El Tester se pausó por exceder el presupuesto de
+200.000 tokens; no hubo reintentos ni ampliaciones. No se acepta como mejora.
+[Ensayo de oficina con referencia conservada](revalidacion-20261021-c/RESULTADO.md).
+
+Última actualización: tras reiniciarse la cuota se ejecutaron dos llamadas reales
+nuevas. Codex directo superó 36/36; el Arquitecto de la oficina completó y su
+respuesta llegó correctamente. El Programador se bloqueó antes de inferencia
+por una ruta de referencia Git demasiado larga en Windows. Se reprodujo y corrigió
+localmente, sin reintentar IA. Consumo: 104.778 tokens; no hay ahorro demostrado.
+[Revalidación real y reparación](revalidacion-20261021-b/RESULTADO.md).
+
+Actualización: se intentó una revalidación autorizada tras las reparaciones,
+pero el control de reserva la bloqueó antes de enviar tareas al modelo (90 %
+de uso en la ventana de cinco horas). No hubo comparación nueva ni reintentos.
+[Resultado de la revalidación](revalidacion-20261021/RESULTADO.md).
+
 Se ha preparado y compilado una integración acotada con Agent Orchestrator,
 revisión `1550d440b82ac9cfb3e671b060709457cdffbaea`. Reutiliza sus módulos reales
 de conversaciones nativas de Codex y espacios Git aislados. La cola de la oficina

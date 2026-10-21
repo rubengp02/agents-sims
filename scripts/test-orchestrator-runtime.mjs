@@ -132,7 +132,8 @@ try {
   await check(
     'real AO worktree preserves source and sends tester to the changed workspace',
     async () => {
-      const repo = path.join(testRoot, 'repo');
+      // Match the nested pilot source path: short fixtures hid Windows ref limits.
+      const repo = path.join(testRoot, 'repo-comparable-pilot-path');
       fs.mkdirSync(repo);
       command('git', ['init', '--initial-branch=main', repo]);
       fs.writeFileSync(path.join(repo, '.gitignore'), '.fixture*\n');

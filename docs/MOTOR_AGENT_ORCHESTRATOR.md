@@ -94,6 +94,20 @@ reintentos y el registro no se puede reiniciar preparando otra vez. La caché se
 registra como parte de la entrada y no se convierte en euros ni en un porcentaje
 inventado de cuota. Una única pareja no demuestra superioridad general.
 
+Una nueva autorización puede usar un identificador separado como tercer argumento
+de ambos comandos (`prepare identificador` y `execute identificador`), conservando
+el piloto original y su registro. Cada identificador sigue siendo de un solo uso;
+no autoriza reintentos ni nuevos presupuestos por sí mismo. La revalidación
+`revalidacion-20261021` se cerró bloqueada por la reserva de cuota, sin inferencia.
+
+Para reutilizar una referencia directa aceptada, ambos comandos admiten su
+identificador como cuarto argumento, después del identificador del nuevo ensayo.
+Se valida el resultado, se fija el hash de su informe y se comprueba que los
+archivos iniciales coinciden. En este modo se ejecuta solo la oficina, con tres
+llamadas, 200.000 tokens y cuatro minutos; el consumo anterior queda separado.
+La comparación se identifica como referencia histórica porque caché y carga
+pueden variar. El presupuesto sigue cerrado tras el intento, sin reintentos.
+
 La batería original de AO tiene fallos de portabilidad de pruebas en este Windows
 (rutas POSIX y privilegio de enlaces simbólicos). No se ha marcado como superada.
 Las comprobaciones propias sobre los módulos compilados y los resultados reales

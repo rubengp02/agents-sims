@@ -159,7 +159,9 @@ export class OrchestratorExecutor implements OfficialExecutor {
         action: 'workspace',
         project,
         stateDir: workspaces,
-        sessionId: key,
+        // 128-bit workspace names keep Git ref lock paths within Windows limits.
+        // Session ownership and continuation still use the full 256-bit key.
+        sessionId: key.slice(0, 32),
         baseRef,
       }) + '\n',
     );

@@ -1,0 +1,240 @@
+{
+  "protocol": "ao-integration-pilot-v1",
+  "attempt": "revalidacion-20261021",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 400000,
+    "perMethodTokens": 200000,
+    "perMethodMs": 240000,
+    "totalMs": 480000,
+    "perRunMs": 180000,
+    "minReserve": 20000
+  },
+  "sourceFingerprint": "cbf67cab9fb62d0691a23f78527202bd862a2b4faace7827b5345864597c953e",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "realInference": true,
+  "runs": [
+    {
+      "method": "direct",
+      "role": "developer",
+      "status": "paused",
+      "reason": "quota_reserve",
+      "inputTokens": null,
+      "outputTokens": null,
+      "cachedInputTokens": null,
+      "durationMs": 1010,
+      "sessionMode": "new",
+      "subscriptionVerified": false,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null
+    }
+  ],
+  "methods": [
+    {
+      "method": "direct",
+      "initialHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "status": "not-accepted",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": false
+          },
+          {
+            "id": "parse-overflow",
+            "passed": false
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": false
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": false
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": false
+          },
+          {
+            "id": "discount-type",
+            "passed": false
+          },
+          {
+            "id": "discount-range-0",
+            "passed": false
+          },
+          {
+            "id": "discount-range-1",
+            "passed": false
+          },
+          {
+            "id": "discount-range-2",
+            "passed": false
+          },
+          {
+            "id": "discount-range-3",
+            "passed": false
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": false
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "parse-invalid-0",
+          "parse-invalid-1",
+          "parse-invalid-2",
+          "parse-invalid-3",
+          "parse-invalid-4",
+          "parse-invalid-5",
+          "parse-invalid-6",
+          "parse-invalid-7",
+          "parse-invalid-8",
+          "parse-invalid-9",
+          "parse-invalid-10",
+          "parse-overflow",
+          "half-up",
+          "sum-overflow",
+          "quantity-type",
+          "quantity-range-0",
+          "quantity-range-1",
+          "quantity-range-2",
+          "quantity-range-3",
+          "quantity-range-4",
+          "discount-type",
+          "discount-range-0",
+          "discount-range-1",
+          "discount-range-2",
+          "discount-range-3",
+          "generated-integer-cases"
+        ],
+        "durationMs": 71
+      },
+      "changes": {
+        "changed": [],
+        "unexpected": [],
+        "passed": true
+      },
+      "mechanical": [
+        {
+          "id": "public-tests",
+          "exitCode": 1,
+          "durationMs": 119,
+          "passed": false
+        }
+      ],
+      "tokens": 0,
+      "durationMs": 1439,
+      "roles": []
+    }
+  ],
+  "repairs": 0,
+  "status": "paused",
+  "reason": "usage_unknown",
+  "totalTokens": 0,
+  "durationMs": 1502
+}

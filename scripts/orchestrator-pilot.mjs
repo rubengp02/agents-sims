@@ -7,12 +7,15 @@ import { CASES } from './benchmark/cases.mjs';
 import { materialize, inspectChanges, acceptance } from './benchmark/kit.mjs';
 import { loadTools, root, sourceFingerprint } from './optimization-tools.mjs';
 
+const reuseDirect = process.argv[4];
+if (reuseDirect !== undefined && !/^[a-z][a-z0-9-]{0,63}$/.test(reuseDirect))
+  throw new Error('Identificador de referencia inválido.');
 export const LIMITS = Object.freeze({
-  maxRuns: 4,
-  maxTokens: 400000,
+  maxRuns: reuseDirect ? 3 : 4,
+  maxTokens: reuseDirect ? 200000 : 400000,
   perMethodTokens: 200000,
   perMethodMs: 240000,
-  totalMs: 480000,
+  totalMs: reuseDirect ? 240000 : 480000,
   perRunMs: 180000,
   minReserve: 20000,
 });
@@ -26,8 +29,12 @@ export const cases = CASES.map((item) => ({
         ? '\nPrecisión: también rechaza con TypeError un id cuyo trim() sea vacío. No normalices los ids válidos.'
         : ''),
 }));
-const local = path.join(root, '.local-office/orchestrator-pilot');
-const reports = path.join(root, 'reports/agent-orchestrator');
+// A newly authorized attempt gets separate evidence; existing ledgers remain one-shot.
+const attempt = process.argv[3];
+if (attempt !== undefined && !/^[a-z][a-z0-9-]{0,63}$/.test(attempt))
+  throw new Error('Identificador de ensayo inválido.');
+const local = path.join(root, '.local-office/orchestrator-pilot', ...(attempt ? [attempt] : []));
+const reports = path.join(root, 'reports/agent-orchestrator', ...(attempt ? [attempt] : []));
 const write = (p, v) => {
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(v, null, 2) + '\n', { mode: 0o600 });
@@ -38,6 +45,32 @@ const fingerprint = () =>
     .update(fs.readFileSync(path.join(root, 'integrations/agent-orchestrator/main.go')))
     .update(fs.readFileSync(path.join(root, 'integrations/agent-orchestrator/office_driver.go')))
     .digest('hex');
+function directReference() {
+  if (!reuseDirect) return null;
+  const file = path.join(root, 'reports/agent-orchestrator', reuseDirect, 'PILOTO_REAL.json');
+  const bytes = fs.readFileSync(file);
+  const report = JSON.parse(bytes);
+  const method = report.methods.find((m) => m.method === 'direct');
+  const run = report.runs.find((r) => r.method === 'direct');
+  if (
+    report.model !== 'gpt-6.1-sol' ||
+    report.effort !== 'medium' ||
+    !report.realInference ||
+    method?.status !== 'accepted' ||
+    !method.quality.passed ||
+    !method.changes.passed ||
+    !method.mechanical.every((c) => c.passed) ||
+    run?.status !== 'completed' ||
+    !run.subscriptionVerified
+  )
+    throw new Error('La referencia directa no cumple la aceptación.');
+  return {
+    attempt: reuseDirect,
+    sha256: createHash('sha256').update(bytes).digest('hex'),
+    method,
+    run,
+  };
+}
 function snap(dir) {
   const out = {};
   const visit = (relative = '') => {
@@ -82,6 +115,8 @@ export async function prepare() {
   }
   const value = {
     protocol: 'ao-integration-pilot-v1',
+    attempt: attempt ?? 'original',
+    directReference: directReference(),
     sourceFingerprint: fingerprint(),
     limits: LIMITS,
     realCase: 'medium',
@@ -98,6 +133,7 @@ export async function execute() {
   const preparation = JSON.parse(fs.readFileSync(path.join(reports, 'PREPARACION.json'), 'utf8'));
   if (
     preparation.sourceFingerprint !== fingerprint() ||
+    JSON.stringify(preparation.directReference) !== JSON.stringify(directReference()) ||
     JSON.stringify(preparation.limits) !== JSON.stringify(LIMITS)
   )
     throw new Error('Preparación desactualizada.');
@@ -119,11 +155,13 @@ export async function execute() {
   fs.mkdirSync(runRoot);
   const report = {
     protocol: preparation.protocol,
+    attempt: preparation.attempt,
     limits: LIMITS,
     sourceFingerprint: preparation.sourceFingerprint,
     model: preparation.model,
     effort: preparation.effort,
     realInference: true,
+    directReference: preparation.directReference,
     runs: [],
     methods: [],
     repairs: 0,
@@ -167,7 +205,11 @@ export async function execute() {
           parallelReadOnly: false,
           timeoutMs: Math.max(
             1,
-            Math.min(LIMITS.perRunMs, LIMITS.perMethodMs - (Date.now() - methodStart)),
+            Math.min(
+              LIMITS.perRunMs,
+              LIMITS.perMethodMs - (Date.now() - methodStart),
+              LIMITS.totalMs - (Date.now() - ledger.startedAt),
+            ),
           ),
           maxReportedTokens: Math.min(
             LIMITS.perMethodTokens - methodTokens,
@@ -210,7 +252,7 @@ export async function execute() {
       });
       if (total === null) {
         ledger.paused = true;
-        ledger.reason = 'usage_unknown';
+        ledger.reason = record.reasonCode ?? 'usage_unknown';
       } else {
         ledger.tokens += total;
         methodTokens += total;
@@ -228,7 +270,7 @@ export async function execute() {
     },
   });
   try {
-    for (const method of ['direct', 'office']) {
+    for (const method of reuseDirect ? ['office'] : ['direct', 'office']) {
       if (ledger.paused) break;
       methodName = method;
       methodTokens = 0;
@@ -240,6 +282,9 @@ export async function execute() {
       const git = (args) =>
         execFileSync('git', args, { cwd: project, windowsHide: true, stdio: 'ignore' });
       git(['init', '--initial-branch=main']);
+      // Keep fixture bytes identical when AO checks out a separate worktree.
+      // This affects only this disposable benchmark repository, never user config.
+      git(['config', '--local', 'core.autocrlf', 'false']);
       git(['add', '.']);
       git([
         '-c',
@@ -276,6 +321,11 @@ export async function execute() {
       };
       report.methods.push(row);
       save();
+      if (
+        preparation.directReference &&
+        row.initialHash !== preparation.directReference.method.initialHash
+      )
+        throw new Error('La referencia y la oficina no parten de los mismos archivos.');
       if (method === 'direct') {
         let output = '';
         const record = await executor.execute({

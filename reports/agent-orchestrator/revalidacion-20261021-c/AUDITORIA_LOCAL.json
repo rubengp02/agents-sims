@@ -1,0 +1,34 @@
+{
+  "inferenceCalls": 0,
+  "protectedFileAudit": [
+    {
+      "file": "AGENTS.md",
+      "bytesEqual": false,
+      "onlyLineEndingsDiffer": true
+    },
+    {
+      "file": "TASK.md",
+      "bytesEqual": false,
+      "onlyLineEndingsDiffer": true
+    },
+    {
+      "file": "contract.test.mjs",
+      "bytesEqual": false,
+      "onlyLineEndingsDiffer": true
+    },
+    {
+      "file": "package.json",
+      "bytesEqual": false,
+      "onlyLineEndingsDiffer": true
+    }
+  ],
+  "localAutocrlfFalsePreservesFixtureBytes": true,
+  "realTrialUnmodified": true,
+  "postTrialRepair": true,
+  "failedLocalAttempts": [
+    {
+      "check": "line endings isolated checkout",
+      "reason": "Initial diagnostic fixture path too long; preserved and repeated with a shorter independent fixture."
+    }
+  ]
+}
