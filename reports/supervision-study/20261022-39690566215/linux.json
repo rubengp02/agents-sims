@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "platform": "linux",
+  "node": "v22.23.3",
+  "inferenceCalls": 0,
+  "repetitions": 5,
+  "attempts": [
+    {
+      "index": 1,
+      "passed": true,
+      "exitCode": 0,
+      "signal": null,
+      "passedTests": 13,
+      "failedTests": 0,
+      "failures": []
+    },
+    {
+      "index": 2,
+      "passed": true,
+      "exitCode": 0,
+      "signal": null,
+      "passedTests": 13,
+      "failedTests": 0,
+      "failures": []
+    },
+    {
+      "index": 3,
+      "passed": true,
+      "exitCode": 0,
+      "signal": null,
+      "passedTests": 13,
+      "failedTests": 0,
+      "failures": []
+    },
+    {
+      "index": 4,
+      "passed": true,
+      "exitCode": 0,
+      "signal": null,
+      "passedTests": 13,
+      "failedTests": 0,
+      "failures": []
+    },
+    {
+      "index": 5,
+      "passed": true,
+      "exitCode": 0,
+      "signal": null,
+      "passedTests": 13,
+      "failedTests": 0,
+      "failures": []
+    }
+  ],
+  "passed": true,
+  "durationMs": 62771
+}
