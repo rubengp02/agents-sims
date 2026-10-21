@@ -37,6 +37,7 @@ const extra = new tools.LocalChecks(
         'scripts/benchmark-v2.test.mjs',
         'scripts/pilot-policy.test.mjs',
         'scripts/chief-pilot.test.mjs',
+        'scripts/context-pilot.test.mjs',
       ],
       timeoutMs: 60000,
     },
