@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "phase": "offline_baseline_and_experiment_design",
+  "newInferenceCalls": 0,
+  "variants": [
+    { "id": "A", "name": "Flujo histórico de cuatro papeles", "roles": ["chief", "architect", "developer", "tester"], "context": "historical_including_global_instructions", "status": "one_historical_success_observed", "reportedTokens": 126572 },
+    { "id": "B", "name": "Mismos papeles, contexto delimitado por proyecto", "roles": ["chief", "architect", "developer", "tester"], "context": "proposed_scoped_instructions_and_bounded_handoff", "status": "not_executed", "reportedTokens": null },
+    { "id": "C", "name": "Implementación y revisión necesarias", "roles": ["developer", "tester"], "context": "same_as_B", "status": "not_executed", "reportedTokens": null },
+    { "id": "D", "name": "Implementación con aceptación local", "roles": ["developer"], "localChecks": true, "context": "same_as_B", "status": "not_executed", "reportedTokens": null }
+  ],
+  "controls": ["same_task_and_initial_files", "same_acceptance_contract", "fixed_model_and_effort_while_comparing_context", "fresh_isolated_project_per_trial", "equal_permissions", "record_cli_version_and_catalog", "separate_cold_and_warm_cache", "exclude_human_pause_from_execution_timing", "record_failures_and_repair_rounds", "official_subscription_verified_per_execution", "explicit_run_and_token_budget_before_live_trials"],
+  "acceptance": ["independent_tests_pass", "no_out_of_scope_changes", "no_security_or_subscription_policy_changes", "independent_review_for_high_risk_work"],
+  "selection": "Only compare efficiency among variants meeting the same acceptance requirements. No savings claim from removing historical calls or counting characters."
+}

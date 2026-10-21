@@ -508,14 +508,14 @@ export class OfficeState {
   reassignSeat(agentId: number, seatId: string): void {
     const ch = this.characters.get(agentId);
     if (!ch) return;
+    const seat = this.seats.get(seatId);
+    if (!seat || seat.assigned || ch.seatId === seatId) return;
     // Unassign old seat
     if (ch.seatId) {
       const old = this.seats.get(ch.seatId);
       if (old) old.assigned = false;
     }
     // Assign new seat
-    const seat = this.seats.get(seatId);
-    if (!seat || seat.assigned) return;
     seat.assigned = true;
     ch.seatId = seatId;
     // Pathfind to new seat (unblock own seat tile for this query)
@@ -528,8 +528,8 @@ export class OfficeState {
       ch.state = CharacterState.WALK;
       ch.frame = 0;
       ch.frameTimer = 0;
-    } else {
-      // Already at seat or no path — sit down
+    } else if (ch.tileCol === seat.seatCol && ch.tileRow === seat.seatRow) {
+      // Already at seat — sit down
       ch.state = CharacterState.TYPE;
       ch.dir = seat.facingDir;
       ch.frame = 0;
@@ -583,7 +583,7 @@ export class OfficeState {
       ch.state = CharacterState.WALK;
       ch.frame = 0;
       ch.frameTimer = 0;
-    } else {
+    } else if (ch.tileCol === seat.seatCol && ch.tileRow === seat.seatRow) {
       // Already at seat — sit down
       ch.state = CharacterState.TYPE;
       ch.dir = seat.facingDir;
@@ -1051,6 +1051,13 @@ export class OfficeState {
       }
 
       // Temporarily unblock own seat so character can pathfind to it
+      if (ch.isActive && !ch.isSubagent && !ch.seatId) {
+        const freeSeat = this.findFreeSeat(ch.folderName);
+        if (freeSeat) {
+          this.seats.get(freeSeat)!.assigned = true;
+          ch.seatId = freeSeat;
+        }
+      }
       this.withOwnSeatUnblocked(ch, () =>
         updateCharacter(ch, dt, this.walkableTiles, this.seats, this.tileMap, this.blockedTiles),
       );

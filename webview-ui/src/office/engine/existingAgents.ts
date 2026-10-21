@@ -18,6 +18,12 @@ export interface ExistingAgentMeta {
   seatId?: string;
 }
 
+/** A reconnect snapshot is authoritative; derived subagents have negative IDs. */
+export function staleAgentIds(existing: Iterable<number>, incoming: readonly number[]): number[] {
+  const live = new Set(incoming);
+  return [...existing].filter((id) => id >= 0 && !live.has(id));
+}
+
 /** An agent buffered until the layout (and its seats) has been built. */
 export interface PendingAgent {
   id: number;

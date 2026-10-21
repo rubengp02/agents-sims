@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { playDoneSound, playPermissionSound, setSoundEnabled } from '../notificationSound.js';
 import type { ExistingAgentMeta, PendingAgent } from '../office/engine/existingAgents.js';
-import { reconcileExistingAgents } from '../office/engine/existingAgents.js';
+import { reconcileExistingAgents, staleAgentIds } from '../office/engine/existingAgents.js';
 import type { OfficeState } from '../office/engine/officeState.js';
 import { setGhostHeadlessAgents as setRendererGhostHeadlessAgents } from '../office/engine/renderer.js';
 import { setFloorSprites } from '../office/floorTiles.js';
@@ -303,6 +303,24 @@ export function useExtensionMessages(
         os.removeAgent(id);
       } else if (msg.type === 'existingAgents') {
         const incoming = msg.agents as number[];
+        const live = new Set(incoming);
+        for (const id of staleAgentIds(os.characters.keys(), incoming)) {
+          os.removeAllSubagents(id);
+          os.removeAgent(id);
+          delete backgroundParentToolIdsRef.current[id];
+        }
+        pendingAgents = pendingAgents.filter((agent) => live.has(agent.id));
+        setSelectedAgent((id) => (id !== null && live.has(id) ? id : null));
+        setAgentTools((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([id]) => live.has(Number(id)))),
+        );
+        setAgentStatuses((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([id]) => live.has(Number(id)))),
+        );
+        setSubagentTools((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([id]) => live.has(Number(id)))),
+        );
+        setSubagentCharacters((prev) => prev.filter((agent) => live.has(agent.parentAgentId)));
         const meta = (msg.agentMeta || {}) as Record<number, ExistingAgentMeta>;
         const folderNames = (msg.folderNames || {}) as Record<number, string>;
         const externalAgents = (msg.externalAgents || {}) as Record<number, boolean>;
@@ -328,16 +346,7 @@ export function useExtensionMessages(
         ) {
           saveAgentSeats(os);
         }
-        setAgents((prev) => {
-          const ids = new Set(prev);
-          const merged = [...prev];
-          for (const id of incoming) {
-            if (!ids.has(id)) {
-              merged.push(id);
-            }
-          }
-          return merged.sort((a, b) => a - b);
-        });
+        setAgents([...live].sort((a, b) => a - b));
       } else if (msg.type === 'agentToolStart') {
         const id = msg.id as number;
         const toolId = msg.toolId as string;

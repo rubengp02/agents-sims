@@ -1,0 +1,32 @@
+{
+  "status": "ready-not-authorized",
+  "sourceFingerprint": "35ea9377e31f1e6052bffda8a22f687f43bc10bb3716b0abcd4791e1bf08c59c",
+  "protocolFingerprint": "09ccde3741ede4279ec6b95ba8694e774b6fda6834fc328b56e9e534940c1bd4",
+  "realInferenceCalls": 0,
+  "subscriptionProbes": 0,
+  "harnessTestsPassed": 12,
+  "regressions": {
+    "webview": 59,
+    "server": 628,
+    "packageContract": 7,
+    "previousStudyAndPolicy": 7,
+    "types": true,
+    "lint": true,
+    "knownWarnings": 1
+  },
+  "acceptanceChecks": {
+    "easy": 15,
+    "medium": 36,
+    "hard": 16
+  },
+  "referenceImplementationsAccepted": 3,
+  "initialImplementationsRejected": 3,
+  "bothMethodsRehearsed": true,
+  "executor": "simulated",
+  "liveEntryGuard": "authorization_required",
+  "realLedgersCreated": 0,
+  "oldPilotBudgetUnchanged": true,
+  "automaticStageAdvance": false,
+  "budgets": "proposed-not-approved",
+  "performanceResults": null
+}

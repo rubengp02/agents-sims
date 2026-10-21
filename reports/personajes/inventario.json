@@ -1,0 +1,18 @@
+{
+  "before": {
+    "count": 4,
+    "folders": {
+      "1": "AGENTS SIMS",
+      "2": "project",
+      "3": "project",
+      "4": "project"
+    }
+  },
+  "after": {
+    "count": 1,
+    "folders": {
+      "1": "AGENTS SIMS"
+    }
+  },
+  "additionalInferenceCalls": 0
+}

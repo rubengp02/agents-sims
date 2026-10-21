@@ -8,6 +8,7 @@ import { DebugView } from './components/DebugView.js';
 import { EditActionBar } from './components/EditActionBar.js';
 import { MigrationNotice } from './components/MigrationNotice.js';
 import { SettingsModal } from './components/SettingsModal.js';
+import { TeamPanel } from './components/TeamPanel.js';
 import { Tooltip } from './components/Tooltip.js';
 import { Modal } from './components/ui/Modal.js';
 import { VersionIndicator } from './components/VersionIndicator.js';
@@ -99,6 +100,7 @@ function App() {
 
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isTeamOpen, setIsTeamOpen] = useState(false);
   const [isHooksInfoOpen, setIsHooksInfoOpen] = useState(false);
   const [hooksTooltipDismissed, setHooksTooltipDismissed] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
@@ -430,6 +432,7 @@ function App() {
         />
       )}
 
+      {isTeamOpen && <TeamPanel onClose={() => setIsTeamOpen(false)} />}
       {/* Hooks first-run tooltip */}
       {!hooksInfoShown && !hooksTooltipDismissed && (
         <Tooltip
@@ -495,6 +498,11 @@ function App() {
         isSettingsOpen={isSettingsOpen}
         onToggleSettings={() => setIsSettingsOpen((v) => !v)}
         workspaceFolders={workspaceFolders}
+        onToggleTeam={
+          isBrowserRuntime && !import.meta.env.DEV
+            ? () => setIsTeamOpen((value) => !value)
+            : undefined
+        }
       />
 
       <VersionIndicator

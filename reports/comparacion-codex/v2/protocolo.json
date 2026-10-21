@@ -1,0 +1,132 @@
+{
+  "id": "codex-direct-vs-office-v2",
+  "status": "prepared-not-authorized",
+  "model": "gpt-6.1-sol",
+  "claudeEnabled": false,
+  "antigravityConnected": false,
+  "maxRepairRuns": 0,
+  "repetitionsPerMethod": 1,
+  "suiteLimits": {
+    "maxRuns": 10,
+    "maxTokens": 880000,
+    "maxMs": 1380000
+  },
+  "calibration": {
+    "reportedTokens": 56873,
+    "methodDurationMs": 28752,
+    "source": "reports/comparacion-codex/easy-real.json",
+    "includedAsNewTrial": false
+  },
+  "stages": [
+    {
+      "id": "easy",
+      "label": "Fácil: normalizar etiquetas",
+      "effort": "low",
+      "order": [
+        "direct",
+        "office"
+      ],
+      "officeRoles": [
+        "developer"
+      ],
+      "limits": {
+        "maxRuns": 2,
+        "maxMethodRuns": {
+          "direct": 1,
+          "office": 1
+        },
+        "maxMethodTokens": 90000,
+        "maxMethodMs": 120000,
+        "maxTokens": 180000,
+        "maxMs": 300000,
+        "minRunReserve": 20000
+      },
+      "initialFilesHash": "55bbd7c862cb9a5cd21e28c54f1397086a272459edae20c7278d4af437aa52bb",
+      "allowedFiles": [
+        "label.mjs"
+      ]
+    },
+    {
+      "id": "medium",
+      "label": "Media: factura en céntimos",
+      "effort": "medium",
+      "order": [
+        "office",
+        "direct"
+      ],
+      "officeRoles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "limits": {
+        "maxRuns": 4,
+        "maxMethodRuns": {
+          "direct": 1,
+          "office": 3
+        },
+        "maxMethodTokens": 150000,
+        "maxMethodMs": 180000,
+        "maxTokens": 300000,
+        "maxMs": 420000,
+        "minRunReserve": 20000
+      },
+      "initialFilesHash": "f5737d9a1a606c5633f8ed56212b4bdb6ee7c0c46296418b16d086bbd5463c4c",
+      "allowedFiles": [
+        "money.mjs",
+        "invoice.mjs"
+      ]
+    },
+    {
+      "id": "hard",
+      "label": "Difícil: cola concurrente e idempotente",
+      "effort": "high",
+      "order": [
+        "direct",
+        "office"
+      ],
+      "officeRoles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "limits": {
+        "maxRuns": 4,
+        "maxMethodRuns": {
+          "direct": 1,
+          "office": 3
+        },
+        "maxMethodTokens": 200000,
+        "maxMethodMs": 270000,
+        "maxTokens": 400000,
+        "maxMs": 600000,
+        "minRunReserve": 20000
+      },
+      "initialFilesHash": "d8b79d9db735e376a283346e979c18e693923c4cd5872dec9f6f1c0fe6d3acf4",
+      "allowedFiles": [
+        "queue.mjs",
+        "validation.mjs"
+      ]
+    }
+  ],
+  "fairness": [
+    "equal-token-and-time-budget-per-method",
+    "specialists-share-office-budget",
+    "no-borrowing-from-other-method",
+    "same-contract-model-effort-and-initial-files",
+    "same-writer-permissions",
+    "external-acceptance",
+    "fresh-sessions",
+    "cache-observed-not-reset",
+    "no-automatic-repairs-or-increases"
+  ],
+  "limitations": [
+    "one exploratory pair per case",
+    "reported tokens include cached input",
+    "turn usage threshold may overshoot before reporting",
+    "capacity is not a guarantee of completion",
+    "calibration retained and study cost reported separately"
+  ],
+  "protocolFingerprint": "d9a6bdc637929875c839eaa5efdb9b7e44abc2b088f3c77e0dc7fda1cd9a7306",
+  "sourceFingerprint": "35333ebda2bed53ab40f5d105c5c41e6edff696f595bf4e1b10626eb67deb6fe"
+}

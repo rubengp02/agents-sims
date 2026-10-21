@@ -1,0 +1,325 @@
+{
+  "stageOrder": [
+    "context-only",
+    "specialist-policy",
+    "mechanical-checks",
+    "classification",
+    "observed-cache"
+  ],
+  "inferenceCalls": 0,
+  "contextComparison": {
+    "controls": {
+      "task": "clamp-analysis-v1",
+      "model": "gpt-6.1-sol",
+      "effort": "low",
+      "roles": [
+        "developer"
+      ],
+      "permission": "read-only",
+      "acceptance": "six-independent-checks"
+    },
+    "variants": [
+      {
+        "id": "history",
+        "characters": 4809,
+        "fingerprint": "a0e27f64fa329aa00c7d1114aac624bf13f28ff7507a0f5b3ad83db227216190",
+        "modelTokens": null
+      },
+      {
+        "id": "specific",
+        "characters": 1914,
+        "fingerprint": "f9b540088a843cd08e3710e3f3d774974fb61ffc5714cdb2a95dab858c56dfa3",
+        "modelTokens": null
+      }
+    ],
+    "quality": "context invariants checked locally; real model acceptance pending",
+    "note": "Synthetic full history versus specific packet; not the historical four-role baseline."
+  },
+  "specialistComparison": {
+    "kind": "policy evaluation, not real inference timing or token savings",
+    "classifications": [
+      {
+        "id": "explanation-security",
+        "expected": "simple",
+        "actual": "simple",
+        "roles": [
+          "developer"
+        ],
+        "passed": true,
+        "legacyDifficulty": "complex",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 1,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "auth-change",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "bounded-tested",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "developer"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 1,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "bounded-no-tests",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 2,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "cross-module",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "uncertain",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "unknown",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 2,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "visual",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "designer",
+          "developer"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 2,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "misleading-keyword",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "simple",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 2,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "risk-overrides-simple",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "simple",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "evidence-overrides-text",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "simple",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "race",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "complex",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "mixed-request",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "simple",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "unknown-module",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 2,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "contradictory-scope",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 2,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "authorized-work",
+        "expected": "normal",
+        "actual": "normal",
+        "roles": [
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": true,
+        "fullTeamRoles": 4,
+        "proposedRoles": 2,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "authorization-change",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      },
+      {
+        "id": "access-control",
+        "expected": "complex",
+        "actual": "complex",
+        "roles": [
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "passed": true,
+        "legacyDifficulty": "normal",
+        "legacyPassed": false,
+        "fullTeamRoles": 4,
+        "proposedRoles": 3,
+        "modelTokensSaved": null
+      }
+    ],
+    "passed": 18,
+    "legacyDifficultyPassed": 8
+  },
+  "durationMs": 2.058399999999992,
+  "cache": "Only provider cached_input_tokens counts prove reuse; fingerprints and characters do not.",
+  "sessionReuse": "All pilot runs start new CLI sessions. Character reuse is independent."
+}

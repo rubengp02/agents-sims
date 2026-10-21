@@ -1,0 +1,138 @@
+{
+  "id": "codex-direct-vs-office-v1",
+  "status": "prepared-not-authorized",
+  "model": "gpt-6.1-sol",
+  "provider": "codex",
+  "claudeEnabled": false,
+  "antigravityConnected": false,
+  "maxRepairRuns": 0,
+  "repetitionsPerMethod": 1,
+  "stages": [
+    {
+      "id": "easy",
+      "label": "Fácil: normalizar etiquetas",
+      "effort": "low",
+      "order": [
+        "direct",
+        "office"
+      ],
+      "officeRoles": [
+        "developer"
+      ],
+      "limits": {
+        "maxRuns": 2,
+        "maxTokens": 60000,
+        "reservePerRun": 30000,
+        "perRunMs": 90000,
+        "maxMs": 240000
+      },
+      "initialFilesHash": "55bbd7c862cb9a5cd21e28c54f1397086a272459edae20c7278d4af437aa52bb",
+      "allowedFiles": [
+        "label.mjs"
+      ],
+      "assessment": {
+        "scope": "bounded",
+        "risk": "low",
+        "uncertainty": "low",
+        "modules": [
+          "label"
+        ],
+        "tests": "available"
+      }
+    },
+    {
+      "id": "medium",
+      "label": "Media: factura en céntimos",
+      "effort": "medium",
+      "order": [
+        "office",
+        "direct"
+      ],
+      "officeRoles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "limits": {
+        "maxRuns": 4,
+        "maxTokens": 120000,
+        "reservePerRun": 30000,
+        "perRunMs": 90000,
+        "maxMs": 360000
+      },
+      "initialFilesHash": "f5737d9a1a606c5633f8ed56212b4bdb6ee7c0c46296418b16d086bbd5463c4c",
+      "allowedFiles": [
+        "money.mjs",
+        "invoice.mjs"
+      ],
+      "assessment": {
+        "scope": "cross-module",
+        "risk": "low",
+        "uncertainty": "low",
+        "modules": [
+          "money",
+          "invoice"
+        ],
+        "tests": "available"
+      }
+    },
+    {
+      "id": "hard",
+      "label": "Difícil: cola concurrente e idempotente",
+      "effort": "high",
+      "order": [
+        "direct",
+        "office"
+      ],
+      "officeRoles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "limits": {
+        "maxRuns": 4,
+        "maxTokens": 160000,
+        "reservePerRun": 40000,
+        "perRunMs": 120000,
+        "maxMs": 480000
+      },
+      "initialFilesHash": "d8b79d9db735e376a283346e979c18e693923c4cd5872dec9f6f1c0fe6d3acf4",
+      "allowedFiles": [
+        "queue.mjs",
+        "validation.mjs"
+      ],
+      "assessment": {
+        "scope": "cross-module",
+        "risk": "high",
+        "uncertainty": "high",
+        "modules": [
+          "queue",
+          "validation"
+        ],
+        "tests": "available"
+      }
+    }
+  ],
+  "controls": [
+    "identical-initial-files",
+    "same-full-contract-and-public-tests",
+    "same-model-and-effort-within-case",
+    "same-writer-sandbox",
+    "reviewers-read-only",
+    "official-subscription-check-per-CLI-run",
+    "fresh-session-per-role",
+    "external-identical-acceptance",
+    "count-all-calls-including-failures",
+    "no-automatic-repairs-or-budget-increases"
+  ],
+  "limitations": [
+    "one observation per method and difficulty is exploratory",
+    "cache observed; not forced cold",
+    "order alternates across cases, not repeated within a case",
+    "no subscription-quota conversion from tokens",
+    "synthetic code fixtures; no claim about all real projects",
+    "external tests are not a secrecy boundary"
+  ],
+  "protocolFingerprint": "09ccde3741ede4279ec6b95ba8694e774b6fda6834fc328b56e9e534940c1bd4",
+  "sourceFingerprint": "35ea9377e31f1e6052bffda8a22f687f43bc10bb3716b0abcd4791e1bf08c59c"
+}

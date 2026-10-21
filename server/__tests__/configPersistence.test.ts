@@ -8,14 +8,19 @@ import { parseAreaMappings, readConfig, writeConfig } from '../src/configPersist
 describe('configPersistence: areas', () => {
   let tempHome: string;
   let originalHome: string | undefined;
+  let originalUserProfile: string | undefined;
 
   beforeEach(() => {
     tempHome = fs.mkdtempSync(path.join(os.tmpdir(), 'pxl-config-test-'));
     originalHome = process.env.HOME;
+    originalUserProfile = process.env.USERPROFILE;
+    process.env.USERPROFILE = tempHome;
     process.env.HOME = tempHome;
   });
 
   afterEach(() => {
+    if (originalUserProfile === undefined) delete process.env.USERPROFILE;
+    else process.env.USERPROFILE = originalUserProfile;
     if (originalHome === undefined) {
       delete process.env.HOME;
     } else {

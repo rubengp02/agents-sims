@@ -17,6 +17,7 @@ import {
   SERVER_REGISTRY_PROTOCOL_VERSION,
   SERVERS_DIR,
 } from './constants.js';
+import type { TeamCoordinator } from './execution/teamCoordinator.js';
 import { createHttpServer } from './httpServer.js';
 import type { ServerConfig } from './serverConfig.js';
 import { isServerConfig, isServerTarget } from './serverConfig.js';
@@ -60,6 +61,7 @@ export class PixelAgentsServer {
    * the multi-server registry), reuses its config without starting a new one.
    */
   async start(options?: {
+    team?: TeamCoordinator;
     store?: AgentStateStore;
     runtime?: AgentRuntime;
     embedded?: boolean;
@@ -96,6 +98,7 @@ export class PixelAgentsServer {
 
     const { app, port } = await createHttpServer({
       embedded,
+      team: options?.team,
       host: options?.host,
       port: options?.port,
       token,

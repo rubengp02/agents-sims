@@ -14,6 +14,8 @@
 /** Persisted agent data (survives F5 reload / restart) */
 export interface PersistedAgent {
   id: number;
+  /** Absent in legacy records, which belong to Claude. */
+  providerId?: string;
   sessionId?: string;
   terminalName: string;
   isExternal?: boolean;

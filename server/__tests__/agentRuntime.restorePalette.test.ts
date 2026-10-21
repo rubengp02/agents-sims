@@ -7,6 +7,7 @@ import type { StateAdapter } from '../../core/src/adapter.js';
 import { AgentRuntime } from '../src/agentRuntime.js';
 import { AgentStateStore } from '../src/agentStateStore.js';
 import { claudeProvider } from '../src/providers/hook/claude/claude.js';
+import { codexProvider } from '../src/providers/hook/codex/codex.js';
 import type { AgentState, PersistedAgent } from '../src/types.js';
 
 function createTestAgent(overrides: Partial<AgentState> = {}): AgentState {
@@ -84,6 +85,78 @@ describe('AgentRuntime -- restore preserves palette/hueShift', () => {
     // adapter's load) it can clobber in-memory state.
     runtime?.dispose();
     fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('restores Codex identity without Claude watchers and skips disabled providers', () => {
+    const adapter = createMockAdapter([
+      {
+        id: 1,
+        providerId: 'codex',
+        sessionId: 'codex-restored',
+        terminalName: '',
+        isExternal: true,
+        jsonlFile: jsonlPath,
+        projectDir: tmpDir,
+        palette: 3,
+      },
+      {
+        id: 2,
+        providerId: 'claude',
+        terminalName: '',
+        isExternal: true,
+        jsonlFile: jsonlPath,
+        projectDir: tmpDir,
+      },
+      { id: 3, terminalName: '', isExternal: true, jsonlFile: jsonlPath, projectDir: tmpDir },
+    ]);
+    const store = new AgentStateStore();
+    store.setAdapter(adapter);
+    runtime = new AgentRuntime(store, [codexProvider]);
+    runtime.restoreExternalAgents();
+    expect(store.size).toBe(1);
+    expect(store.get(1)?.providerId).toBe('codex');
+    expect(store.get(1)?.hooksOnly).toBe(true);
+    expect(store.get(1)?.palette).toBe(3);
+    expect(runtime.fileWatchers.size).toBe(0);
+    expect(adapter.saved.at(-1)?.[0].providerId).toBe('codex');
+    runtime.handleHookEvent('codex', {
+      hook_event_name: 'ExecStart',
+      session_id: 'codex-restored',
+      tool_id: 'restored-call',
+      tool_name: 'exec',
+    });
+    expect(store.get(1)?.currentHookToolName).toBe('exec');
+  });
+  it('does not resurrect a finished office execution from persisted external agents', () => {
+    const adapter = createMockAdapter([
+      {
+        id: 1,
+        providerId: 'codex',
+        sessionId: 'owned',
+        terminalName: '',
+        isExternal: true,
+        jsonlFile: jsonlPath,
+        projectDir: tmpDir,
+      },
+      {
+        id: 2,
+        providerId: 'codex',
+        sessionId: 'external',
+        terminalName: '',
+        isExternal: true,
+        jsonlFile: jsonlPath,
+        projectDir: tmpDir,
+      },
+    ]);
+    const store = new AgentStateStore();
+    store.setAdapter(adapter);
+    runtime = new AgentRuntime(store, [codexProvider], {
+      ignoreObservedSession: (_provider, session) => session === 'owned',
+    });
+    runtime.restoreExternalAgents();
+    expect(store.has(1)).toBe(false);
+    expect(store.get(2)?.sessionId).toBe('external');
+    expect(adapter.saved.at(-1)?.map((agent) => agent.sessionId)).toEqual(['external']);
   });
 
   it('restoreExternalAgents keeps palette/hueShift from the persisted record', () => {

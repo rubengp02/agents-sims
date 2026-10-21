@@ -1,0 +1,57 @@
+{
+  "scope": "Local implementation checks; no model inference",
+  "inferenceCalls": 0,
+  "attempts": [
+    {
+      "id": "preliminary-types",
+      "command": "npm run check-types",
+      "exitCode": 1,
+      "durationMs": 3779,
+      "defects": 1,
+      "issue": "Missing ChildProcessWithoutNullStreams import after broadening stopProcess input type",
+      "repair": "Keep both child process types imported",
+      "repaired": true,
+      "inputTokens": null, "outputTokens": null, "cachedInputTokens": null
+    },
+    {
+      "id": "preliminary-targeted-tests",
+      "command": "vitest taskOptimization + teamCoordinator + codexExecutor",
+      "exitCode": 1,
+      "durationMs": 5410,
+      "testsPassed": 84,
+      "testsFailed": 1,
+      "defects": 1,
+      "issue": "One handoff grew beyond the previous 4000-character bound",
+      "repair": "Preserve per-result and total bounds including JSON escaping; mark incomplete results explicitly",
+      "repaired": true,
+      "inputTokens": null, "outputTokens": null, "cachedInputTokens": null
+    },
+    {
+      "id": "browser-team-first",
+      "command": "npm run test:standalone -- team.spec.ts",
+      "exitCode": 1,
+      "durationMs": 8500,
+      "testsPassed": 0,
+      "testsFailed": 1,
+      "defects": 0,
+      "issue": "Browser test expected the old keyword routing: QA of changed code automatically on Luna",
+      "repair": "Assert the deliberate conservative routing to Sol for code verification with unknown scope; keep all workflow, concurrency, character and mobile assertions",
+      "repaired": true,
+      "inputTokens": null, "outputTokens": null, "cachedInputTokens": null
+    },
+    {
+      "id": "browser-team-second",
+      "command": "npm run test:standalone -- team.spec.ts",
+      "exitCode": 1,
+      "durationMs": 8400,
+      "testsPassed": 0,
+      "testsFailed": 1,
+      "defects": 1,
+      "issue": "Routing misread the phrase cambio autorizado as an authorization-system change and selected high effort",
+      "repair": "Match authorization as a domain concept, not the broad autoriz prefix; add regression cases for authorized work, authorization changes and access control",
+      "repaired": true,
+      "inputTokens": null, "outputTokens": null, "cachedInputTokens": null
+    }
+  ],
+  "note": "Null tokens mean not applicable to local checks; these are not model runs. The ongoing development chat is outside the pilot's CLI usage measurements. Successful full rechecks are in validacion-local.json."
+}

@@ -45,6 +45,7 @@ agent-orchestrator.yaml
 !/docs/e2e-claude-mocking.md
 
 .playwright-mcp/
+.local-office/
 
 # Agent-orchestrator / tooling scaffolding
 .ao/

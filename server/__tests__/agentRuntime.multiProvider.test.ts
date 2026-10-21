@@ -29,6 +29,45 @@ describe('AgentRuntime -- multi-provider routing', () => {
     return dir;
   }
 
+  it('uses Codex events without running its transcript through the Claude parser', () => {
+    store = new AgentStateStore();
+    runtime = new AgentRuntime(store, [codexProvider]);
+    runtime.watchAllSessions.current = true;
+    const dir = trackedDir('codex-transcript');
+    const transcript = path.join(dir, 'rollout-test.jsonl');
+    fs.writeFileSync(
+      transcript,
+      JSON.stringify({ type: 'response_item', payload: { type: 'custom_tool_call' } }) + '\n',
+    );
+    try {
+      runtime.handleHookEvent('codex', {
+        hook_event_name: 'SessionStart',
+        session_id: 'codex-transcript',
+        transcript_path: transcript,
+        cwd: dir,
+      });
+      runtime.handleHookEvent('codex', {
+        hook_event_name: 'ExecStart',
+        session_id: 'codex-transcript',
+        tool_id: 'test-call',
+        tool_name: 'exec',
+      });
+      const agent = [...store.values()][0];
+      expect(agent.jsonlFile).toBe(transcript);
+      expect(agent.folderName).toBe(path.basename(dir));
+      expect(agent.providerId).toBe('codex');
+      expect(agent.hooksOnly).toBe(true);
+      expect(agent.currentHookToolName).toBe('exec');
+      expect(agent.isWaiting).toBe(false);
+      expect(runtime.fileWatchers.size).toBe(0);
+      expect(runtime.pollingTimers.size).toBe(0);
+      expect(agent.seenUnknownRecordTypes.size).toBe(0);
+    } finally {
+      runtime.dispose();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('drops an event from an unregistered providerId without throwing', () => {
     store = new AgentStateStore();
     runtime = new AgentRuntime(store, [claudeProvider, hermesProvider, codexProvider]);

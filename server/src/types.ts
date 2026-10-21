@@ -1,6 +1,8 @@
 import type * as vscode from 'vscode';
 
 export interface AgentState {
+  /** Managed role characters belong to the current queue, not transcript restoration. */
+  officeRole?: import('../../core/src/team.js').TeamRole;
   id: number;
   sessionId: string;
   /** Terminal reference — undefined for extension panel sessions */
@@ -30,7 +32,7 @@ export interface AgentState {
   seenUnknownRecordTypes: Set<string>;
   /** Whether a hook event has been delivered for this agent (suppresses heuristic timers) */
   hookDelivered: boolean;
-  /** True when agent has no transcript file (provider doesn't use JSONL). All state from hooks. */
+  /** All state comes from hook events, including providers with a separate transcript bridge. */
   hooksOnly?: boolean;
   /** Provider that created this agent (defaults to 'claude') */
   providerId?: string;
@@ -89,6 +91,8 @@ export interface AgentState {
 
 export interface PersistedAgent {
   id: number;
+  /** Absent in legacy records, which belong to Claude. */
+  providerId?: string;
   sessionId?: string;
   /** Terminal name — empty string for extension panel sessions */
   terminalName: string;

@@ -1,0 +1,35 @@
+{
+  "sourceFingerprint": "e3e42169e8275426c098e23db5ae6578d81a27c4269b06c6da286ec11db20b09",
+  "inferenceCallsByLocalChecks": 0,
+  "checksPassed": [
+    "check-types",
+    "lint",
+    "test",
+    "context-study",
+    "package"
+  ],
+  "tests": {
+    "webview": 59,
+    "server": 628,
+    "packageContract": 7,
+    "studyAndPilotPolicy": 7,
+    "browser": 1
+  },
+  "totalTestsPassed": 702,
+  "browser": {
+    "attempts": 3,
+    "failedAttempts": 2,
+    "finalPassed": true,
+    "testDurationMs": 3600,
+    "runnerDurationMs": 5200,
+    "executor": "simulated",
+    "simulatedRuns": 5,
+    "realModelRuns": 0
+  },
+  "knownWarnings": [
+    "Existing react-hooks/exhaustive-deps warning in App.tsx:196"
+  ],
+  "newRealModelRuns": 2,
+  "budgetClosed": true,
+  "pilotDataVerified": true
+}

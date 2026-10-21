@@ -1,0 +1,230 @@
+{
+  "inferenceCallsMadeByAudit": 0,
+  "baselineCliRuns": 4,
+  "quality": "previously-validated-small-fixture",
+  "units": {
+    "instructions": "characters, not exact model tokens",
+    "durations": "CLI elapsed time, not human review gaps",
+    "quota": "unknown conversion to subscription percentage"
+  },
+  "totals": {
+    "inputTokens": 124561,
+    "cachedInputTokens": 60288,
+    "nonCachedInputTokens": 64273,
+    "outputTokens": 2011,
+    "durationMs": 113273,
+    "toolCalls": 4,
+    "reportedTokens": 126572,
+    "inputCacheRatio": 0.4840038214208299
+  },
+  "runs": [
+    {
+      "role": "chief",
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "low",
+      "durationMs": 15483,
+      "instructions": [
+        {
+          "kind": "cli_base",
+          "characters": 21546
+        },
+        {
+          "kind": "skills_catalog",
+          "characters": 3208
+        },
+        {
+          "kind": "permissions",
+          "characters": 342
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 1056
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 2400
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 271
+        },
+        {
+          "kind": "other_project_instructions",
+          "characters": 14033
+        },
+        {
+          "kind": "environment",
+          "characters": 601
+        },
+        {
+          "kind": "task_or_project",
+          "characters": 2368
+        }
+      ],
+      "toolCalls": 0,
+      "distinctUsageSnapshots": 1,
+      "usage": {
+        "inputTokens": 15227,
+        "cachedInputTokens": 0,
+        "nonCachedInputTokens": 15227,
+        "outputTokens": 312
+      }
+    },
+    {
+      "role": "architect",
+      "requestedModel": "gpt-6-luna",
+      "effort": "low",
+      "durationMs": 12372,
+      "instructions": [
+        {
+          "kind": "cli_base",
+          "characters": 17814
+        },
+        {
+          "kind": "skills_catalog",
+          "characters": 3208
+        },
+        {
+          "kind": "permissions",
+          "characters": 342
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 1056
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 2400
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 271
+        },
+        {
+          "kind": "other_project_instructions",
+          "characters": 14033
+        },
+        {
+          "kind": "environment",
+          "characters": 601
+        },
+        {
+          "kind": "task_or_project",
+          "characters": 1109
+        }
+      ],
+      "toolCalls": 1,
+      "distinctUsageSnapshots": 2,
+      "usage": {
+        "inputTokens": 28792,
+        "cachedInputTokens": 0,
+        "nonCachedInputTokens": 28792,
+        "outputTokens": 232
+      }
+    },
+    {
+      "role": "developer",
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "low",
+      "durationMs": 46879,
+      "instructions": [
+        {
+          "kind": "cli_base",
+          "characters": 21546
+        },
+        {
+          "kind": "skills_catalog",
+          "characters": 3208
+        },
+        {
+          "kind": "permissions",
+          "characters": 575
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 1056
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 2400
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 271
+        },
+        {
+          "kind": "other_project_instructions",
+          "characters": 14033
+        },
+        {
+          "kind": "environment",
+          "characters": 1467
+        },
+        {
+          "kind": "task_or_project",
+          "characters": 2159
+        }
+      ],
+      "toolCalls": 2,
+      "distinctUsageSnapshots": 3,
+      "usage": {
+        "inputTokens": 48448,
+        "cachedInputTokens": 36096,
+        "nonCachedInputTokens": 12352,
+        "outputTokens": 1277
+      }
+    },
+    {
+      "role": "tester",
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "low",
+      "durationMs": 38539,
+      "instructions": [
+        {
+          "kind": "cli_base",
+          "characters": 21546
+        },
+        {
+          "kind": "skills_catalog",
+          "characters": 3208
+        },
+        {
+          "kind": "permissions",
+          "characters": 342
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 1056
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 2400
+        },
+        {
+          "kind": "other_cli_instructions",
+          "characters": 271
+        },
+        {
+          "kind": "other_project_instructions",
+          "characters": 14033
+        },
+        {
+          "kind": "environment",
+          "characters": 601
+        },
+        {
+          "kind": "task_or_project",
+          "characters": 2180
+        }
+      ],
+      "toolCalls": 1,
+      "distinctUsageSnapshots": 2,
+      "usage": {
+        "inputTokens": 32094,
+        "cachedInputTokens": 24192,
+        "nonCachedInputTokens": 7902,
+        "outputTokens": 190
+      }
+    }
+  ]
+}

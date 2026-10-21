@@ -21,6 +21,12 @@ import {
 import type { AssetCache, ReloadAssetsSideEffect } from './clientMessageHandler.js';
 import { readConfig } from './configPersistence.js';
 import { MAX_PORT, MIN_PORT } from './constants.js';
+import { ClaudeExecutor } from './execution/claudeExecutor.js';
+import { CodexExecutor } from './execution/codexExecutor.js';
+import { pixelOfficeChecks } from './execution/localChecks.js';
+import { OfficeSessionFilter } from './execution/officeSessionFilter.js';
+import { TeamCoordinator } from './execution/teamCoordinator.js';
+import { TeamOfficeBridge } from './execution/teamOfficeBridge.js';
 import { FileStateAdapter } from './fileStateAdapter.js';
 import { copyHermesPlugin } from './providers/hook/hermes/hermesHookInstaller.js';
 import {
@@ -43,6 +49,8 @@ export interface CliArgs {
    *  can run at once without a collision. --port picks a fixed one. */
   port?: number;
   host: string;
+  providers: string[];
+  watchAllSessions?: boolean;
 }
 
 /** Thrown by parseArgs on an invalid --port. Kept separate from process.exit so
@@ -51,7 +59,7 @@ export interface CliArgs {
 export class CliArgsError extends Error {}
 
 export function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { host: '127.0.0.1' };
+  const args: CliArgs = { host: '127.0.0.1', providers: ALL_PROVIDERS.map((p) => p.id) };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--port' || argv[i] === '-p') {
       const raw = argv[i + 1];
@@ -71,12 +79,29 @@ export function parseArgs(argv: string[]): CliArgs {
     } else if (argv[i] === '--host' && argv[i + 1]) {
       args.host = argv[i + 1];
       i++;
+    } else if (argv[i] === '--providers') {
+      const raw = argv[++i];
+      const ids = raw?.split(',').map((id) => id.trim()) ?? [];
+      if (!ids.length || ids.some((id) => !ALL_PROVIDERS.some((p) => p.id === id))) {
+        throw new CliArgsError(
+          'Invalid --providers: choose claude, hermes, codex (comma-separated).',
+        );
+      }
+      // Preserve the original primary-provider order, regardless of argument order.
+      args.providers = ALL_PROVIDERS.filter((p) => ids.includes(p.id)).map((p) => p.id);
+    } else if (argv[i] === '--watch-all-sessions') {
+      args.watchAllSessions = true;
+    } else if (argv[i] === '--no-watch-all-sessions') {
+      args.watchAllSessions = false;
     } else if (argv[i] === '--help') {
       console.log(`Usage: pixel-agents [options]
 
 Options:
   --port, -p <number>   Port to listen on (default: OS-assigned ephemeral port)
   --host <string>       Host to bind to (default: 127.0.0.1)
+  --providers <list>    Enabled integrations (default: claude,hermes,codex)
+  --watch-all-sessions  Observe local sessions across all project directories
+  --no-watch-all-sessions  Restrict observation to tracked project directories
   --help                Show this help message`);
       process.exit(0);
     }
@@ -126,7 +151,23 @@ async function main(): Promise<void> {
 
   try {
     // Create runtime first (before server.start, so we can pass it in)
-    const runtime = new AgentRuntime(store, ALL_PROVIDERS);
+    const providers = ALL_PROVIDERS.filter((p) => args.providers.includes(p.id));
+    const executionDirectory = path.resolve('.local-office', 'executions');
+    const officeSessions = new OfficeSessionFilter(executionDirectory);
+    const runtime = new AgentRuntime(store, providers, {
+      ignoreObservedSession: (provider, session, transcript) =>
+        officeSessions.shouldIgnore(provider, session, transcript),
+    });
+    const team: TeamCoordinator = new TeamCoordinator(
+      {
+        codex: new CodexExecutor(executionDirectory),
+        claude: new ClaudeExecutor(() => team.snapshot().settings.claudeEnabled),
+      },
+      path.resolve('.local-office', 'team-settings.json'),
+      new TeamOfficeBridge(store, runtime),
+      pixelOfficeChecks(process.cwd()),
+    );
+    console.log(`[Pixel Agents] Enabled providers: ${providers.map((p) => p.id).join(', ')}`);
 
     // Wire hook events: HTTP POST -> runtime -> hookEventHandler -> agents
     server.onHookEvent((providerId, event) => {
@@ -140,48 +181,52 @@ async function main(): Promise<void> {
     // block the others (graceful degradation: one broken provider can't take
     // down hook delivery for the rest).
     const installAllHooks = async (serverUrl: string, authToken: string): Promise<void> => {
-      const copied = copyHookScript(packageRoot);
-      try {
-        await claudeProvider.installHooks(serverUrl, authToken);
-        console.log(
-          copied
-            ? '[Pixel Agents] Claude hooks installed'
-            : '[Pixel Agents] Claude hooks NOT installed, hook script missing',
-        );
-      } catch (err) {
-        console.error('[Pixel Agents] Failed to install Claude hooks:', err);
+      if (args.providers.includes('claude')) {
+        const copied = copyHookScript(packageRoot);
+        try {
+          await claudeProvider.installHooks(serverUrl, authToken);
+          console.log(
+            copied
+              ? '[Pixel Agents] Claude hooks installed'
+              : '[Pixel Agents] Claude hooks NOT installed, hook script missing',
+          );
+        } catch (err) {
+          console.error('[Pixel Agents] Failed to install Claude hooks:', err);
+        }
       }
-      try {
-        const pluginCopied = copyHermesPlugin(packageRoot);
-        await hermesProvider.installHooks(serverUrl, authToken);
-        console.log(
-          pluginCopied
-            ? '[Pixel Agents] Hermes plugin installed (applies to Hermes sessions started from now on -- see README for the already-running-session limitation)'
-            : '[Pixel Agents] Hermes plugin NOT installed, plugin source missing',
-        );
-      } catch (err) {
-        console.error('[Pixel Agents] Failed to install Hermes plugin:', err);
+      if (args.providers.includes('hermes')) {
+        try {
+          const pluginCopied = copyHermesPlugin(packageRoot);
+          await hermesProvider.installHooks(serverUrl, authToken);
+          console.log(
+            pluginCopied
+              ? '[Pixel Agents] Hermes plugin installed (applies to Hermes sessions started from now on -- see README for the already-running-session limitation)'
+              : '[Pixel Agents] Hermes plugin NOT installed, plugin source missing',
+          );
+        } catch (err) {
+          console.error('[Pixel Agents] Failed to install Hermes plugin:', err);
+        }
       }
-      try {
-        await codexProvider.installHooks(serverUrl, authToken);
-        console.log('[Pixel Agents] Codex JSONL tailer started');
-      } catch (err) {
-        console.error('[Pixel Agents] Failed to start Codex tailer:', err);
+      if (args.providers.includes('codex')) {
+        try {
+          await codexProvider.installHooks(serverUrl, authToken);
+          console.log('[Pixel Agents] Codex JSONL tailer started');
+        } catch (err) {
+          console.error('[Pixel Agents] Failed to start Codex tailer:', err);
+        }
       }
     };
 
     const uninstallAllHooks = async (): Promise<void> => {
-      await Promise.all([
-        claudeProvider
-          .uninstallHooks()
-          .catch((err) => console.error('[Pixel Agents] Failed to uninstall Claude hooks:', err)),
-        hermesProvider
-          .uninstallHooks()
-          .catch((err) => console.error('[Pixel Agents] Failed to uninstall Hermes plugin:', err)),
-        codexProvider
-          .uninstallHooks()
-          .catch((err) => console.error('[Pixel Agents] Failed to stop Codex tailer:', err)),
-      ]);
+      await Promise.all(
+        providers.map((provider) =>
+          provider
+            .uninstallHooks()
+            .catch((err) =>
+              console.error(`[Pixel Agents] Failed to uninstall ${provider.id} hooks:`, err),
+            ),
+        ),
+      );
       console.log('[Pixel Agents] Hooks uninstalled');
     };
 
@@ -235,6 +280,7 @@ async function main(): Promise<void> {
     };
 
     const config = await server.start({
+      team,
       store,
       runtime,
       embedded: false,
@@ -249,6 +295,9 @@ async function main(): Promise<void> {
 
     // Sync runtime refs with persisted settings BEFORE first scan tick
     runtime.hooksEnabled.current = adapter.getSetting('pixel-agents.hooksEnabled', true);
+    if (args.watchAllSessions !== undefined) {
+      adapter.setSetting('pixel-agents.watchAllSessions', args.watchAllSessions);
+    }
     runtime.watchAllSessions.current = adapter.getSetting('pixel-agents.watchAllSessions', false);
 
     // Install hooks on startup if the persisted setting says so
@@ -258,7 +307,9 @@ async function main(): Promise<void> {
 
     // Start scanning for external sessions (Claude running in user's terminal)
     const cwd = process.cwd();
-    const dirs = claudeProvider.getSessionDirs?.(cwd);
+    const dirs = args.providers.includes('claude')
+      ? claudeProvider.getSessionDirs?.(cwd)
+      : undefined;
     if (dirs && dirs[0]) {
       const projectDir = dirs[0];
       console.log(`[Pixel Agents] Scanning project dir: ${projectDir}`);
@@ -270,15 +321,19 @@ async function main(): Promise<void> {
     console.log(`\n  Pixel Agents server running at http://${args.host}:${config.port}\n`);
 
     // ── Graceful shutdown ──
-    function shutdown(): void {
+    let shuttingDown = false;
+    async function shutdown(): Promise<void> {
+      if (shuttingDown) return;
+      shuttingDown = true;
       console.log('\nShutting down...');
+      await team.shutdown();
       runtime.dispose();
       server.stop();
       process.exit(0);
     }
 
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', () => void shutdown());
+    process.on('SIGTERM', () => void shutdown());
   } catch (err) {
     console.error('Failed to start server:', err);
     process.exit(1);

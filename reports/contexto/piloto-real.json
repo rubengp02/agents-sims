@@ -1,0 +1,316 @@
+{
+  "type": "single-pair-context-only",
+  "limits": {
+    "maxRuns": 2,
+    "maxMs": 240000,
+    "perRunMs": 90000,
+    "maxTokens": 60000,
+    "reservePerRun": 30000
+  },
+  "sourceFingerprint": "699825c88e2b661dc3dd8bc1dab060ee5d1c28d03ba01b7d4ab3fe9286721955",
+  "controls": {
+    "task": "clamp-analysis-v1",
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "roles": [
+      "developer"
+    ],
+    "permission": "read-only",
+    "acceptance": "six-independent-checks"
+  },
+  "order": [
+    "history",
+    "specific"
+  ],
+  "orderAlternated": false,
+  "coldCacheControlled": false,
+  "cacheNote": "Cache is observed, not forced cold/warm; order may influence it.",
+  "runs": [
+    {
+      "variant": "history",
+      "attempt": 1,
+      "status": "completed",
+      "contextCharacters": 4809,
+      "contextFingerprint": "a0e27f64fa329aa00c7d1114aac624bf13f28ff7507a0f5b3ad83db227216190",
+      "defects": 0,
+      "repairs": 0,
+      "subscriptionVerifiedBeforeRun": true,
+      "catalog": [
+        {
+          "id": "gpt-6.1-sol",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-6-astra",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-6-sol",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-6-luna",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ]
+        },
+        {
+          "id": "gpt-5.6-sol",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-5.6-terra",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-5.6-luna",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ]
+        }
+      ],
+      "quality": {
+        "tests": [
+          {
+            "id": "json",
+            "passed": true
+          },
+          {
+            "id": "defect",
+            "passed": true
+          },
+          {
+            "id": "patch",
+            "passed": true
+          },
+          {
+            "id": "boundary-results",
+            "passed": true
+          },
+          {
+            "id": "outcome",
+            "passed": true
+          },
+          {
+            "id": "unchanged",
+            "passed": true
+          },
+          {
+            "id": "no-tools",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "defects": 0
+      },
+      "reasonCode": null,
+      "durationMs": 8468,
+      "cliDurationMs": 7221,
+      "inputTokens": 13755,
+      "outputTokens": 38,
+      "cachedInputTokens": 5120,
+      "nonCachedInputTokens": 8635,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "effort": "low",
+      "cliVersion": "0.163.0-alpha.10.2",
+      "sessionMode": "new",
+      "sessionHash": "6fc6314e4f1eceeac17bc751ae681516e58981e21061f2d33bdcc56e89cc89cb",
+      "subscriptionVerifiedByExecutor": true,
+      "initialFilesHash": "d8cffe1e0d74b1d349e3d3c55a51aafc01fc6c17a43a95e857b009d179dccf5e",
+      "toolCalls": 0
+    },
+    {
+      "variant": "specific",
+      "attempt": 2,
+      "status": "completed",
+      "contextCharacters": 1914,
+      "contextFingerprint": "f9b540088a843cd08e3710e3f3d774974fb61ffc5714cdb2a95dab858c56dfa3",
+      "defects": 0,
+      "repairs": 0,
+      "subscriptionVerifiedBeforeRun": true,
+      "catalog": [
+        {
+          "id": "gpt-6.1-sol",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-6-astra",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-6-sol",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-6-luna",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ]
+        },
+        {
+          "id": "gpt-5.6-sol",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-5.6-terra",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        {
+          "id": "gpt-5.6-luna",
+          "efforts": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ]
+        }
+      ],
+      "quality": {
+        "tests": [
+          {
+            "id": "json",
+            "passed": true
+          },
+          {
+            "id": "defect",
+            "passed": true
+          },
+          {
+            "id": "patch",
+            "passed": true
+          },
+          {
+            "id": "boundary-results",
+            "passed": true
+          },
+          {
+            "id": "outcome",
+            "passed": true
+          },
+          {
+            "id": "unchanged",
+            "passed": true
+          },
+          {
+            "id": "no-tools",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "defects": 0
+      },
+      "reasonCode": null,
+      "durationMs": 8472,
+      "cliDurationMs": 7322,
+      "inputTokens": 12985,
+      "outputTokens": 38,
+      "cachedInputTokens": 9216,
+      "nonCachedInputTokens": 3769,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "effort": "low",
+      "cliVersion": "0.163.0-alpha.10.2",
+      "sessionMode": "new",
+      "sessionHash": "7374c1c0ce2f474411d9dbcf18831b1b3123eb4b82003326d6e3f3168b1a0301",
+      "subscriptionVerifiedByExecutor": true,
+      "initialFilesHash": "d8cffe1e0d74b1d349e3d3c55a51aafc01fc6c17a43a95e857b009d179dccf5e",
+      "toolCalls": 0
+    }
+  ],
+  "comparison": {
+    "accepted": false,
+    "reason": "no_pareto_improvement",
+    "tokenDifference": -770,
+    "durationDifferenceMs": 4,
+    "stableImprovementProven": false
+  },
+  "stoppedReason": null,
+  "status": "completed",
+  "totalReportedTokens": 26816,
+  "totalDurationMs": 16946,
+  "distinctSessions": true
+}

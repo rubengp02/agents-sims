@@ -1,0 +1,68 @@
+{
+  "status": "passed",
+  "cliVersion": "0.163.0-alpha.10.2",
+  "inferenceCalls": 0,
+  "diagnostic": "codex debug prompt-input (local rendering only)",
+  "global": {
+    "beforeCharacters": 13373,
+    "afterCharacters": 1952
+  },
+  "backupHashesVerified": true,
+  "projectSpecificRulesPreservedExceptGit": true,
+  "projectGuideRestoredWithExistingMap": true,
+  "results": [
+    {
+      "scope": "neutral",
+      "markers": {
+        "global": true,
+        "ajudes": false,
+        "office": false,
+        "workspace": false,
+        "legacyGlobal": false,
+        "localCommitsAllowed": true,
+        "ajudesDetailedGuideLinked": false
+      },
+      "instructionBlocks": 9
+    },
+    {
+      "scope": "office-workspace",
+      "markers": {
+        "global": true,
+        "ajudes": false,
+        "office": false,
+        "workspace": true,
+        "legacyGlobal": false,
+        "localCommitsAllowed": true,
+        "ajudesDetailedGuideLinked": false
+      },
+      "instructionBlocks": 9
+    },
+    {
+      "scope": "office-repository",
+      "markers": {
+        "global": true,
+        "ajudes": false,
+        "office": true,
+        "workspace": false,
+        "legacyGlobal": false,
+        "localCommitsAllowed": true,
+        "ajudesDetailedGuideLinked": false
+      },
+      "instructionBlocks": 9
+    },
+    {
+      "scope": "ajudes-project",
+      "markers": {
+        "global": true,
+        "ajudes": true,
+        "office": false,
+        "workspace": false,
+        "legacyGlobal": false,
+        "localCommitsAllowed": true,
+        "ajudesDetailedGuideLinked": true
+      },
+      "instructionBlocks": 9
+    }
+  ],
+  "existingConversations": "Previous messages are not erased; use a new conversation to validate fresh context."
+}

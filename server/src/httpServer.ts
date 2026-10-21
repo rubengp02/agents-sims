@@ -14,10 +14,13 @@ import type {
 } from './clientMessageHandler.js';
 import { handleClientMessage } from './clientMessageHandler.js';
 import { HOOK_API_PREFIX, MAX_HOOK_BODY_SIZE } from './constants.js';
+import type { TeamCoordinator } from './execution/teamCoordinator.js';
+import { registerTeamRoutes } from './execution/teamRoutes.js';
 import type { AgentState } from './types.js';
 
 /** Options for creating the HTTP + WebSocket server. */
 export interface HttpServerOptions {
+  team?: TeamCoordinator;
   /** true = VS Code embedded mode (ephemeral port, no static, quiet logging) */
   embedded: boolean;
   /** Host to bind to. Default: '127.0.0.1' */
@@ -82,6 +85,7 @@ export async function createHttpServer(options: HttpServerOptions): Promise<Http
   registerHealthRoute(app);
   registerHookRoute(app, options);
   registerWebSocketRoute(app, options);
+  if (!options.embedded && options.team) registerTeamRoutes(app, options.team);
 
   // ── Listen ──────────────────────────────────────────────────
 

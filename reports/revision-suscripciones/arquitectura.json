@@ -1,0 +1,80 @@
+{
+  "schema_version": "ecc.agent-architecture-audit.report.v1",
+  "executive_verdict": {
+    "overall_health": "observation_working_execution_not_implemented",
+    "primary_failure_mode": "The existing office observes sessions but cannot enforce subscription-only execution.",
+    "most_urgent_fix": "Implement a server-side subscription-only gate before adding managed inference."
+  },
+  "scope": {
+    "target_name": "Pixel Office personal subscription-only execution review",
+    "model_stack": ["Codex CLI with managed ChatGPT login", "Claude Code CLI disabled", "Antigravity not implemented"],
+    "layers_to_audit": ["tool selection", "tool execution", "tool interpretation", "platform rendering", "hidden repair loops", "persistence"]
+  },
+  "findings": [
+    {
+      "severity": "critical",
+      "title": "Subscription-only execution is not enforced",
+      "mechanism": "Provider hooks normalize observation events; there is no managed execution eligibility gate.",
+      "source_layer": "tool execution",
+      "root_cause": "The requested execution capability is not implemented.",
+      "evidence_refs": ["core/src/provider.ts:77", "server/src/cli.ts:148"],
+      "confidence": 1,
+      "recommended_fix": "Require validated CLI identity, subscription auth, usable quota and no additional-spend path before every managed task."
+    },
+    {
+      "severity": "high",
+      "title": "Codex provider observes rather than dispatches tasks",
+      "mechanism": "The provider starts a JSONL tailer, with no task/model/effort executor.",
+      "source_layer": "tool execution",
+      "root_cause": "The provider contract serves animation and lifecycle observation.",
+      "evidence_refs": ["server/src/providers/hook/codex/codex.ts:92", "server/src/providers/hook/codex/codex.ts:113"],
+      "confidence": 1,
+      "recommended_fix": "Add a distinct official CLI executor and link its events to the existing runtime."
+    },
+    {
+      "severity": "high",
+      "title": "Standalone transport needs protection before accepting execution controls",
+      "mechanism": "Standalone WebSocket connections skip authentication and lack an Origin gate at this route.",
+      "source_layer": "tool execution",
+      "root_cause": "The current route was designed around a localhost observation and office-settings interface.",
+      "evidence_refs": ["server/src/httpServer.ts:140"],
+      "confidence": 1,
+      "recommended_fix": "Authenticate managed controls, enforce allowed origins, validate messages and reject arbitrary shell commands."
+    },
+    {
+      "severity": "high",
+      "title": "Dismissing a character is not cancelling or pausing a task",
+      "mechanism": "closeAgent dismisses observation and removes the agent representation.",
+      "source_layer": "persistence",
+      "root_cause": "There is no durable managed task lifecycle or owned process to interrupt.",
+      "evidence_refs": ["server/src/clientMessageHandler.ts:74"],
+      "confidence": 1,
+      "recommended_fix": "Separate observation dismissal from managed cancellation, quota pause and guarded resume."
+    },
+    {
+      "severity": "medium",
+      "title": "Context gauge does not establish remaining subscription quota",
+      "mechanism": "The existing context meter derives token occupancy from transcript records.",
+      "source_layer": "tool interpretation",
+      "root_cause": "Context occupancy, cumulative usage, subscription quota and billing are different measurements.",
+      "evidence_refs": ["server/src/contextUsage.ts:42"],
+      "confidence": 1,
+      "recommended_fix": "Keep context, measured task usage and provider-reported quota distinct; block strict execution on missing required billing evidence."
+    }
+  ],
+  "ordered_fix_plan": [
+    {"order": 1, "goal": "Subscription-only eligibility", "why_now": "Precondition for user-authorized inference", "expected_effect": "No start when auth, quota or absence of extra spending cannot be verified"},
+    {"order": 2, "goal": "Managed Codex task lifecycle", "why_now": "Current provider is observation-only", "expected_effect": "Real task execution, recoverable pause and true animation events"},
+    {"order": 3, "goal": "Restricted chief routing", "why_now": "Must control real model and effort", "expected_effect": "Automatic and manual allocation inside mandatory subscription policy"},
+    {"order": 4, "goal": "Connect approved views", "why_now": "Preserve creative decisions and office behavior", "expected_effect": "Both approved layouts show actual task and provider state"},
+    {"order": 5, "goal": "Optional verified Claude CLI", "why_now": "Not currently installed", "expected_effect": "Independent provider without API or implicit fallback; Antigravity remains inactive"}
+  ],
+  "validation": {
+    "existing_test_counts": {"webview": 52, "server": 430, "package": 7, "browser": 7, "total": 496},
+    "existing_tests_passed": true,
+    "managed_inference_executed": false,
+    "credentials_extracted": false,
+    "production_source_changed_in_this_review": false,
+    "limitation": "This report reviews current behavior and proposed changes, not an implemented execution system."
+  }
+}

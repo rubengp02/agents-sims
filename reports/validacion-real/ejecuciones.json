@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-21",
+  "fullWorkflowValidated": false,
+  "reason": "Official CLI tool command rejected by runtime policy. No implementation files or QA test execution.",
+  "runsUsed": 3,
+  "tokensUsed": 76776,
+  "attemptStoppedBeforeQA": true,
+  "runs": [
+    {
+      "role": "chief",
+      "id": "43e073fb-0073-491d-98b5-b8e4c36affd2",
+      "provider": "codex",
+      "billing": "subscription-only",
+      "cliStatus": "completed",
+      "requestedModel": "gpt-6.1-sol",
+      "requestedEffort": "low",
+      "confirmedModel": null,
+      "inputTokens": 15212,
+      "outputTokens": 281,
+      "startedAt": 1792570992819,
+      "updatedAt": 1792571006705,
+      "agentId": 2
+    },
+    {
+      "role": "architect",
+      "id": "bb313d68-5bf3-42ff-af46-1a4eb885196a",
+      "provider": "codex",
+      "billing": "subscription-only",
+      "cliStatus": "completed",
+      "requestedModel": "gpt-6-luna",
+      "requestedEffort": "low",
+      "confirmedModel": null,
+      "inputTokens": 14177,
+      "outputTokens": 69,
+      "startedAt": 1792571057968,
+      "updatedAt": 1792571063973,
+      "agentId": 3
+    },
+    {
+      "role": "developer",
+      "id": "cd8cd93f-c444-4a18-8228-f08709e29b9a",
+      "provider": "codex",
+      "billing": "subscription-only",
+      "cliStatus": "completed",
+      "requestedModel": "gpt-6.1-sol",
+      "requestedEffort": "low",
+      "confirmedModel": null,
+      "inputTokens": 46809,
+      "outputTokens": 228,
+      "startedAt": 1792571065230,
+      "updatedAt": 1792571079018,
+      "agentId": 4
+    }
+  ]
+}

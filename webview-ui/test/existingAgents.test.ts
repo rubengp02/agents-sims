@@ -23,7 +23,7 @@ import type {
   ExistingAgentsOffice,
   PendingAgent,
 } from '../src/office/engine/existingAgents.js';
-import { reconcileExistingAgents } from '../src/office/engine/existingAgents.js';
+import { reconcileExistingAgents, staleAgentIds } from '../src/office/engine/existingAgents.js';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -35,6 +35,12 @@ interface AddAgentCall {
   skipSpawnEffect?: boolean;
   folderName?: string;
 }
+
+test('reconnect removes absent top-level characters while preserving live and derived subagents', () => {
+  assert.deepEqual(staleAgentIds([1, 2, 3, -1, -2], [1, 3]), [2]);
+  assert.deepEqual(staleAgentIds([1, 2], []), [1, 2]);
+  assert.deepEqual(staleAgentIds([1, 2], [1, 2]), []);
+});
 
 /** A fake office that records addAgent calls, mirroring how officeCanvasCursor
  *  tests inject closures instead of constructing a real OfficeState. */

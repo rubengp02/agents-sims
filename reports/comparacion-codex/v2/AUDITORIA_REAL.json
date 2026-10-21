@@ -1,0 +1,265 @@
+{
+  "status": "completed-execution-with-acceptance-limitations",
+  "stageCount": 3,
+  "cliAttempts": 6,
+  "unusedMaximumAttempts": 4,
+  "limits": {
+    "maxRuns": 10,
+    "maxTokens": 880000,
+    "maxMs": 1380000
+  },
+  "limitsIncreased": false,
+  "externalRepairRuns": 0,
+  "sourceUnchanged": true,
+  "allSubscriptionOnlyReceiptsVerified": true,
+  "distinctNewSessions": 6,
+  "confirmedModel": null,
+  "cliVersion": "0.163.0-alpha.10.2",
+  "reportedTokens": 336338,
+  "inputTokens": 326790,
+  "outputTokens": 9548,
+  "cachedInputTokens": 245632,
+  "nonCachedInputTokens": 81158,
+  "calibrationTokens": 56873,
+  "knownStudyTokensIncludingCalibration": 393211,
+  "elapsedMsFromSuiteStart": 323126,
+  "receiptSpanMs": 321427,
+  "allLocalAcceptanceRerunsMatch": true,
+  "cases": [
+    {
+      "caseId": "easy",
+      "controlsPassed": true,
+      "originalVerdict": {
+        "verdict": "office_candidate",
+        "tokenDelta": -30,
+        "timeDeltaMs": -242,
+        "generalImprovementProven": false
+      },
+      "stageDurationMs": 46470,
+      "trials": [
+        {
+          "method": "direct",
+          "acceptedByOriginalProtocol": true,
+          "functionalPassed": 15,
+          "functionalTotal": 15,
+          "failedOriginalChecks": [],
+          "methodCompleted": true,
+          "inputTokens": 41694,
+          "outputTokens": 448,
+          "cachedInputTokens": 27264,
+          "nonCachedInputTokens": 14430,
+          "totalTokens": 42142,
+          "durationMs": 22552,
+          "cliAttempts": 1,
+          "scopePassed": true
+        },
+        {
+          "method": "office",
+          "acceptedByOriginalProtocol": true,
+          "functionalPassed": 15,
+          "functionalTotal": 15,
+          "failedOriginalChecks": [],
+          "methodCompleted": true,
+          "inputTokens": 41776,
+          "outputTokens": 336,
+          "cachedInputTokens": 36608,
+          "nonCachedInputTokens": 5168,
+          "totalTokens": 42112,
+          "durationMs": 22310,
+          "cliAttempts": 1,
+          "scopePassed": true,
+          "tasks": [
+            {
+              "role": "developer",
+              "status": "completed",
+              "reasonCode": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "medium",
+      "controlsPassed": true,
+      "originalVerdict": {
+        "verdict": "both_failed",
+        "generalImprovementProven": false
+      },
+      "stageDurationMs": 93976,
+      "trials": [
+        {
+          "method": "office",
+          "acceptedByOriginalProtocol": false,
+          "functionalPassed": 10,
+          "functionalTotal": 36,
+          "failedOriginalChecks": [
+            "parse-invalid-0",
+            "parse-invalid-1",
+            "parse-invalid-2",
+            "parse-invalid-3",
+            "parse-invalid-4",
+            "parse-invalid-5",
+            "parse-invalid-6",
+            "parse-invalid-7",
+            "parse-invalid-8",
+            "parse-invalid-9",
+            "parse-invalid-10",
+            "parse-overflow",
+            "half-up",
+            "sum-overflow",
+            "quantity-type",
+            "quantity-range-0",
+            "quantity-range-1",
+            "quantity-range-2",
+            "quantity-range-3",
+            "quantity-range-4",
+            "discount-type",
+            "discount-range-0",
+            "discount-range-1",
+            "discount-range-2",
+            "discount-range-3",
+            "generated-integer-cases",
+            "method-completed",
+            "public-tests"
+          ],
+          "methodCompleted": false,
+          "inputTokens": 41668,
+          "outputTokens": 551,
+          "cachedInputTokens": 26880,
+          "nonCachedInputTokens": 14788,
+          "totalTokens": 42219,
+          "durationMs": 26785,
+          "cliAttempts": 1,
+          "scopePassed": true,
+          "tasks": [
+            {
+              "role": "architect",
+              "status": "failed",
+              "reasonCode": "task_reported_failed"
+            },
+            {
+              "role": "developer",
+              "status": "paused",
+              "reasonCode": "task_reported_failed"
+            },
+            {
+              "role": "tester",
+              "status": "paused",
+              "reasonCode": "task_reported_failed"
+            }
+          ]
+        },
+        {
+          "method": "direct",
+          "acceptedByOriginalProtocol": false,
+          "functionalPassed": 32,
+          "functionalTotal": 36,
+          "failedOriginalChecks": [
+            "quantity-range-2",
+            "quantity-range-4",
+            "discount-range-2",
+            "discount-range-3"
+          ],
+          "methodCompleted": true,
+          "inputTokens": 60552,
+          "outputTokens": 2213,
+          "cachedInputTokens": 50560,
+          "nonCachedInputTokens": 9992,
+          "totalTokens": 62765,
+          "durationMs": 66066,
+          "cliAttempts": 1,
+          "scopePassed": true
+        }
+      ]
+    },
+    {
+      "caseId": "hard",
+      "controlsPassed": true,
+      "originalVerdict": {
+        "verdict": "both_failed",
+        "generalImprovementProven": false
+      },
+      "stageDurationMs": 182665,
+      "trials": [
+        {
+          "method": "direct",
+          "acceptedByOriginalProtocol": false,
+          "functionalPassed": 15,
+          "functionalTotal": 16,
+          "failedOriginalChecks": [
+            "invalid-submit"
+          ],
+          "methodCompleted": true,
+          "inputTokens": 83270,
+          "outputTokens": 4723,
+          "cachedInputTokens": 62848,
+          "nonCachedInputTokens": 20422,
+          "totalTokens": 87993,
+          "durationMs": 127257,
+          "cliAttempts": 1,
+          "scopePassed": true
+        },
+        {
+          "method": "office",
+          "acceptedByOriginalProtocol": false,
+          "functionalPassed": 2,
+          "functionalTotal": 16,
+          "failedOriginalChecks": [
+            "concurrency-range-0",
+            "concurrency-range-1",
+            "concurrency-range-2",
+            "concurrency-range-3",
+            "concurrency-range-4",
+            "concurrency-type-0",
+            "concurrency-type-1",
+            "concurrency-type-2",
+            "invalid-submit",
+            "fifo-concurrency-and-idle",
+            "duplicate-active-and-completed",
+            "cancel-pending",
+            "cancel-active-retains-slot",
+            "sync-throw-and-rejection-do-not-stall",
+            "method-completed",
+            "public-tests"
+          ],
+          "methodCompleted": false,
+          "inputTokens": 57830,
+          "outputTokens": 1277,
+          "cachedInputTokens": 41472,
+          "nonCachedInputTokens": 16358,
+          "totalTokens": 59107,
+          "durationMs": 54440,
+          "cliAttempts": 1,
+          "scopePassed": true,
+          "tasks": [
+            {
+              "role": "architect",
+              "status": "failed",
+              "reasonCode": "task_reported_failed"
+            },
+            {
+              "role": "developer",
+              "status": "paused",
+              "reasonCode": "task_reported_failed"
+            },
+            {
+              "role": "tester",
+              "status": "paused",
+              "reasonCode": "task_reported_failed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "interpretation": {
+    "easy": "Both passed; 30 fewer tokens and 242 ms less for office in one pair is practically a tie.",
+    "medium": "Office stopped after architect analysis. Direct differs from oracle on four exception classes not unambiguously specified in contract.",
+    "hard": "Office stopped after architect analysis. Direct passed 15/16 oracle checks; only failure is whitespace-only identifier, which the written contract does not prohibit.",
+    "officeFinding": "Analysis roles reported failure due to failing initial product tests, despite delivering analysis. The shared outcome instruction says failed if tests fail. This is an orchestration/role-acceptance problem, not a quota failure.",
+    "testDesignFinding": "Medium exception semantics and hard whitespace restriction need explicit contracts before any new scored comparison.",
+    "generalImprovementProven": false
+  },
+  "noAdditionalModelCallsForAudit": true,
+  "otherSessionsResumed": false
+}

@@ -1,0 +1,340 @@
+{
+  "caseId": "easy",
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "limits": {
+    "maxRuns": 2,
+    "maxMethodRuns": {
+      "direct": 1,
+      "office": 1
+    },
+    "maxMethodTokens": 90000,
+    "maxMethodMs": 120000,
+    "maxTokens": 180000,
+    "maxMs": 300000,
+    "minRunReserve": 20000
+  },
+  "order": [
+    "direct",
+    "office"
+  ],
+  "realInference": true,
+  "runs": [
+    {
+      "attempt": 1,
+      "method": "direct",
+      "role": "developer",
+      "status": "completed",
+      "reasonCode": null,
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "low",
+      "confirmedModel": null,
+      "inputTokens": 41694,
+      "outputTokens": 448,
+      "cachedInputTokens": 27264,
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "sessionHash": "f155e4cf49d9b815ad7ba7c7a93fbe85825090a806c3a5aedb682a5c40a9dd92",
+      "toolCalls": 3,
+      "promptCharacters": 774,
+      "promptFingerprint": "1958710a4ceaab174c51539b7c1a7d5bbf0e86b9b097e6a97eff0a8f644aa12a",
+      "durationMs": 22341,
+      "reportedCeiling": 90000
+    },
+    {
+      "attempt": 2,
+      "method": "office",
+      "role": "developer",
+      "status": "completed",
+      "reasonCode": null,
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "low",
+      "confirmedModel": null,
+      "inputTokens": 41776,
+      "outputTokens": 336,
+      "cachedInputTokens": 36608,
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "sessionHash": "cdaaddaf282e120d28b4711c210d209ba64805b7191acef21ef818f181dcd260",
+      "toolCalls": 3,
+      "promptCharacters": 1628,
+      "promptFingerprint": "28667f2a3b95c03ab8efcbfbe4967c8368ff8da2103edb24d6d8cd0fdd13d7ad",
+      "durationMs": 20069,
+      "reportedCeiling": 90000
+    }
+  ],
+  "trials": [
+    {
+      "method": "direct",
+      "initialFilesHash": "df0612dcea681b40ee477038c5fe73927a57bbbf784b74effc71ae99b137e69a",
+      "setupDurationMs": 11,
+      "status": "accepted",
+      "repairRuns": 0,
+      "localChecks": [
+        {
+          "id": "public-tests",
+          "exitCode": 0,
+          "durationMs": 124,
+          "passed": true
+        }
+      ],
+      "executionAndLocalChecksMs": 22471,
+      "changes": {
+        "changed": [
+          "label.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "quality": {
+        "tests": [
+          {
+            "id": "value-0",
+            "passed": true
+          },
+          {
+            "id": "value-1",
+            "passed": true
+          },
+          {
+            "id": "value-2",
+            "passed": true
+          },
+          {
+            "id": "value-3",
+            "passed": true
+          },
+          {
+            "id": "value-4",
+            "passed": true
+          },
+          {
+            "id": "value-5",
+            "passed": true
+          },
+          {
+            "id": "value-6",
+            "passed": true
+          },
+          {
+            "id": "value-7",
+            "passed": true
+          },
+          {
+            "id": "type-0",
+            "passed": true
+          },
+          {
+            "id": "type-1",
+            "passed": true
+          },
+          {
+            "id": "type-2",
+            "passed": true
+          },
+          {
+            "id": "type-3",
+            "passed": true
+          },
+          {
+            "id": "type-4",
+            "passed": true
+          },
+          {
+            "id": "type-5",
+            "passed": true
+          },
+          {
+            "id": "idempotent",
+            "passed": true
+          },
+          {
+            "id": "file-scope",
+            "passed": true
+          },
+          {
+            "id": "method-completed",
+            "passed": true
+          },
+          {
+            "id": "public-tests",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": []
+      },
+      "acceptanceDurationMs": 66,
+      "totalDurationMs": 22552,
+      "inputTokens": 41694,
+      "outputTokens": 448,
+      "cachedInputTokens": 27264,
+      "nonCachedInputTokens": 14430,
+      "cliAttempts": 1,
+      "budget": {
+        "tokenLimit": 90000,
+        "timeLimitMs": 120000,
+        "tokens": 42142,
+        "exceeded": false,
+        "usageUnknown": false
+      },
+      "functionalQuality": {
+        "passed": true,
+        "failedChecks": []
+      },
+      "completionVerified": true
+    },
+    {
+      "method": "office",
+      "initialFilesHash": "df0612dcea681b40ee477038c5fe73927a57bbbf784b74effc71ae99b137e69a",
+      "setupDurationMs": 7,
+      "status": "accepted",
+      "repairRuns": 0,
+      "localChecks": [
+        {
+          "id": "public-tests",
+          "exitCode": 0,
+          "durationMs": 133,
+          "passed": true
+        }
+      ],
+      "tasks": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reasonCode": null
+        }
+      ],
+      "executionAndLocalChecksMs": 22226,
+      "changes": {
+        "changed": [
+          "label.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "quality": {
+        "tests": [
+          {
+            "id": "value-0",
+            "passed": true
+          },
+          {
+            "id": "value-1",
+            "passed": true
+          },
+          {
+            "id": "value-2",
+            "passed": true
+          },
+          {
+            "id": "value-3",
+            "passed": true
+          },
+          {
+            "id": "value-4",
+            "passed": true
+          },
+          {
+            "id": "value-5",
+            "passed": true
+          },
+          {
+            "id": "value-6",
+            "passed": true
+          },
+          {
+            "id": "value-7",
+            "passed": true
+          },
+          {
+            "id": "type-0",
+            "passed": true
+          },
+          {
+            "id": "type-1",
+            "passed": true
+          },
+          {
+            "id": "type-2",
+            "passed": true
+          },
+          {
+            "id": "type-3",
+            "passed": true
+          },
+          {
+            "id": "type-4",
+            "passed": true
+          },
+          {
+            "id": "type-5",
+            "passed": true
+          },
+          {
+            "id": "idempotent",
+            "passed": true
+          },
+          {
+            "id": "file-scope",
+            "passed": true
+          },
+          {
+            "id": "method-completed",
+            "passed": true
+          },
+          {
+            "id": "public-tests",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": []
+      },
+      "acceptanceDurationMs": 73,
+      "totalDurationMs": 22310,
+      "inputTokens": 41776,
+      "outputTokens": 336,
+      "cachedInputTokens": 36608,
+      "nonCachedInputTokens": 5168,
+      "cliAttempts": 1,
+      "budget": {
+        "tokenLimit": 90000,
+        "timeLimitMs": 120000,
+        "tokens": 42112,
+        "exceeded": false,
+        "usageUnknown": false
+      },
+      "functionalQuality": {
+        "passed": true,
+        "failedChecks": []
+      },
+      "completionVerified": true
+    }
+  ],
+  "repairRuns": 0,
+  "status": "completed",
+  "catalogFingerprint": "f1c09991e98001b3a5681f159c76caa21c86143a3a1aa9ec40b92c7046972eab",
+  "comparison": {
+    "verdict": "office_candidate",
+    "tokenDelta": -30,
+    "timeDeltaMs": -242,
+    "generalImprovementProven": false
+  },
+  "controlsPassed": true,
+  "totalDurationMs": 46470,
+  "reportedTokens": 84254,
+  "cache": {
+    "cachedInputTokens": 63872,
+    "distinctSessionCount": 2,
+    "sessionReuse": false,
+    "coldCacheControlled": false
+  },
+  "budgetPolicy": "equal-method-envelopes",
+  "calibrationExcludedFromTrials": true,
+  "protocol": "codex-direct-vs-office-v2",
+  "sourceFingerprint": "35333ebda2bed53ab40f5d105c5c41e6edff696f595bf4e1b10626eb67deb6fe",
+  "protocolFingerprint": "d9a6bdc637929875c839eaa5efdb9b7e44abc2b088f3c77e0dc7fda1cd9a7306"
+}

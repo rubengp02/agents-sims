@@ -1070,6 +1070,7 @@ export function adoptExternalSessionFromHook(
 
   persistAgents: () => void,
   onAgentCreated?: (agent: AgentState) => void,
+  watchTranscript = true,
 ): void {
   if (transcriptPath) {
     // File-based provider (Claude, Codex): adopt with JSONL file watching
@@ -1086,6 +1087,7 @@ export function adoptExternalSessionFromHook(
     const projectDir = path.dirname(transcriptPath);
     const folderName =
       folderNameResolver?.({ cwd, projectDir }) ??
+      (!watchTranscript && cwd ? path.basename(cwd) : undefined) ??
       folderNameFromProjectDir(path.basename(projectDir));
 
     adoptExternalSession(
@@ -1099,6 +1101,7 @@ export function adoptExternalSessionFromHook(
       permissionTimers,
       persistAgents,
       folderName,
+      watchTranscript,
     );
 
     const adoptedAgent = [...agents.values()].find((a) => pathsMatch(a.jsonlFile, transcriptPath));
@@ -1167,6 +1170,7 @@ function adoptExternalSession(
 
   persistAgents: () => void,
   folderName?: string,
+  watchTranscript = true,
 ): void {
   const id = nextAgentIdRef.current++;
   // Decide whether to replay the existing file content or skip to its end.
@@ -1231,6 +1235,13 @@ function adoptExternalSession(
 
   // Log is emitted by the caller (adoptExternalSessionFromHook or scanExternalDir)
   // to use the correct prefix (Hook: vs Watcher:).
+
+  // Providers with their own event bridge already parse the transcript. Keep
+  // its path for identity/dismissal, but do not feed it through Claude's parser.
+  if (!watchTranscript) {
+    agent.hooksOnly = true;
+    return;
+  }
 
   startFileWatching(
     id,
@@ -1572,6 +1583,8 @@ export function startStaleExternalAgentCheck(
 
     for (const [id, agent] of agents) {
       if (!agent.isExternal) continue;
+      // Queue characters have no transcript watcher and are owned by the bridge.
+      if (agent.officeRole) continue;
 
       // Only despawn if the JSONL file has been deleted from disk.
       // Inactive external agents stay alive so they can resume when

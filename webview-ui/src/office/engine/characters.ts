@@ -101,6 +101,18 @@ export function updateCharacter(
 
   switch (ch.state) {
     case CharacterState.TYPE: {
+      const assignedSeat = ch.seatId ? seats.get(ch.seatId) : undefined;
+      if (
+        !ch.isSubagent &&
+        (!assignedSeat ||
+          ch.tileCol !== assignedSeat.seatCol ||
+          ch.tileRow !== assignedSeat.seatRow)
+      ) {
+        ch.state = CharacterState.IDLE;
+        ch.frame = 0;
+        ch.frameTimer = 0;
+        break;
+      }
       if (ch.frameTimer >= TYPE_FRAME_DURATION_SEC) {
         ch.frameTimer -= TYPE_FRAME_DURATION_SEC;
         ch.frame = (ch.frame + 1) % 2;
@@ -129,8 +141,8 @@ export function updateCharacter(
       // If became active, pathfind to seat
       if (ch.isActive) {
         if (!ch.seatId) {
-          // No seat assigned — type in place
-          ch.state = CharacterState.TYPE;
+          // A top-level agent without a chair must not type in the corridor.
+          if (ch.isSubagent) ch.state = CharacterState.TYPE;
           ch.frame = 0;
           ch.frameTimer = 0;
           break;
@@ -151,8 +163,8 @@ export function updateCharacter(
             ch.state = CharacterState.WALK;
             ch.frame = 0;
             ch.frameTimer = 0;
-          } else {
-            // Already at seat or no path — sit down
+          } else if (ch.tileCol === seat.seatCol && ch.tileRow === seat.seatRow) {
+            // Sit only after reaching the seat. An unreachable chair is not arrival.
             ch.state = CharacterState.TYPE;
             ch.dir = seat.facingDir;
             ch.frame = 0;
@@ -225,8 +237,7 @@ export function updateCharacter(
 
         if (ch.isActive) {
           if (!ch.seatId) {
-            // No seat — type in place
-            ch.state = CharacterState.TYPE;
+            ch.state = ch.isSubagent ? CharacterState.TYPE : CharacterState.IDLE;
           } else {
             const seat = seats.get(ch.seatId);
             if (seat && ch.tileCol === seat.seatCol && ch.tileRow === seat.seatRow) {

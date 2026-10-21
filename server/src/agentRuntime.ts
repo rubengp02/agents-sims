@@ -95,7 +95,10 @@ export class AgentRuntime {
 
   constructor(
     private readonly store: AgentStateStore,
-    providers: HookProvider[],
+    private readonly providers: HookProvider[],
+    private readonly options: {
+      ignoreObservedSession?: (provider: string, sessionId: string, transcript?: string) => boolean;
+    } = {},
   ) {
     if (providers.length === 0) {
       throw new Error('AgentRuntime requires at least one HookProvider');
@@ -247,7 +250,9 @@ export class AgentRuntime {
               // SessionRouter entry in the correct one.
               agent.providerId = provider.id;
               this.registerAgent(agent.sessionId, agent.id, provider.id);
+              this.store.persist();
             },
+            provider.getSessionDirs !== undefined,
           );
         },
         onSessionClear: (agentId, newSessionId, newTranscriptPath) => {
@@ -329,6 +334,15 @@ export class AgentRuntime {
    *  this is the only place an unknown providerId can surface, since the HTTP layer
    *  accepts any :providerId in the URL. */
   handleHookEvent(providerId: string, event: Record<string, unknown>): void {
+    if (
+      typeof event.session_id === 'string' &&
+      this.options.ignoreObservedSession?.(
+        providerId,
+        event.session_id,
+        typeof event.transcript_path === 'string' ? event.transcript_path : undefined,
+      )
+    )
+      return;
     const handler = this.hookEventHandlers.get(providerId);
     if (!handler) {
       console.warn(`[Pixel Agents] Dropping event from unknown provider "${providerId}"`);
@@ -518,6 +532,17 @@ export class AgentRuntime {
 
     for (const p of persisted) {
       if (!p.isExternal) continue;
+      const providerId = p.providerId ?? 'claude';
+      const provider = this.providers.find((item) => item.id === providerId);
+      if (!provider) continue; // Disabled integrations must stay disabled after a restart.
+      if (
+        this.options.ignoreObservedSession?.(
+          providerId,
+          p.sessionId || path.basename(p.jsonlFile, '.jsonl'),
+          p.jsonlFile,
+        )
+      )
+        continue;
       // Background-spawn children (a leadAgentId but no teamName) are derived
       // state: the 1s scan re-materializes them from sidecars while their spawn
       // is live. Restoring them directly would resurrect immortal characters
@@ -536,6 +561,8 @@ export class AgentRuntime {
 
       const agent: AgentState = {
         id: p.id,
+        providerId,
+        hooksOnly: provider.getSessionDirs === undefined,
         sessionId: p.sessionId || path.basename(p.jsonlFile, '.jsonl'),
         terminalRef: undefined,
         isExternal: true,
@@ -577,15 +604,17 @@ export class AgentRuntime {
       try {
         const stat = fs.statSync(p.jsonlFile);
         agent.fileOffset = stat.size;
-        startFileWatching(
-          p.id,
-          p.jsonlFile,
-          this.store,
-          this.fileWatchers,
-          this.pollingTimers,
-          this.waitingTimers,
-          this.permissionTimers,
-        );
+        if (!agent.hooksOnly) {
+          startFileWatching(
+            p.id,
+            p.jsonlFile,
+            this.store,
+            this.fileWatchers,
+            this.pollingTimers,
+            this.waitingTimers,
+            this.permissionTimers,
+          );
+        }
       } catch {
         /* ignore stat errors on restore */
       }

@@ -174,6 +174,17 @@ export class CodexTailer {
       }
       if (stat.size === tracked.offset) continue;
 
+      // Codex can continue the same rollout after a long pause. Re-open the
+      // session before forwarding new tools, otherwise the runtime has already
+      // removed its character and the resumed events have no session to route to.
+      if (tracked.sessionEndSent) {
+        tracked.sessionEndSent = false;
+        await this.emit(file, tracked, {
+          hook_event_name: 'SessionStart',
+          transcript_path: file,
+          cwd: tracked.cwd,
+        });
+      }
       await this.readNewLines(file, tracked);
     }
 
@@ -260,7 +271,10 @@ export class CodexTailer {
       return;
     }
 
-    if (type === 'response_item' && payload.type === 'function_call') {
+    if (
+      type === 'response_item' &&
+      (payload.type === 'function_call' || payload.type === 'custom_tool_call')
+    ) {
       const callId = payload.call_id;
       const name = payload.name;
       if (typeof callId !== 'string' || typeof name !== 'string') return;
@@ -269,12 +283,17 @@ export class CodexTailer {
         hook_event_name: 'ExecStart',
         tool_id: callId,
         tool_name: name,
-        tool_input: parseArgs(payload.arguments),
+        // Freeform inputs may contain complete scripts or patches. Expose only
+        // their tool name; never send the raw input to the visualizer.
+        tool_input: payload.type === 'function_call' ? parseArgs(payload.arguments) : undefined,
       });
       return;
     }
 
-    if (type === 'response_item' && payload.type === 'function_call_output') {
+    if (
+      type === 'response_item' &&
+      (payload.type === 'function_call_output' || payload.type === 'custom_tool_call_output')
+    ) {
       const callId = payload.call_id;
       if (typeof callId !== 'string') return;
       tracked.openToolIds.delete(callId);

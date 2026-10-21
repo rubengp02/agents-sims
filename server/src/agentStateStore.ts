@@ -152,12 +152,14 @@ export class AgentStateStore {
     }
     const persisted: PersistedAgent[] = [];
     for (const agent of this.agents.values()) {
+      if (agent.officeRole) continue;
       // Background-spawn children are derived state: the 1s scan re-materializes
       // them from sidecars after a restore. Persisting them would resurrect
       // immortal characters whose completion signal never comes.
       if (agent.spawnToolUseId) continue;
       persisted.push({
         id: agent.id,
+        providerId: agent.providerId,
         sessionId: agent.sessionId,
         terminalName: agent.terminalRef?.name ?? '',
         isExternal: agent.isExternal || undefined,

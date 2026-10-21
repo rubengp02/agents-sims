@@ -118,6 +118,27 @@ describe('parseArgs', () => {
   it('parses --host', () => {
     expect(parseArgs(['--host', '0.0.0.0']).host).toBe('0.0.0.0');
   });
+
+  it('keeps all original integrations by default and allows Codex alone', () => {
+    expect(parseArgs([]).providers).toEqual(['claude', 'hermes', 'codex']);
+    expect(parseArgs(['--providers', 'codex']).providers).toEqual(['codex']);
+    expect(parseArgs(['--providers', 'codex,claude,codex']).providers).toEqual(['claude', 'codex']);
+  });
+
+  it.each([undefined, '', 'unknown', 'codex,', '--port'])(
+    'rejects invalid providers: %s',
+    (value) => {
+      expect(() =>
+        parseArgs(value === undefined ? ['--providers'] : ['--providers', value]),
+      ).toThrow(CliArgsError);
+    },
+  );
+
+  it('only overrides session visibility when explicitly requested', () => {
+    expect(parseArgs([]).watchAllSessions).toBeUndefined();
+    expect(parseArgs(['--watch-all-sessions']).watchAllSessions).toBe(true);
+    expect(parseArgs(['--no-watch-all-sessions']).watchAllSessions).toBe(false);
+  });
 });
 
 /**
@@ -130,6 +151,53 @@ describe('parseArgs', () => {
  * dist/cli.js first; skips gracefully if it hasn't.
  */
 describe('dist/cli.js entry-point guard', () => {
+  it('runs Codex alone without creating Claude or Hermes configuration, including after toggling hooks', async () => {
+    if (!fs.existsSync(CLI_BUNDLE)) throw new Error('Build the CLI before running this test');
+    const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), 'pxl-codex-only-'));
+    const port = await getFreePort();
+    const child = spawn(
+      process.execPath,
+      [CLI_BUNDLE, '--port', String(port), '--providers', 'codex', '--watch-all-sessions'],
+      {
+        cwd: tmpHome,
+        env: { ...process.env, HOME: tmpHome, USERPROFILE: tmpHome },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      },
+    );
+    let output = '';
+    child.stdout.on('data', (chunk: Buffer) => (output += chunk.toString()));
+    child.stderr.on('data', (chunk: Buffer) => (output += chunk.toString()));
+    let socket: WebSocket | undefined;
+    try {
+      await waitForCondition(() => output.includes('Codex JSONL tailer started'));
+      expect((await fetch(`http://127.0.0.1:${port}/api/health`)).ok).toBe(true);
+      socket = new WebSocket(`ws://127.0.0.1:${port}/ws`);
+      await new Promise<void>((resolve, reject) => {
+        socket!.addEventListener('open', () => resolve(), { once: true });
+        socket!.addEventListener('error', () => reject(new Error('WebSocket failed')), {
+          once: true,
+        });
+      });
+      socket.send(JSON.stringify({ type: 'setHooksEnabled', enabled: false }));
+      await waitForCondition(() => output.includes('Hooks uninstalled'));
+      socket.send(JSON.stringify({ type: 'setHooksEnabled', enabled: true }));
+      await waitForCondition(() => output.split('Codex JSONL tailer started').length === 3);
+      expect(fs.existsSync(path.join(tmpHome, '.claude'))).toBe(false);
+      expect(fs.existsSync(path.join(tmpHome, '.hermes'))).toBe(false);
+      expect(fs.existsSync(path.join(tmpHome, '.pixel-agents', 'hooks', 'claude-hook.js'))).toBe(
+        false,
+      );
+      const config = JSON.parse(
+        fs.readFileSync(path.join(tmpHome, '.pixel-agents', 'config.json'), 'utf8'),
+      );
+      expect(config.standalone.watchAllSessions).toBe(true);
+    } finally {
+      socket?.close();
+      await stopChild(child);
+      fs.rmSync(tmpHome, { recursive: true, force: true });
+    }
+  });
+
   function skipIfNotBuilt(): void {
     if (!fs.existsSync(CLI_BUNDLE)) {
       console.warn(`Skipping: ${CLI_BUNDLE} not found. Run 'npm run compile' first.`);
@@ -200,7 +268,7 @@ describe('dist/cli.js entry-point guard', () => {
         string,
         unknown
       >;
-      expect(JSON.stringify(settings)).toContain(installedHook);
+      expect(JSON.stringify(settings)).toContain(JSON.stringify(installedHook).slice(1, -1));
     } finally {
       await stopChild(child);
       fs.rmSync(tmpHome, { recursive: true, force: true });

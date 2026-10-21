@@ -1,3 +1,20 @@
+# Agents Sims — Pixel Office
+
+Oficina visual de agentes con ejecución local de Codex mediante la suscripción de ChatGPT. Conserva el diseño, las animaciones y el editor del proyecto de origen.
+
+- [Guía de uso en español](LEEME-PRIMERO.md).
+- [Instalación y requisitos](docs/INSTALACION_LOCAL.md).
+- [Equipo, asignaciones y límites](docs/EQUIPO_MULTIAGENTE.md).
+- [Resultados medidos de la comparación con Codex](reports/comparacion-codex/v2/RESULTADOS_REALES.md). La comparación todavía no demuestra una ventaja general del equipo.
+
+Para instalar desde la raíz: `npm ci` y `npm run package`. En Windows, abre `ABRIR-OFICINA.cmd`; usa `CERRAR-OFICINA.cmd` para apagarla. Node.js 20 o superior; la ejecución de tareas requiere Codex CLI oficial y su comprobación de suscripción. Claude permanece desactivado y Antigravity sin conectar.
+
+Los informes conservan sus fechas y resultados históricos. El estado privado, las credenciales, las transcripciones, las dependencias y los archivos compilados se excluyen del repositorio.
+
+Se conserva el historial de [Pixel Office](https://github.com/josephndex/pixel-office), basado en [Pixel Agents](https://github.com/pixel-agents-hq/pixel-agents), junto con sus licencias y avisos. La documentación original del fork continúa a continuación.
+
+---
+
 # pixel-office
 
 A pixel-art visual office where your AI coding agents — **Claude Code**, **Codex CLI**,

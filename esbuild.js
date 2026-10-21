@@ -137,19 +137,19 @@ async function main() {
 /** Bundle the standalone CLI entry point. */
 async function buildCli() {
   await esbuild.build({
-    entryPoints: ['server/src/cli.ts'],
+    entryPoints: { cli: 'server/src/cli.ts', execute: 'server/src/execution/cli.ts' },
     bundle: true,
     format: 'cjs',
     minify: production,
     sourcemap: !production,
     platform: 'node',
-    outfile: 'dist/cli.js',
+    outdir: 'dist',
     external: ['fastify', '@fastify/websocket', '@fastify/static', '@fastify/cors'],
     define: versionDefine,
     logLevel: 'silent',
   });
   if (!production) {
-    console.log('[build] CLI bundled: dist/cli.mjs');
+    console.log('[build] CLIs bundled: dist/cli.js and dist/execute.js');
   }
 }
 

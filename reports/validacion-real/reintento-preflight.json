@@ -1,0 +1,18 @@
+{
+  "runtimeVersion": "0.163.0-alpha.10.2",
+  "inferenceCalls": 0,
+  "results": [
+    {
+      "profile": ":read-only",
+      "canRead": true,
+      "writeAllowed": false,
+      "outsideWriteDenied": true
+    },
+    {
+      "profile": ":workspace",
+      "canRead": true,
+      "writeAllowed": true,
+      "outsideWriteDenied": true
+    }
+  ]
+}

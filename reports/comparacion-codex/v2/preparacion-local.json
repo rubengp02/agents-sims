@@ -1,0 +1,118 @@
+{
+  "protocol": "codex-direct-vs-office-v2",
+  "realInferenceCalls": 0,
+  "attempts": [
+    {
+      "startedAt": "2026-10-21T10:45:44.731Z",
+      "sourceFingerprint": "35333ebda2bed53ab40f5d105c5c41e6edff696f595bf4e1b10626eb67deb6fe",
+      "protocolFingerprint": "d9a6bdc637929875c839eaa5efdb9b7e44abc2b088f3c77e0dc7fda1cd9a7306",
+      "status": "ready-not-authorized",
+      "cases": [
+        {
+          "caseId": "easy",
+          "initialRejected": true,
+          "initialFailedChecks": [
+            "value-1",
+            "value-2",
+            "value-3",
+            "type-0",
+            "type-1",
+            "type-2",
+            "type-3",
+            "type-4",
+            "type-5"
+          ],
+          "referenceAccepted": true,
+          "independentAcceptanceChecks": 15,
+          "rehearsalAccepted": true,
+          "officeRoles": [
+            "developer"
+          ],
+          "simulatedExecutionAttempts": 2,
+          "realInferenceCalls": 0
+        },
+        {
+          "caseId": "medium",
+          "initialRejected": true,
+          "initialFailedChecks": [
+            "parse-invalid-0",
+            "parse-invalid-1",
+            "parse-invalid-2",
+            "parse-invalid-3",
+            "parse-invalid-4",
+            "parse-invalid-5",
+            "parse-invalid-6",
+            "parse-invalid-7",
+            "parse-invalid-8",
+            "parse-invalid-9",
+            "parse-invalid-10",
+            "parse-overflow",
+            "half-up",
+            "sum-overflow",
+            "quantity-type",
+            "quantity-range-0",
+            "quantity-range-1",
+            "quantity-range-2",
+            "quantity-range-3",
+            "quantity-range-4",
+            "discount-type",
+            "discount-range-0",
+            "discount-range-1",
+            "discount-range-2",
+            "discount-range-3",
+            "generated-integer-cases"
+          ],
+          "referenceAccepted": true,
+          "independentAcceptanceChecks": 36,
+          "rehearsalAccepted": true,
+          "officeRoles": [
+            "architect",
+            "developer",
+            "tester"
+          ],
+          "simulatedExecutionAttempts": 4,
+          "realInferenceCalls": 0
+        },
+        {
+          "caseId": "hard",
+          "initialRejected": true,
+          "initialFailedChecks": [
+            "concurrency-range-0",
+            "concurrency-range-1",
+            "concurrency-range-2",
+            "concurrency-range-3",
+            "concurrency-range-4",
+            "concurrency-type-0",
+            "concurrency-type-1",
+            "concurrency-type-2",
+            "invalid-submit",
+            "fifo-concurrency-and-idle",
+            "duplicate-active-and-completed",
+            "cancel-pending",
+            "cancel-active-retains-slot",
+            "sync-throw-and-rejection-do-not-stall"
+          ],
+          "referenceAccepted": true,
+          "independentAcceptanceChecks": 16,
+          "rehearsalAccepted": true,
+          "officeRoles": [
+            "architect",
+            "developer",
+            "tester"
+          ],
+          "simulatedExecutionAttempts": 4,
+          "realInferenceCalls": 0
+        }
+      ],
+      "realInferenceCalls": 0,
+      "harnessTests": {
+        "exitCode": 0,
+        "durationMs": 4703,
+        "passed": true,
+        "testsPassed": 26
+      },
+      "sourceUnchanged": true,
+      "finishedAt": "2026-10-21T10:45:51.704Z"
+    }
+  ]
+}

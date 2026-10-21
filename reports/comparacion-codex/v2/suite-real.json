@@ -1,0 +1,58 @@
+{
+  "startedAt": 1792579987923,
+  "attempts": 6,
+  "tokens": 336338,
+  "paused": true,
+  "limits": {
+    "maxRuns": 10,
+    "maxTokens": 880000,
+    "maxMs": 1380000
+  },
+  "stages": [
+    {
+      "caseId": "easy",
+      "status": "completed",
+      "attempts": 2,
+      "reportedTokens": 84254,
+      "controlsPassed": true,
+      "comparison": {
+        "verdict": "office_candidate",
+        "tokenDelta": -30,
+        "timeDeltaMs": -242,
+        "generalImprovementProven": false
+      }
+    },
+    {
+      "caseId": "medium",
+      "status": "completed",
+      "attempts": 2,
+      "reportedTokens": 104984,
+      "controlsPassed": true,
+      "comparison": {
+        "verdict": "both_failed",
+        "generalImprovementProven": false
+      }
+    },
+    {
+      "caseId": "hard",
+      "status": "completed",
+      "attempts": 2,
+      "reportedTokens": 147100,
+      "controlsPassed": true,
+      "comparison": {
+        "verdict": "both_failed",
+        "generalImprovementProven": false
+      }
+    }
+  ],
+  "sourceFingerprint": "35333ebda2bed53ab40f5d105c5c41e6edff696f595bf4e1b10626eb67deb6fe",
+  "protocolFingerprint": "d9a6bdc637929875c839eaa5efdb9b7e44abc2b088f3c77e0dc7fda1cd9a7306",
+  "closed": true,
+  "status": "completed",
+  "reason": "suite_closed",
+  "realInference": true,
+  "calibrationTokens": 56873,
+  "knownTotalStudyTokens": 393211,
+  "reportedTokens": 336338,
+  "generalImprovementProven": false
+}

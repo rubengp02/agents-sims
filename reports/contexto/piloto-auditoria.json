@@ -1,0 +1,23 @@
+{
+  "controlsPassed": true,
+  "acceptanceChecksPerRun": 7,
+  "fixedCatalog": true,
+  "distinctSessions": true,
+  "noResume": true,
+  "modelsRequestedEqual": true,
+  "modelConfirmation": "not communicated by CLI",
+  "comparisonUnchangedAfterControlAudit": true,
+  "totalInputTokens": 26740,
+  "totalOutputTokens": 76,
+  "totalCachedInputTokens": 14336,
+  "totalNonCachedInputTokens": 12404,
+  "totalReportedTokens": 26816,
+  "inputReductionPercent": 5.597964376590331,
+  "totalReductionPercent": 5.582541869064018,
+  "timeDifferenceMs": 4,
+  "budgetClosed": "run_budget",
+  "additionalInferenceCalls": 0,
+  "measuredCodeFingerprint": "699825c88e2b661dc3dd8bc1dab060ee5d1c28d03ba01b7d4ab3fe9286721955",
+  "finalLocallyVerifiedFingerprint": "e3e42169e8275426c098e23db5ae6578d81a27c4269b06c6da286ec11db20b09",
+  "note": "Pilot data is from the pre-hardening source version. Later acceptance/cancellation guards were verified locally, without further inference. The six-check contract label in the original report excludes the additional no-tools check: seven were actually evaluated in each run."
+}

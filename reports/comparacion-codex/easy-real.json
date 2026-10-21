@@ -1,0 +1,170 @@
+{
+  "caseId": "easy",
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "limits": {
+    "maxRuns": 2,
+    "maxTokens": 60000,
+    "reservePerRun": 30000,
+    "perRunMs": 90000,
+    "maxMs": 240000
+  },
+  "order": [
+    "direct",
+    "office"
+  ],
+  "realInference": true,
+  "runs": [
+    {
+      "attempt": 1,
+      "role": "developer",
+      "status": "paused",
+      "reasonCode": "token_budget",
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "low",
+      "confirmedModel": null,
+      "inputTokens": 56141,
+      "outputTokens": 732,
+      "cachedInputTokens": 40960,
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "sessionHash": "5ff1cecd2afcc2b24a029ada44fa323851f49f3881c4b9993eb1cb572623e8a3",
+      "toolCalls": 5,
+      "durationMs": 28544,
+      "promptCharacters": 774,
+      "promptFingerprint": "1958710a4ceaab174c51539b7c1a7d5bbf0e86b9b097e6a97eff0a8f644aa12a"
+    }
+  ],
+  "trials": [
+    {
+      "method": "direct",
+      "initialFilesHash": "df0612dcea681b40ee477038c5fe73927a57bbbf784b74effc71ae99b137e69a",
+      "setupDurationMs": 7,
+      "status": "failed",
+      "repairRuns": 0,
+      "localChecks": [
+        {
+          "id": "public-tests",
+          "exitCode": 0,
+          "durationMs": 119,
+          "passed": true
+        }
+      ],
+      "executionAndLocalChecksMs": 28671,
+      "changes": {
+        "changed": [
+          "label.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "quality": {
+        "tests": [
+          {
+            "id": "value-0",
+            "passed": true
+          },
+          {
+            "id": "value-1",
+            "passed": true
+          },
+          {
+            "id": "value-2",
+            "passed": true
+          },
+          {
+            "id": "value-3",
+            "passed": true
+          },
+          {
+            "id": "value-4",
+            "passed": true
+          },
+          {
+            "id": "value-5",
+            "passed": true
+          },
+          {
+            "id": "value-6",
+            "passed": true
+          },
+          {
+            "id": "value-7",
+            "passed": true
+          },
+          {
+            "id": "type-0",
+            "passed": true
+          },
+          {
+            "id": "type-1",
+            "passed": true
+          },
+          {
+            "id": "type-2",
+            "passed": true
+          },
+          {
+            "id": "type-3",
+            "passed": true
+          },
+          {
+            "id": "type-4",
+            "passed": true
+          },
+          {
+            "id": "type-5",
+            "passed": true
+          },
+          {
+            "id": "idempotent",
+            "passed": true
+          },
+          {
+            "id": "file-scope",
+            "passed": true
+          },
+          {
+            "id": "method-completed",
+            "passed": false
+          },
+          {
+            "id": "public-tests",
+            "passed": true
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "method-completed"
+        ]
+      },
+      "acceptanceDurationMs": 72,
+      "totalDurationMs": 28752,
+      "inputTokens": 56141,
+      "outputTokens": 732,
+      "cachedInputTokens": 40960,
+      "nonCachedInputTokens": 15181,
+      "cliAttempts": 1
+    }
+  ],
+  "repairRuns": 0,
+  "status": "paused",
+  "catalogFingerprint": "f1c09991e98001b3a5681f159c76caa21c86143a3a1aa9ec40b92c7046972eab",
+  "comparison": {
+    "verdict": "controls_unverified",
+    "generalImprovementProven": false
+  },
+  "controlsPassed": false,
+  "totalDurationMs": 30049,
+  "reportedTokens": 56873,
+  "cache": {
+    "cachedInputTokens": 40960,
+    "distinctSessionCount": 1,
+    "sessionReuse": false,
+    "coldCacheControlled": false
+  },
+  "protocol": "codex-direct-vs-office-v1",
+  "sourceFingerprint": "35ea9377e31f1e6052bffda8a22f687f43bc10bb3716b0abcd4791e1bf08c59c",
+  "protocolFingerprint": "09ccde3741ede4279ec6b95ba8694e774b6fda6834fc328b56e9e534940c1bd4"
+}

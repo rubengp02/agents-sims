@@ -1,0 +1,26 @@
+[
+  {
+    "role": "chief",
+    "effectiveSandbox": "read-only",
+    "approvalPolicy": "never",
+    "verifiedTestCommands": 0
+  },
+  {
+    "role": "architect",
+    "effectiveSandbox": "read-only",
+    "approvalPolicy": "never",
+    "verifiedTestCommands": 0
+  },
+  {
+    "role": "developer",
+    "effectiveSandbox": "workspace-write",
+    "approvalPolicy": "never",
+    "verifiedTestCommands": 1
+  },
+  {
+    "role": "tester",
+    "effectiveSandbox": "read-only",
+    "approvalPolicy": "never",
+    "verifiedTestCommands": 1
+  }
+]

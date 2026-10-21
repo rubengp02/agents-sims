@@ -1,0 +1,200 @@
+{
+  "inferenceCalls": 0,
+  "attempts": [
+    {
+      "startedAt": "2026-10-21T09:47:30.332Z",
+      "sourceFingerprint": "699825c88e2b661dc3dd8bc1dab060ee5d1c28d03ba01b7d4ab3fe9286721955",
+      "results": [
+        {
+          "id": "check-types",
+          "exitCode": 0,
+          "durationMs": 5120,
+          "passed": true
+        },
+        {
+          "id": "lint",
+          "exitCode": 0,
+          "durationMs": 8681,
+          "passed": true
+        },
+        {
+          "id": "test",
+          "exitCode": 0,
+          "durationMs": 22157,
+          "passed": true
+        },
+        {
+          "id": "context-study",
+          "exitCode": 0,
+          "durationMs": 175,
+          "passed": true
+        },
+        {
+          "id": "package",
+          "exitCode": 0,
+          "durationMs": 27098,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "sourceUnchanged": true,
+      "finishedAt": "2026-10-21T09:48:33.740Z"
+    },
+    {
+      "startedAt": "2026-10-21T09:53:18.412Z",
+      "sourceFingerprint": "343e0ffd9a08eb1606839077f07c22e7950a6aa07f2786fd2aafbcaefe2f4497",
+      "results": [
+        {
+          "id": "check-types",
+          "exitCode": 0,
+          "durationMs": 5109,
+          "passed": true
+        },
+        {
+          "id": "lint",
+          "exitCode": 0,
+          "durationMs": 8613,
+          "passed": true
+        },
+        {
+          "id": "test",
+          "exitCode": 0,
+          "durationMs": 21951,
+          "passed": true
+        },
+        {
+          "id": "context-study",
+          "exitCode": 0,
+          "durationMs": 169,
+          "passed": true
+        },
+        {
+          "id": "package",
+          "exitCode": 0,
+          "durationMs": 27089,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "sourceUnchanged": true,
+      "finishedAt": "2026-10-21T09:54:21.539Z"
+    },
+    {
+      "startedAt": "2026-10-21T09:58:33.986Z",
+      "sourceFingerprint": "e3e42169e8275426c098e23db5ae6578d81a27c4269b06c6da286ec11db20b09",
+      "results": [
+        {
+          "id": "check-types",
+          "exitCode": 0,
+          "durationMs": 5046,
+          "passed": true
+        },
+        {
+          "id": "lint",
+          "exitCode": 0,
+          "durationMs": 8755,
+          "passed": true
+        },
+        {
+          "id": "test",
+          "exitCode": 0,
+          "durationMs": 21933,
+          "passed": true
+        },
+        {
+          "id": "context-study",
+          "exitCode": 0,
+          "durationMs": 165,
+          "passed": true
+        },
+        {
+          "id": "package",
+          "exitCode": 0,
+          "durationMs": 26998,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "sourceUnchanged": true,
+      "finishedAt": "2026-10-21T09:59:37.054Z"
+    },
+    {
+      "startedAt": "2026-10-21T10:46:14.466Z",
+      "sourceFingerprint": "35333ebda2bed53ab40f5d105c5c41e6edff696f595bf4e1b10626eb67deb6fe",
+      "results": [
+        {
+          "id": "check-types",
+          "exitCode": 0,
+          "durationMs": 5284,
+          "passed": true
+        },
+        {
+          "id": "lint",
+          "exitCode": 0,
+          "durationMs": 9094,
+          "passed": true
+        },
+        {
+          "id": "test",
+          "exitCode": 0,
+          "durationMs": 22426,
+          "passed": true
+        },
+        {
+          "id": "context-study",
+          "exitCode": 0,
+          "durationMs": 195,
+          "passed": true
+        },
+        {
+          "id": "package",
+          "exitCode": 0,
+          "durationMs": 27088,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "sourceUnchanged": true,
+      "finishedAt": "2026-10-21T10:47:18.732Z"
+    },
+    {
+      "startedAt": "2026-10-21T11:13:51.198Z",
+      "sourceFingerprint": "35333ebda2bed53ab40f5d105c5c41e6edff696f595bf4e1b10626eb67deb6fe",
+      "results": [
+        {
+          "id": "check-types",
+          "exitCode": 0,
+          "durationMs": 5087,
+          "passed": true
+        },
+        {
+          "id": "lint",
+          "exitCode": 0,
+          "durationMs": 9428,
+          "passed": true
+        },
+        {
+          "id": "test",
+          "exitCode": 0,
+          "durationMs": 22392,
+          "passed": true
+        },
+        {
+          "id": "context-study",
+          "exitCode": 0,
+          "durationMs": 191,
+          "passed": true
+        },
+        {
+          "id": "package",
+          "exitCode": 0,
+          "durationMs": 28422,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "sourceUnchanged": true,
+      "finishedAt": "2026-10-21T11:14:56.884Z"
+    }
+  ]
+}

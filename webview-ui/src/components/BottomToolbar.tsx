@@ -13,6 +13,7 @@ interface BottomToolbarProps {
   isSettingsOpen: boolean;
   onToggleSettings: () => void;
   workspaceFolders: WorkspaceFolder[];
+  onToggleTeam?: () => void;
 }
 
 export function BottomToolbar({
@@ -22,6 +23,7 @@ export function BottomToolbar({
   isSettingsOpen,
   onToggleSettings,
   workspaceFolders,
+  onToggleTeam,
 }: BottomToolbarProps) {
   const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
   const [isBypassMenuOpen, setIsBypassMenuOpen] = useState(false);
@@ -134,6 +136,7 @@ export function BottomToolbar({
       >
         Settings
       </Button>
+      {onToggleTeam && <Button onClick={onToggleTeam}>Equipo</Button>}
     </div>
   );
 }

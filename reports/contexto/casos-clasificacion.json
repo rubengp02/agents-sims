@@ -1,0 +1,20 @@
+[
+  { "id": "explanation-security", "prompt": "Documenta la política de seguridad existente", "expected": "simple", "roles": ["developer"] },
+  { "id": "auth-change", "prompt": "Modifica la autenticación de usuarios", "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "bounded-tested", "prompt": "Corrige el redondeo de una función", "assessment": { "scope": "bounded", "risk": "low", "uncertainty": "low", "modules": ["math"], "tests": "available" }, "expected": "normal", "roles": ["developer"] },
+  { "id": "bounded-no-tests", "prompt": "Corrige el redondeo de una función", "assessment": { "scope": "bounded", "risk": "low", "uncertainty": "low", "modules": ["math"], "tests": "missing" }, "expected": "normal", "roles": ["developer", "tester"] },
+  { "id": "cross-module", "prompt": "Añade un campo al contrato y al servidor", "assessment": { "scope": "cross-module", "risk": "low", "uncertainty": "low", "modules": ["core", "server"], "tests": "available" }, "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "uncertain", "prompt": "Investiga el fallo intermitente", "assessment": { "scope": "bounded", "risk": "unknown", "uncertainty": "high", "modules": ["runtime"], "tests": "unknown" }, "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "unknown", "prompt": "Implementa la petición", "expected": "normal", "roles": ["developer", "tester"] },
+  { "id": "visual", "prompt": "Analiza la propuesta visual solicitada", "assessment": { "scope": "bounded", "risk": "low", "uncertainty": "low", "modules": ["ui"], "tests": "available", "visualDecision": true }, "expected": "normal", "roles": ["designer", "developer"] },
+  { "id": "misleading-keyword", "prompt": "Implementa el endpoint y documenta después el resultado", "expected": "normal", "roles": ["developer", "tester"] },
+  { "id": "risk-overrides-simple", "prompt": "Explica el contrato", "assessment": { "scope": "explanation", "risk": "high", "uncertainty": "low", "modules": ["auth"], "tests": "available" }, "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "evidence-overrides-text", "prompt": "Lista los cambios", "assessment": { "scope": "bounded", "risk": "low", "uncertainty": "low", "modules": ["server", "core"], "tests": "available" }, "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "race", "prompt": "Arregla una race condition", "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "mixed-request", "prompt": "Documenta y modifica la autenticación", "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "unknown-module", "prompt": "Corrige la función", "assessment": { "scope": "bounded", "risk": "low", "uncertainty": "low", "modules": [], "tests": "available" }, "expected": "normal", "roles": ["developer", "tester"] },
+  { "id": "contradictory-scope", "prompt": "Implementa la función", "assessment": { "scope": "explanation", "risk": "low", "uncertainty": "low", "modules": ["math"], "tests": "available" }, "expected": "normal", "roles": ["developer", "tester"] },
+  { "id": "authorized-work", "prompt": "Implementa el cambio autorizado", "expected": "normal", "roles": ["developer", "tester"] },
+  { "id": "authorization-change", "prompt": "Modifica la autorización por roles", "expected": "complex", "roles": ["architect", "developer", "tester"] },
+  { "id": "access-control", "prompt": "Corrige el control de acceso", "expected": "complex", "roles": ["architect", "developer", "tester"] }
+]

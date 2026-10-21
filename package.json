@@ -27,9 +27,12 @@
     "pixel-agents": "./dist/cli.js"
   },
   "files": [
+    "THIRD_PARTY_NOTICES.md",
+    "licenses/",
     "CHANGELOG.md",
     "LICENSE",
     "dist/cli.js",
+    "dist/execute.js",
     "dist/extension.js",
     "dist/hooks/claude-hook.js",
     "dist/hooks/pixel_agents_bridge_plugin.py",
@@ -83,6 +86,17 @@
     }
   },
   "scripts": {
+    "verify:local": "node scripts/verify-local.mjs",
+    "study:optimization": "node scripts/optimization-study.mjs",
+    "study:pilot": "node scripts/optimization-pilot.mjs",
+    "benchmark:prepare": "node scripts/benchmark.mjs prepare",
+    "benchmark:test": "node --test scripts/benchmark.test.mjs",
+    "benchmark:run": "node scripts/benchmark.mjs execute",
+    "benchmark:v2:prepare": "node scripts/benchmark-v2.mjs prepare",
+    "benchmark:v2:test": "node --test --test-concurrency=1 scripts/benchmark.test.mjs scripts/benchmark-v2.test.mjs",
+    "benchmark:v2:run": "node scripts/benchmark-v2.mjs execute",
+    "agent:check": "node dist/execute.js check",
+    "agent": "node dist/execute.js",
     "vscode:prepublish": "npm run package",
     "prepack": "npm run package",
     "build:extension": "node esbuild.js --production",
@@ -104,6 +118,7 @@
     "format:check": "prettier --check \"adapters/vscode/**/*.ts\" \"server/**/*.ts\" \"core/src/**/*.ts\" \"webview-ui/src/**/*.{ts,tsx,css}\" \"*.{js,mjs}\" \"webview-ui/*.{js,ts}\"",
     "test:webview": "cd webview-ui && npm test",
     "test:server": "cd server && npm test",
+    "test:standalone": "playwright test --config e2e/playwright.standalone.config.ts",
     "test:package-contract": "node --test scripts/npm-package-contract.test.mjs",
     "test": "npm run test:webview && npm run test:server && npm run test:package-contract",
     "verify:npm-package": "node scripts/verify-npm-package.mjs",

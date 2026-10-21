@@ -11,7 +11,9 @@ let tmpHome: string;
 let workspaceDir: string;
 
 function makeNodeCommand(scriptPath: string): string {
-  return `${JSON.stringify(process.execPath)} ${JSON.stringify(scriptPath)}`;
+  // Forward slashes work on Windows too; JSON-escaped backslashes are not
+  // command-line escaping and prevented the fixture from matching its hook.
+  return `${JSON.stringify(process.execPath.replaceAll('\\', '/'))} ${JSON.stringify(scriptPath.replaceAll('\\', '/'))}`;
 }
 
 function writeHookScript(scriptPath: string, outputPath: string): void {
@@ -54,6 +56,7 @@ function runMockClaude(
       env: {
         ...process.env,
         HOME: tmpHome,
+        USERPROFILE: tmpHome,
       },
       stdio: ['ignore', 'ignore', 'pipe'],
     });

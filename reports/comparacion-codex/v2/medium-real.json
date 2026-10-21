@@ -1,0 +1,574 @@
+{
+  "caseId": "medium",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "limits": {
+    "maxRuns": 4,
+    "maxMethodRuns": {
+      "direct": 1,
+      "office": 3
+    },
+    "maxMethodTokens": 150000,
+    "maxMethodMs": 180000,
+    "maxTokens": 300000,
+    "maxMs": 420000,
+    "minRunReserve": 20000
+  },
+  "order": [
+    "office",
+    "direct"
+  ],
+  "realInference": true,
+  "runs": [
+    {
+      "attempt": 1,
+      "method": "office",
+      "role": "architect",
+      "status": "completed",
+      "reasonCode": null,
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "medium",
+      "confirmedModel": null,
+      "inputTokens": 41668,
+      "outputTokens": 551,
+      "cachedInputTokens": 26880,
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "sessionHash": "cd76abe1c8cf74544ba961b4d4ac34ee425b72e3c72ada9f034acb98b4c20301",
+      "toolCalls": 2,
+      "promptCharacters": 2182,
+      "promptFingerprint": "0c92fa00152a563ff05be7f29e71cf07f0807a86324ed7bc3dafbac2768a7ce6",
+      "durationMs": 22304,
+      "reportedCeiling": 150000
+    },
+    {
+      "attempt": 2,
+      "method": "direct",
+      "role": "developer",
+      "status": "completed",
+      "reasonCode": null,
+      "requestedModel": "gpt-6.1-sol",
+      "effort": "medium",
+      "confirmedModel": null,
+      "inputTokens": 60552,
+      "outputTokens": 2213,
+      "cachedInputTokens": 50560,
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "sessionHash": "2c4e514e50de2e5e799faaa6bf395c2936954df2a0002e8e6bb724352f064cd7",
+      "toolCalls": 4,
+      "promptCharacters": 1339,
+      "promptFingerprint": "0fe9d31b7466c19f77dac139eff4c5f30945704996dfb26764f0ce403e3376f2",
+      "durationMs": 65851,
+      "reportedCeiling": 150000
+    }
+  ],
+  "trials": [
+    {
+      "method": "office",
+      "initialFilesHash": "66b9110e177e132c0630adec1c49edc11da98cce848ed8d59c3083ed5c567c58",
+      "setupDurationMs": 11,
+      "status": "failed",
+      "repairRuns": 0,
+      "localChecks": [],
+      "tasks": [
+        {
+          "role": "architect",
+          "status": "failed",
+          "reasonCode": "task_reported_failed"
+        },
+        {
+          "role": "developer",
+          "status": "paused",
+          "reasonCode": "task_reported_failed"
+        },
+        {
+          "role": "tester",
+          "status": "paused",
+          "reasonCode": "task_reported_failed"
+        }
+      ],
+      "executionAndLocalChecksMs": 26696,
+      "changes": {
+        "changed": [],
+        "unexpected": [],
+        "passed": true
+      },
+      "quality": {
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": false
+          },
+          {
+            "id": "parse-overflow",
+            "passed": false
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": false
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": false
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": false
+          },
+          {
+            "id": "discount-type",
+            "passed": false
+          },
+          {
+            "id": "discount-range-0",
+            "passed": false
+          },
+          {
+            "id": "discount-range-1",
+            "passed": false
+          },
+          {
+            "id": "discount-range-2",
+            "passed": false
+          },
+          {
+            "id": "discount-range-3",
+            "passed": false
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": false
+          },
+          {
+            "id": "file-scope",
+            "passed": true
+          },
+          {
+            "id": "method-completed",
+            "passed": false
+          },
+          {
+            "id": "public-tests",
+            "passed": false
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "parse-invalid-0",
+          "parse-invalid-1",
+          "parse-invalid-2",
+          "parse-invalid-3",
+          "parse-invalid-4",
+          "parse-invalid-5",
+          "parse-invalid-6",
+          "parse-invalid-7",
+          "parse-invalid-8",
+          "parse-invalid-9",
+          "parse-invalid-10",
+          "parse-overflow",
+          "half-up",
+          "sum-overflow",
+          "quantity-type",
+          "quantity-range-0",
+          "quantity-range-1",
+          "quantity-range-2",
+          "quantity-range-3",
+          "quantity-range-4",
+          "discount-type",
+          "discount-range-0",
+          "discount-range-1",
+          "discount-range-2",
+          "discount-range-3",
+          "generated-integer-cases",
+          "method-completed",
+          "public-tests"
+        ]
+      },
+      "acceptanceDurationMs": 73,
+      "totalDurationMs": 26785,
+      "inputTokens": 41668,
+      "outputTokens": 551,
+      "cachedInputTokens": 26880,
+      "nonCachedInputTokens": 14788,
+      "cliAttempts": 1,
+      "budget": {
+        "tokenLimit": 150000,
+        "timeLimitMs": 180000,
+        "tokens": 42219,
+        "exceeded": false,
+        "usageUnknown": false
+      },
+      "functionalQuality": {
+        "passed": false,
+        "failedChecks": [
+          "parse-invalid-0",
+          "parse-invalid-1",
+          "parse-invalid-2",
+          "parse-invalid-3",
+          "parse-invalid-4",
+          "parse-invalid-5",
+          "parse-invalid-6",
+          "parse-invalid-7",
+          "parse-invalid-8",
+          "parse-invalid-9",
+          "parse-invalid-10",
+          "parse-overflow",
+          "half-up",
+          "sum-overflow",
+          "quantity-type",
+          "quantity-range-0",
+          "quantity-range-1",
+          "quantity-range-2",
+          "quantity-range-3",
+          "quantity-range-4",
+          "discount-type",
+          "discount-range-0",
+          "discount-range-1",
+          "discount-range-2",
+          "discount-range-3",
+          "generated-integer-cases"
+        ]
+      },
+      "completionVerified": false
+    },
+    {
+      "method": "direct",
+      "initialFilesHash": "66b9110e177e132c0630adec1c49edc11da98cce848ed8d59c3083ed5c567c58",
+      "setupDurationMs": 10,
+      "status": "failed",
+      "repairRuns": 0,
+      "localChecks": [
+        {
+          "id": "public-tests",
+          "exitCode": 0,
+          "durationMs": 126,
+          "passed": true
+        }
+      ],
+      "executionAndLocalChecksMs": 65982,
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "quality": {
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": false
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": false
+          },
+          {
+            "id": "discount-range-3",
+            "passed": false
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          },
+          {
+            "id": "file-scope",
+            "passed": true
+          },
+          {
+            "id": "method-completed",
+            "passed": true
+          },
+          {
+            "id": "public-tests",
+            "passed": true
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "quantity-range-2",
+          "quantity-range-4",
+          "discount-range-2",
+          "discount-range-3"
+        ]
+      },
+      "acceptanceDurationMs": 71,
+      "totalDurationMs": 66066,
+      "inputTokens": 60552,
+      "outputTokens": 2213,
+      "cachedInputTokens": 50560,
+      "nonCachedInputTokens": 9992,
+      "cliAttempts": 1,
+      "budget": {
+        "tokenLimit": 150000,
+        "timeLimitMs": 180000,
+        "tokens": 62765,
+        "exceeded": false,
+        "usageUnknown": false
+      },
+      "functionalQuality": {
+        "passed": false,
+        "failedChecks": [
+          "quantity-range-2",
+          "quantity-range-4",
+          "discount-range-2",
+          "discount-range-3"
+        ]
+      },
+      "completionVerified": true
+    }
+  ],
+  "repairRuns": 0,
+  "status": "completed",
+  "catalogFingerprint": "f1c09991e98001b3a5681f159c76caa21c86143a3a1aa9ec40b92c7046972eab",
+  "comparison": {
+    "verdict": "both_failed",
+    "generalImprovementProven": false
+  },
+  "controlsPassed": true,
+  "totalDurationMs": 93976,
+  "reportedTokens": 104984,
+  "cache": {
+    "cachedInputTokens": 77440,
+    "distinctSessionCount": 2,
+    "sessionReuse": false,
+    "coldCacheControlled": false
+  },
+  "budgetPolicy": "equal-method-envelopes",
+  "calibrationExcludedFromTrials": true,
+  "protocol": "codex-direct-vs-office-v2",
+  "sourceFingerprint": "35333ebda2bed53ab40f5d105c5c41e6edff696f595bf4e1b10626eb67deb6fe",
+  "protocolFingerprint": "d9a6bdc637929875c839eaa5efdb9b7e44abc2b088f3c77e0dc7fda1cd9a7306"
+}
