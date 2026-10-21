@@ -172,8 +172,12 @@ test('team plans, assigns, runs dependencies and animates real office messages @
     await expect(
       panel.getByText('Modelo confirmado por el CLI: no comunicado').first(),
     ).toBeVisible();
-    await panel.getByText('Ver respuesta', { exact: true }).last().click();
-    await expect(panel.getByText('RESULTADO LOCAL DE PRUEBA').last()).toBeVisible();
+    // The Chief also has a response; DOM order does not identify the Tester.
+    const verification = panel.getByRole('article').filter({
+      has: page.getByText('Verificación de prueba', { exact: true }),
+    });
+    await verification.getByText('Ver respuesta', { exact: true }).click();
+    await expect(verification.getByText('RESULTADO LOCAL DE PRUEBA')).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath('equipo-fixture-desktop.png') });
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(panel).toBeVisible();
