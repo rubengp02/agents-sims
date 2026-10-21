@@ -1,0 +1,201 @@
+{
+  "reason": "execution_controller_lost",
+  "recoveredAt": "2026-10-21T16:17:42.635Z",
+  "observationWindowMs": 479517,
+  "terminalSessionLookup": "Unknown process id",
+  "processes": {
+    "observedAt": "2026-10-21T16:17:42.3595551+00:00",
+    "controllerCount": 0,
+    "workspaceWorkerCount": 0,
+    "scope": "Exact pilot script and workspace; unrelated processes untouched"
+  },
+  "receiptState": "running, stale and unverified",
+  "actualModelDurationMs": null,
+  "inferenceCallsCompleted": null,
+  "observedUsage": null,
+  "localQuality": {
+    "caseId": "medium",
+    "tests": [
+      {
+        "id": "parse-0",
+        "passed": true
+      },
+      {
+        "id": "parse-1",
+        "passed": true
+      },
+      {
+        "id": "parse-2",
+        "passed": true
+      },
+      {
+        "id": "parse-invalid-0",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-1",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-2",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-3",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-4",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-5",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-6",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-7",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-8",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-9",
+        "passed": false
+      },
+      {
+        "id": "parse-invalid-10",
+        "passed": false
+      },
+      {
+        "id": "parse-overflow",
+        "passed": false
+      },
+      {
+        "id": "empty",
+        "passed": true
+      },
+      {
+        "id": "half-up",
+        "passed": false
+      },
+      {
+        "id": "round-once",
+        "passed": true
+      },
+      {
+        "id": "full-discount",
+        "passed": true
+      },
+      {
+        "id": "safe-boundary",
+        "passed": true
+      },
+      {
+        "id": "sum-overflow",
+        "passed": false
+      },
+      {
+        "id": "invalid-lines",
+        "passed": true
+      },
+      {
+        "id": "invalid-item",
+        "passed": true
+      },
+      {
+        "id": "quantity-type",
+        "passed": false
+      },
+      {
+        "id": "quantity-range-0",
+        "passed": false
+      },
+      {
+        "id": "quantity-range-1",
+        "passed": false
+      },
+      {
+        "id": "quantity-range-2",
+        "passed": false
+      },
+      {
+        "id": "quantity-range-3",
+        "passed": false
+      },
+      {
+        "id": "quantity-range-4",
+        "passed": false
+      },
+      {
+        "id": "discount-type",
+        "passed": false
+      },
+      {
+        "id": "discount-range-0",
+        "passed": false
+      },
+      {
+        "id": "discount-range-1",
+        "passed": false
+      },
+      {
+        "id": "discount-range-2",
+        "passed": false
+      },
+      {
+        "id": "discount-range-3",
+        "passed": false
+      },
+      {
+        "id": "immutable",
+        "passed": true
+      },
+      {
+        "id": "generated-integer-cases",
+        "passed": false
+      }
+    ],
+    "passed": false,
+    "failedChecks": [
+      "parse-invalid-0",
+      "parse-invalid-1",
+      "parse-invalid-2",
+      "parse-invalid-3",
+      "parse-invalid-4",
+      "parse-invalid-5",
+      "parse-invalid-6",
+      "parse-invalid-7",
+      "parse-invalid-8",
+      "parse-invalid-9",
+      "parse-invalid-10",
+      "parse-overflow",
+      "half-up",
+      "sum-overflow",
+      "quantity-type",
+      "quantity-range-0",
+      "quantity-range-1",
+      "quantity-range-2",
+      "quantity-range-3",
+      "quantity-range-4",
+      "discount-type",
+      "discount-range-0",
+      "discount-range-1",
+      "discount-range-2",
+      "discount-range-3",
+      "generated-integer-cases"
+    ],
+    "durationMs": 72
+  },
+  "workingTreeChanged": false,
+  "historicalReportsUnchanged": true,
+  "historicalReportCount": 94,
+  "originalReportHash": "5040198f0ab45513408e8c69595987d2fa051c0db32dd6942a76dc05af8850ee",
+  "sourceUnchanged": true,
+  "noAdditionalRunsStarted": true
+}

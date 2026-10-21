@@ -1,0 +1,470 @@
+{
+  "protocol": "context-controlled-real-v1",
+  "mode": "real-pilot",
+  "planHash": "59e8a4bb83ee27838f1fd054e3623648a4db2a02d79b12281949ac6d32c5dddc",
+  "sourceFingerprint": "eb19d0cc0e49f05be022e2d92af9d2f603a6e8d1ab00fbb7a65dcc45decd5fb0",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 480000,
+    "perRunTokens": 120000,
+    "totalMs": 960000,
+    "perArmMs": 220000,
+    "perRunMs": 180000,
+    "maxRepairs": 0
+  },
+  "runs": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "order": 0,
+      "status": "unverified-interrupted",
+      "reason": "execution_controller_lost",
+      "input": null,
+      "output": null,
+      "cached": null,
+      "durationMs": null,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null,
+      "requestedEffort": "low",
+      "cliVersion": "0.163.0-alpha.10.2",
+      "subscriptionVerified": true,
+      "sessionMode": "new",
+      "contextFingerprint": "95d0a9abcdc4c70b5c10aa15c8d617fe2bb41e2d5a513a3b185638cdb181ae51",
+      "submittedPromptHash": "be22e5f1ecbc7c9c5b264bdcf7390f151361f07c555b025e2ab67da8041b32e6",
+      "metrics": {
+        "version": 1,
+        "source": "codex-json",
+        "promptCharacters": 2762,
+        "promptUtf8Bytes": 2784,
+        "submittedCharacters": 2947,
+        "submittedUtf8Bytes": 2970,
+        "activityEvents": 0,
+        "completedToolEvents": 0,
+        "commandEvents": 0,
+        "fileChangeEvents": 0,
+        "observedToolOutputUtf8Bytes": 0,
+        "toolOutputMissing": 0,
+        "duplicateToolEvents": 0,
+        "counterSaturated": false,
+        "completedTurns": 0,
+        "failedTurns": 0,
+        "usageEvents": 0,
+        "fileReads": null,
+        "internalModelRequests": null
+      },
+      "metricsObservation": "Last persisted partial counters; not complete activity totals."
+    }
+  ],
+  "arms": [
+    {
+      "method": "direct",
+      "variant": "standard",
+      "order": 0,
+      "status": "not-accepted",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": false
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": false
+          },
+          {
+            "id": "parse-overflow",
+            "passed": false
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": false
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": false
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": false
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": false
+          },
+          {
+            "id": "discount-type",
+            "passed": false
+          },
+          {
+            "id": "discount-range-0",
+            "passed": false
+          },
+          {
+            "id": "discount-range-1",
+            "passed": false
+          },
+          {
+            "id": "discount-range-2",
+            "passed": false
+          },
+          {
+            "id": "discount-range-3",
+            "passed": false
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": false
+          }
+        ],
+        "passed": false,
+        "failedChecks": [
+          "parse-invalid-0",
+          "parse-invalid-1",
+          "parse-invalid-2",
+          "parse-invalid-3",
+          "parse-invalid-4",
+          "parse-invalid-5",
+          "parse-invalid-6",
+          "parse-invalid-7",
+          "parse-invalid-8",
+          "parse-invalid-9",
+          "parse-invalid-10",
+          "parse-overflow",
+          "half-up",
+          "sum-overflow",
+          "quantity-type",
+          "quantity-range-0",
+          "quantity-range-1",
+          "quantity-range-2",
+          "quantity-range-3",
+          "quantity-range-4",
+          "discount-type",
+          "discount-range-0",
+          "discount-range-1",
+          "discount-range-2",
+          "discount-range-3",
+          "generated-integer-cases"
+        ],
+        "durationMs": 72
+      },
+      "localCheckTiming": "After loss of the controller; not a completed model result",
+      "workingTreeChanged": false,
+      "durationMs": null,
+      "tokens": null
+    }
+  ],
+  "status": "paused",
+  "inferenceObserved": null,
+  "automaticPromotion": false,
+  "reason": "execution_controller_lost",
+  "observedTokens": null,
+  "durationMs": null,
+  "skipped": [
+    {
+      "method": "office",
+      "variant": "standard"
+    },
+    {
+      "method": "office",
+      "variant": "canonical"
+    },
+    {
+      "method": "direct",
+      "variant": "canonical"
+    }
+  ],
+  "recovery": {
+    "reason": "execution_controller_lost",
+    "recoveredAt": "2026-10-21T16:17:42.635Z",
+    "observationWindowMs": 479517,
+    "terminalSessionLookup": "Unknown process id",
+    "processes": {
+      "observedAt": "2026-10-21T16:17:42.3595551+00:00",
+      "controllerCount": 0,
+      "workspaceWorkerCount": 0,
+      "scope": "Exact pilot script and workspace; unrelated processes untouched"
+    },
+    "receiptState": "running, stale and unverified",
+    "actualModelDurationMs": null,
+    "inferenceCallsCompleted": null,
+    "observedUsage": null,
+    "localQuality": {
+      "caseId": "medium",
+      "tests": [
+        {
+          "id": "parse-0",
+          "passed": true
+        },
+        {
+          "id": "parse-1",
+          "passed": true
+        },
+        {
+          "id": "parse-2",
+          "passed": true
+        },
+        {
+          "id": "parse-invalid-0",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-1",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-2",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-3",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-4",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-5",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-6",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-7",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-8",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-9",
+          "passed": false
+        },
+        {
+          "id": "parse-invalid-10",
+          "passed": false
+        },
+        {
+          "id": "parse-overflow",
+          "passed": false
+        },
+        {
+          "id": "empty",
+          "passed": true
+        },
+        {
+          "id": "half-up",
+          "passed": false
+        },
+        {
+          "id": "round-once",
+          "passed": true
+        },
+        {
+          "id": "full-discount",
+          "passed": true
+        },
+        {
+          "id": "safe-boundary",
+          "passed": true
+        },
+        {
+          "id": "sum-overflow",
+          "passed": false
+        },
+        {
+          "id": "invalid-lines",
+          "passed": true
+        },
+        {
+          "id": "invalid-item",
+          "passed": true
+        },
+        {
+          "id": "quantity-type",
+          "passed": false
+        },
+        {
+          "id": "quantity-range-0",
+          "passed": false
+        },
+        {
+          "id": "quantity-range-1",
+          "passed": false
+        },
+        {
+          "id": "quantity-range-2",
+          "passed": false
+        },
+        {
+          "id": "quantity-range-3",
+          "passed": false
+        },
+        {
+          "id": "quantity-range-4",
+          "passed": false
+        },
+        {
+          "id": "discount-type",
+          "passed": false
+        },
+        {
+          "id": "discount-range-0",
+          "passed": false
+        },
+        {
+          "id": "discount-range-1",
+          "passed": false
+        },
+        {
+          "id": "discount-range-2",
+          "passed": false
+        },
+        {
+          "id": "discount-range-3",
+          "passed": false
+        },
+        {
+          "id": "immutable",
+          "passed": true
+        },
+        {
+          "id": "generated-integer-cases",
+          "passed": false
+        }
+      ],
+      "passed": false,
+      "failedChecks": [
+        "parse-invalid-0",
+        "parse-invalid-1",
+        "parse-invalid-2",
+        "parse-invalid-3",
+        "parse-invalid-4",
+        "parse-invalid-5",
+        "parse-invalid-6",
+        "parse-invalid-7",
+        "parse-invalid-8",
+        "parse-invalid-9",
+        "parse-invalid-10",
+        "parse-overflow",
+        "half-up",
+        "sum-overflow",
+        "quantity-type",
+        "quantity-range-0",
+        "quantity-range-1",
+        "quantity-range-2",
+        "quantity-range-3",
+        "quantity-range-4",
+        "discount-type",
+        "discount-range-0",
+        "discount-range-1",
+        "discount-range-2",
+        "discount-range-3",
+        "generated-integer-cases"
+      ],
+      "durationMs": 72
+    },
+    "workingTreeChanged": false,
+    "historicalReportsUnchanged": true,
+    "historicalReportCount": 94,
+    "originalReportHash": "5040198f0ab45513408e8c69595987d2fa051c0db32dd6942a76dc05af8850ee",
+    "sourceUnchanged": true,
+    "noAdditionalRunsStarted": true
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "protocol": "context-controlled-real-v1",
+  "mode": "real-pilot",
+  "planHash": "59e8a4bb83ee27838f1fd054e3623648a4db2a02d79b12281949ac6d32c5dddc",
+  "sourceFingerprint": "eb19d0cc0e49f05be022e2d92af9d2f603a6e8d1ab00fbb7a65dcc45decd5fb0",
+  "limits": {
+    "maxRuns": 4,
+    "maxTokens": 480000,
+    "perRunTokens": 120000,
+    "totalMs": 960000,
+    "perArmMs": 220000,
+    "perRunMs": 180000,
+    "maxRepairs": 0
+  },
+  "runs": [],
+  "arms": [],
+  "status": "running",
+  "inferenceObserved": false,
+  "automaticPromotion": false
+}
