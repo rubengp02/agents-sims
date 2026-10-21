@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 // Solo comprueba la propuesta local: no inicia agentes ni llama a modelos.
-const require = createRequire(new URL('../pixel-office/package.json', import.meta.url));
+const require = createRequire(new URL('../package.json', import.meta.url));
 const { chromium } = require('playwright');
 const preview = process.argv[2];
 assert.ok(preview, 'Indica la ruta absoluta a la vista previa renderizada.');
