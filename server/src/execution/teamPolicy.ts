@@ -37,7 +37,10 @@ export function validateSettings(value: TeamSettings): TeamSettings {
 
 /** Routing is bounded and free of extra model calls. API price is not subscription quota. */
 export function chooseModel(
-  task: Pick<TeamTask, 'prompt' | 'role' | 'override' | 'assessment' | 'proposedChoice'>,
+  task: Pick<
+    TeamTask,
+    'prompt' | 'role' | 'override' | 'assessment' | 'proposedChoice' | 'reviewMode'
+  >,
   evidence: SubscriptionEvidence,
 ): {
   choice: TeamChoice;
@@ -48,6 +51,7 @@ export function chooseModel(
   const { difficulty } = assessment;
   const simple = difficulty === 'simple';
   const complex = difficulty === 'complex';
+  const deep = task.role === 'tester' && task.reviewMode === 'deep';
   if (task.override) {
     const model = evidence.models.find((m) => m.id === task.override!.model);
     if (!model?.efforts.includes(task.override.effort))
@@ -75,7 +79,7 @@ export function chooseModel(
         'plan_choice_unavailable',
         'La propuesta del Jefe no pertenece al catálogo automático permitido.',
       );
-    if (complex && proposed.effort === 'low')
+    if ((complex || deep) && proposed.effort === 'low')
       throw new ExecutionBlocked(
         'reasoning_review_required',
         'Un trabajo de alto riesgo necesita revisar su razonamiento.',
@@ -87,15 +91,15 @@ export function chooseModel(
     };
   }
   // Curated automatic set. Never silently expand to old or high consumption models.
-  const preferred = simple ? ['gpt-6-luna', 'gpt-6.1-sol'] : ['gpt-6.1-sol'];
-  const effort = complex ? 'high' : 'low';
+  const preferred = simple && !deep ? ['gpt-6-luna', 'gpt-6.1-sol'] : ['gpt-6.1-sol'];
+  const effort = complex || deep ? 'high' : 'low';
   for (const id of preferred) {
     const model = evidence.models.find((m) => m.id === id);
     if (model?.efforts.includes(effort))
       return {
         choice: { provider: 'codex', model: id, effort },
         difficulty,
-        explanation: `${assessment.reason} ${simple ? 'Modelo ligero y razonamiento bajo.' : complex ? 'Sol y razonamiento alto.' : 'Sol y razonamiento bajo.'}`,
+        explanation: `${assessment.reason} ${deep ? 'Revisión profunda: Sol y razonamiento alto.' : simple ? 'Modelo ligero y razonamiento bajo.' : complex ? 'Sol y razonamiento alto.' : 'Sol y razonamiento bajo.'}`,
       };
   }
   throw new ExecutionBlocked(

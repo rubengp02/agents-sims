@@ -9,6 +9,9 @@ import { loadTools, root } from './optimization-tools.mjs';
 
 // Offline only. This script has no command or option for enabling a real provider.
 const tools = await loadTools();
+const runName = process.argv[2];
+if (runName !== undefined && !/^[a-z][a-z0-9-]{0,63}$/.test(runName))
+  throw new Error('Nombre de validación inválido.');
 const local = path.join(root, '.local-office', 'ae-' + randomUUID().slice(0, 8));
 fs.mkdirSync(local, { recursive: true });
 const report = {
@@ -271,7 +274,13 @@ try {
   report.results.push(await simulate(cases[0], 'light-local', true));
   report.passed = true;
 } finally {
-  const output = path.join(root, 'reports/optimizacion-adaptativa/SIMULACION.json');
+  const output = path.join(
+    root,
+    'reports/optimizacion-adaptativa',
+    ...(runName ? [runName] : []),
+    'SIMULACION.json',
+  );
+  fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(output, JSON.stringify(report, null, 2) + '\n');
   console.log(
     JSON.stringify({

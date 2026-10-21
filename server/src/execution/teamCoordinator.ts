@@ -386,7 +386,7 @@ export class TeamCoordinator {
     allowWrites = false,
   ): TeamTask[] {
     const packet = validateContext(context);
-    const evidence = validateAssessment(assessment);
+    let evidence = validateAssessment(assessment);
     if (
       evidence.acceptanceCoverage === 'complete' &&
       !this.checks?.covers?.(packet.checks, packet.acceptance)
@@ -395,7 +395,15 @@ export class TeamCoordinator {
         'coverage_unverified',
         'No se ha acreditado la aceptación completa con comprobaciones locales.',
       );
+    if (this.adaptive)
+      evidence = {
+        ...evidence,
+        acceptanceCoverage: this.checks?.covers?.(packet.checks, packet.acceptance)
+          ? 'complete'
+          : 'partial',
+      };
     const routing = assessTask(packet.objective, evidence);
+    if (this.adaptive) evidence = { ...evidence, risk: routing.effectiveRisk };
     if (
       this.adaptive &&
       evidence.scope !== 'explanation' &&
@@ -443,11 +451,7 @@ export class TeamCoordinator {
           context: packet,
           assessment: evidence,
           reviewMode:
-            role === 'tester'
-              ? evidence.risk === 'high' || evidence.uncertainty !== 'low'
-                ? 'deep'
-                : 'focused'
-              : undefined,
+            role === 'tester' ? (routing.reviewMode === 'deep' ? 'deep' : 'focused') : undefined,
           dependsOn: tasks.map((task) => task.id),
           allowWrites: allowWrites && role === 'developer',
         }),
@@ -1199,12 +1203,17 @@ export class TeamCoordinator {
         assessment.risk === 'low' &&
         assessment.uncertainty === 'low' &&
         !assessment.visualDecision &&
-        this.checks?.covers?.(context.checks, context.acceptance)
+        (assessment.modules.length > 0 || assessment.scope === 'explanation')
       ) {
         this.addScopedWorkflow(
           project,
           context,
-          { ...assessment, acceptanceCoverage: 'complete' },
+          {
+            ...assessment,
+            acceptanceCoverage: this.checks?.covers?.(context.checks, context.acceptance)
+              ? 'complete'
+              : 'partial',
+          },
           allowWrites,
         );
         return;
@@ -1254,7 +1263,9 @@ export class TeamCoordinator {
         /* rejected below */
       }
       const validated = normalizeWorkflowPlan(items);
-      const sensitive = assessTask(goal).difficulty === 'complex';
+      const goalRouting = assessTask(goal, local?.assessment);
+      const sensitive =
+        goalRouting.effectiveRisk === 'high' || local?.assessment.uncertainty === 'high';
       if (this.adaptive) {
         for (const item of validated) {
           if (sensitive) {

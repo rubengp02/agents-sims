@@ -1,0 +1,439 @@
+{
+  "mode": "local-decision-tests",
+  "inferenceCalls": 0,
+  "modelCallsSimulated": 0,
+  "sourceFingerprint": "8850549e5738205c5f6f21b8aa30e38f03a9a959a3c3257b6805e3b2097899b2",
+  "results": [
+    {
+      "id": "bounded-covered",
+      "roles": [
+        "developer"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "invoice-two-modules",
+      "roles": [
+        "developer"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "three-known-modules",
+      "roles": [
+        "developer"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "partial-cross-module",
+      "roles": [
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": "focused"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "available-does-not-mean-covered",
+      "roles": [
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": "focused"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "missing-tests",
+      "roles": [
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "security-change-low-label",
+      "roles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mixed-document-delete",
+      "roles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mixed-summary-disable",
+      "roles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "password-change",
+      "roles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "race-condition",
+      "roles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "migration-write",
+      "roles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "security-doc-readonly",
+      "roles": [
+        "developer"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "migration-doc-readonly",
+      "roles": [
+        "developer"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "change-history-readonly",
+      "roles": [
+        "developer"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "unknown-usage-evidence",
+      "roles": [
+        "chief"
+      ],
+      "blocked": "budget_review_required",
+      "choices": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "explicit-risk-local",
+      "roles": [
+        "chief"
+      ],
+      "blocked": "budget_review_required",
+      "choices": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "forged-complete",
+      "roles": [],
+      "blocked": "coverage_unverified",
+      "choices": [],
+      "passed": true
+    },
+    {
+      "id": "empty-modules",
+      "roles": [
+        "chief"
+      ],
+      "blocked": "budget_review_required",
+      "choices": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "review": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "english-mixed-delete",
+      "roles": [
+        "architect",
+        "developer",
+        "tester"
+      ],
+      "blocked": null,
+      "choices": [
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": null
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "review": "deep"
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

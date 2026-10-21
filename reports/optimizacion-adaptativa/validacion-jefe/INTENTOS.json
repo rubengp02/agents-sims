@@ -1,0 +1,133 @@
+[
+  {
+    "at": "2026-10-21T15:04:40.711Z",
+    "sourceFingerprint": "ec975a0b59b849ef2cc1a7bc2167472d39845d234a2501dd1523399e843fea5f",
+    "passed": false,
+    "inferenceCalls": 0,
+    "failedCases": [
+      {
+        "id": "missing-tests",
+        "actual": [
+          {
+            "role": "developer",
+            "model": "gpt-6.1-sol",
+            "effort": "low",
+            "review": null
+          },
+          {
+            "role": "tester",
+            "model": "gpt-6.1-sol",
+            "effort": "low",
+            "review": "focused"
+          }
+        ],
+        "expected": {
+          "roles": [
+            "developer",
+            "tester"
+          ],
+          "block": null,
+          "effort": "low",
+          "review": "deep"
+        }
+      },
+      {
+        "id": "migration-write",
+        "actual": [
+          {
+            "role": "developer",
+            "model": "gpt-6.1-sol",
+            "effort": "low",
+            "review": null
+          }
+        ],
+        "expected": {
+          "roles": [
+            "architect",
+            "developer",
+            "tester"
+          ],
+          "block": null,
+          "effort": "high",
+          "review": "deep"
+        }
+      },
+      {
+        "id": "migration-doc-readonly",
+        "actual": [
+          {
+            "role": "architect",
+            "model": "gpt-6.1-sol",
+            "effort": "high",
+            "review": null
+          },
+          {
+            "role": "developer",
+            "model": "gpt-6.1-sol",
+            "effort": "high",
+            "review": null
+          },
+          {
+            "role": "tester",
+            "model": "gpt-6.1-sol",
+            "effort": "high",
+            "review": "deep"
+          }
+        ],
+        "expected": {
+          "roles": [
+            "developer"
+          ],
+          "block": null,
+          "effort": "low",
+          "review": null
+        }
+      },
+      {
+        "id": "change-history-readonly",
+        "actual": [
+          {
+            "role": "architect",
+            "model": "gpt-6.1-sol",
+            "effort": "high",
+            "review": null
+          },
+          {
+            "role": "developer",
+            "model": "gpt-6.1-sol",
+            "effort": "high",
+            "review": null
+          },
+          {
+            "role": "tester",
+            "model": "gpt-6.1-sol",
+            "effort": "high",
+            "review": "deep"
+          }
+        ],
+        "expected": {
+          "roles": [
+            "developer"
+          ],
+          "block": null,
+          "effort": "low",
+          "review": null
+        }
+      }
+    ]
+  },
+  {
+    "at": "2026-10-21T15:05:26.620Z",
+    "sourceFingerprint": "8cedde00864cd7b437dafee99a3b03db5ef579f331623609d2b77e9a9fac76e7",
+    "passed": true,
+    "inferenceCalls": 0,
+    "failedCases": []
+  },
+  {
+    "at": "2026-10-21T15:11:23.423Z",
+    "sourceFingerprint": "8850549e5738205c5f6f21b8aa30e38f03a9a959a3c3257b6805e3b2097899b2",
+    "passed": true,
+    "inferenceCalls": 0,
+    "failedCases": []
+  }
+]

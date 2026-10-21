@@ -34,20 +34,35 @@ export function validateAssessment(value: TaskAssessment): TaskAssessment {
 export function assessTask(
   prompt: string,
   evidence?: TaskAssessment,
-): { difficulty: TeamTask['difficulty']; roles: TeamRole[]; reason: string } {
+): {
+  difficulty: TeamTask['difficulty'];
+  roles: TeamRole[];
+  reason: string;
+  effectiveRisk: TaskAssessment['risk'];
+  reviewMode: 'none' | 'focused' | 'deep';
+} {
   const explanation =
     /^\s*(explica|resume|lista|documenta|traduce|explain|summari[sz]e|list\b)/i.test(prompt) &&
-    !/\b(modifica|cambia|implementa|migra|refactoriza|modify|implement|migrate)\b/i.test(prompt);
+    !/\b(?:(?:modifica|cambia|implementa|migra|refactoriza|elimina|borra|quita|desactiva|activa|habilita|repara|arregla|actualiza|ajusta)(?:r|s|n|mos)?|añade|añadir|añadan|anade|anadir|corrige|corregir|corrijan|sustituye|sustituir|add|remove|delete|disable|enable|fix|change|update|modify|implement|migrate)\b/i.test(
+      prompt,
+    );
   // Words in a documentation request do not imply a security modification.
   const sensitive =
     !explanation &&
-    /autentic|authentic|autorizaci[oó]n|authorization|control(?:es)? de acceso|permisos|permissions|credencial|seguridad|concurren|race condition|security|migraci[oó]n|migration|arquitect/i.test(
+    /autentic|authentic|autorizaci[oó]n|authorization|control(?:es)? de acceso|permisos|permissions|credencial|seguridad|concurren|race condition|security|migraci[oó]n|migration|\b(?:migra|migrar|migrate)\b|arquitect|contrase[nñ]a|password|\blogin\b|cifrad|encryption|datos personales/i.test(
       prompt,
     );
   const assessment = evidence ? validateAssessment(evidence) : null;
   const highRisk = sensitive || assessment?.risk === 'high';
   const crossModule = assessment?.scope === 'cross-module' || (assessment?.modules.length ?? 0) > 1;
   const uncertain = assessment?.uncertainty === 'high';
+  const understood =
+    assessment?.acceptanceCoverage !== undefined &&
+    assessment.risk === 'low' &&
+    assessment.uncertainty === 'low' &&
+    assessment.modules.length > 0 &&
+    !highRisk &&
+    !assessment.visualDecision;
   const covered =
     assessment?.acceptanceCoverage === 'complete' &&
     assessment.risk === 'low' &&
@@ -68,7 +83,7 @@ export function assessTask(
     : simple
       ? ['developer']
       : [
-          ...(highRisk || crossModule || uncertain ? ['architect' as const] : []),
+          ...(highRisk || (crossModule && !understood) || uncertain ? ['architect' as const] : []),
           ...(assessment?.visualDecision ? ['designer' as const] : []),
           'developer',
           // Only positive evidence can remove independent acceptance for code changes.
@@ -86,8 +101,22 @@ export function assessTask(
         ];
   return {
     difficulty:
-      highRisk || uncertain || (crossModule && !covered) ? 'complex' : simple ? 'simple' : 'normal',
+      highRisk || uncertain || (crossModule && !understood)
+        ? 'complex'
+        : simple
+          ? 'simple'
+          : 'normal',
     roles,
+    effectiveRisk: highRisk ? 'high' : (assessment?.risk ?? 'unknown'),
+    reviewMode: !roles.includes('tester')
+      ? 'none'
+      : highRisk ||
+          uncertain ||
+          assessment?.risk !== 'low' ||
+          assessment?.uncertainty !== 'low' ||
+          assessment?.tests !== 'available'
+        ? 'deep'
+        : 'focused',
     reason: `Alcance: ${assessment?.scope ?? (simple ? 'explanation' : 'unknown')}; riesgo: ${highRisk ? 'high' : (assessment?.risk ?? 'unknown')}; incertidumbre: ${assessment?.uncertainty ?? 'unknown'}; módulos: ${assessment?.modules.length ?? 'unknown'}; pruebas: ${assessment?.tests ?? 'unknown'}. ${simple ? 'Respuesta directa.' : roles.includes('tester') ? 'Mantener revisión independiente.' : 'Aceptación mecánica local requerida.'}`,
   };
 }

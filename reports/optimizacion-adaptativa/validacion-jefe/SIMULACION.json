@@ -1,0 +1,648 @@
+{
+  "version": 1,
+  "mode": "offline-protocol-simulation",
+  "inferenceCalls": 0,
+  "tokenCounters": "injected fixtures, not model efficiency measurements",
+  "nativeIsolation": "separately covered by engine:test, not claimed by this in-memory adapter",
+  "results": [
+    {
+      "caseId": "easy",
+      "variant": "codex-individual",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 15,
+      "totalChecks": 15,
+      "localDurationMs": 239,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "easy",
+      "variant": "light-local",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 15,
+      "totalChecks": 15,
+      "localDurationMs": 231,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "easy",
+      "variant": "balanced-local",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 15,
+      "totalChecks": 15,
+      "localDurationMs": 232,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "easy",
+      "variant": "selective-review",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 15,
+      "totalChecks": 15,
+      "localDurationMs": 229,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "easy",
+      "variant": "full-team-control",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": false
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": true
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 15,
+      "totalChecks": 15,
+      "localDurationMs": 457,
+      "simulatedTokens": 4400,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "easy",
+      "variant": "adaptive-office",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 15,
+      "totalChecks": 15,
+      "localDurationMs": 227,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "medium",
+      "variant": "codex-individual",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 36,
+      "totalChecks": 36,
+      "localDurationMs": 236,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "medium",
+      "variant": "light-local",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 36,
+      "totalChecks": 36,
+      "localDurationMs": 256,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "medium",
+      "variant": "balanced-local",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 36,
+      "totalChecks": 36,
+      "localDurationMs": 254,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "medium",
+      "variant": "selective-review",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 36,
+      "totalChecks": 36,
+      "localDurationMs": 238,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "medium",
+      "variant": "full-team-control",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": false
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": true
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 36,
+      "totalChecks": 36,
+      "localDurationMs": 504,
+      "simulatedTokens": 4400,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "medium",
+      "variant": "adaptive-office",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 36,
+      "totalChecks": 36,
+      "localDurationMs": 244,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "hard",
+      "variant": "codex-individual",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": true
+        }
+      ],
+      "accepted": false,
+      "checksPassed": 16,
+      "totalChecks": 16,
+      "localDurationMs": 237,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": true,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "hard",
+      "variant": "light-local",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": false,
+      "checksPassed": 16,
+      "totalChecks": 16,
+      "localDurationMs": 248,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": true,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "hard",
+      "variant": "balanced-local",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": false,
+      "checksPassed": 16,
+      "totalChecks": 16,
+      "localDurationMs": 241,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": true,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "hard",
+      "variant": "selective-review",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "allowWrites": true
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "allowWrites": false
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 16,
+      "totalChecks": 16,
+      "localDurationMs": 503,
+      "simulatedTokens": 2200,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "hard",
+      "variant": "full-team-control",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "allowWrites": false
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": true
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 16,
+      "totalChecks": 16,
+      "localDurationMs": 499,
+      "simulatedTokens": 4400,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "hard",
+      "variant": "adaptive-office",
+      "injectedDefect": false,
+      "calls": [
+        {
+          "role": "chief",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "allowWrites": false
+        },
+        {
+          "role": "architect",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        },
+        {
+          "role": "developer",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": true
+        },
+        {
+          "role": "tester",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "allowWrites": false
+        }
+      ],
+      "accepted": true,
+      "checksPassed": 16,
+      "totalChecks": 16,
+      "localDurationMs": 504,
+      "simulatedTokens": 4400,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "architect",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "reason": null
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "caseId": "easy",
+      "variant": "light-local",
+      "injectedDefect": true,
+      "calls": [
+        {
+          "role": "developer",
+          "model": "gpt-6-luna",
+          "effort": "low",
+          "allowWrites": true
+        }
+      ],
+      "accepted": false,
+      "checksPassed": 6,
+      "totalChecks": 15,
+      "localDurationMs": 196,
+      "simulatedTokens": 1100,
+      "missingSensitiveReview": false,
+      "statuses": [
+        {
+          "role": "developer",
+          "status": "blocked",
+          "reason": "local_checks_failed"
+        }
+      ]
+    }
+  ],
+  "realTrialAuthorized": false,
+  "passed": true
+}

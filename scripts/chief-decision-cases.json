@@ -1,0 +1,22 @@
+[
+  {"id":"bounded-covered","objective":"Corrige el redondeo de la función","scope":"bounded","coverage":"complete","expectedRoles":["developer"],"expectedEffort":"low"},
+  {"id":"invoice-two-modules","objective":"Implementa el contrato de factura en céntimos","scope":"cross-module","coverage":"complete","expectedRoles":["developer"],"expectedEffort":"low"},
+  {"id":"three-known-modules","objective":"Añade el campo definido por el contrato existente","scope":"cross-module","modules":["types","codec","handler"],"coverage":"complete","expectedRoles":["developer"],"expectedEffort":"low"},
+  {"id":"partial-cross-module","objective":"Corrige el cálculo compartido","scope":"cross-module","coverage":"partial","expectedRoles":["developer","tester"],"expectedReview":"focused","expectedEffort":"low"},
+  {"id":"available-does-not-mean-covered","objective":"Implementa el cambio acotado","scope":"bounded","coverage":"none","expectedRoles":["developer","tester"],"expectedReview":"focused","expectedEffort":"low"},
+  {"id":"missing-tests","objective":"Corrige el cálculo acotado","scope":"bounded","coverage":"none","tests":"missing","expectedRoles":["developer","tester"],"expectedReview":"deep","expectedEffort":"low"},
+  {"id":"security-change-low-label","objective":"Modifica la autorización por roles","scope":"bounded","coverage":"complete","method":"scope","expectedRoles":["architect","developer","tester"],"expectedReview":"deep","expectedEffort":"high"},
+  {"id":"mixed-document-delete","objective":"Documenta y elimina el control de acceso","scope":"bounded","coverage":"complete","method":"scope","expectedRoles":["architect","developer","tester"],"expectedReview":"deep","expectedEffort":"high"},
+  {"id":"mixed-summary-disable","objective":"Resume el comportamiento y desactiva los permisos","scope":"bounded","coverage":"complete","method":"scope","expectedRoles":["architect","developer","tester"],"expectedReview":"deep","expectedEffort":"high"},
+  {"id":"password-change","objective":"Actualiza el almacenamiento de contraseñas","scope":"bounded","coverage":"complete","method":"scope","expectedRoles":["architect","developer","tester"],"expectedReview":"deep","expectedEffort":"high"},
+  {"id":"race-condition","objective":"Arregla una race condition","scope":"cross-module","coverage":"complete","method":"scope","expectedRoles":["architect","developer","tester"],"expectedReview":"deep","expectedEffort":"high"},
+  {"id":"migration-write","objective":"Migra los datos existentes","scope":"bounded","coverage":"complete","method":"scope","expectedRoles":["architect","developer","tester"],"expectedReview":"deep","expectedEffort":"high"},
+  {"id":"security-doc-readonly","objective":"Documenta la política de seguridad existente","scope":"explanation","coverage":"none","write":false,"expectedRoles":["developer"],"expectedEffort":"low"},
+  {"id":"migration-doc-readonly","objective":"Explica la migración existente","scope":"explanation","coverage":"none","write":false,"expectedRoles":["developer"],"expectedEffort":"low"},
+  {"id":"change-history-readonly","objective":"Lista los cambios de arquitectura anteriores","scope":"explanation","coverage":"none","write":false,"expectedRoles":["developer"],"expectedEffort":"low"},
+  {"id":"unknown-usage-evidence","objective":"Investiga el fallo intermitente","scope":"bounded","risk":"unknown","uncertainty":"high","coverage":"none","expectedRoles":["chief"],"expectedBlock":"budget_review_required"},
+  {"id":"explicit-risk-local","objective":"Corrige el resultado","scope":"bounded","risk":"high","coverage":"complete","expectedRoles":["chief"],"expectedBlock":"budget_review_required"},
+  {"id":"forged-complete","objective":"Implementa el cálculo","scope":"bounded","coverage":"none","claimComplete":true,"method":"scope","expectedRoles":[],"expectedBlock":"coverage_unverified"},
+  {"id":"empty-modules","objective":"Implementa la petición","scope":"bounded","modules":[],"coverage":"complete","expectedRoles":["chief"],"expectedBlock":"budget_review_required"},
+  {"id":"english-mixed-delete","objective":"Explain the change and delete the authorization check","scope":"bounded","coverage":"complete","method":"scope","expectedRoles":["architect","developer","tester"],"expectedReview":"deep","expectedEffort":"high"}
+]

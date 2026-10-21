@@ -1,0 +1,226 @@
+{
+  "protocol": "adaptive-chief-single-worker-v1",
+  "status": "prepared-not-authorized",
+  "sourceFingerprint": "8850549e5738205c5f6f21b8aa30e38f03a9a959a3c3257b6805e3b2097899b2",
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "engine": "agent-orchestrator",
+  "limits": {
+    "maxRuns": 1,
+    "maxTokens": 120000,
+    "totalMs": 240000,
+    "perRunMs": 180000,
+    "maxRepairs": 0
+  },
+  "caseId": "medium",
+  "initialHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+  "allowedFiles": [
+    "money.mjs",
+    "invoice.mjs"
+  ],
+  "baseline": {
+    "reportSha256": "185932bd11ee342fe9fbdcb0dfe7a130591d1ae5eec1d711f9bf3b53e40fd484",
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "method": {
+      "method": "direct",
+      "initialHash": "aae05e9c27e8253dd18805144379f5bc2c5411f2b2f4b620ebbe0c78a49fe86b",
+      "status": "accepted",
+      "quality": {
+        "caseId": "medium",
+        "tests": [
+          {
+            "id": "parse-0",
+            "passed": true
+          },
+          {
+            "id": "parse-1",
+            "passed": true
+          },
+          {
+            "id": "parse-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-0",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-1",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-2",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-3",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-4",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-5",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-6",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-7",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-8",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-9",
+            "passed": true
+          },
+          {
+            "id": "parse-invalid-10",
+            "passed": true
+          },
+          {
+            "id": "parse-overflow",
+            "passed": true
+          },
+          {
+            "id": "empty",
+            "passed": true
+          },
+          {
+            "id": "half-up",
+            "passed": true
+          },
+          {
+            "id": "round-once",
+            "passed": true
+          },
+          {
+            "id": "full-discount",
+            "passed": true
+          },
+          {
+            "id": "safe-boundary",
+            "passed": true
+          },
+          {
+            "id": "sum-overflow",
+            "passed": true
+          },
+          {
+            "id": "invalid-lines",
+            "passed": true
+          },
+          {
+            "id": "invalid-item",
+            "passed": true
+          },
+          {
+            "id": "quantity-type",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-0",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-1",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-2",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-3",
+            "passed": true
+          },
+          {
+            "id": "quantity-range-4",
+            "passed": true
+          },
+          {
+            "id": "discount-type",
+            "passed": true
+          },
+          {
+            "id": "discount-range-0",
+            "passed": true
+          },
+          {
+            "id": "discount-range-1",
+            "passed": true
+          },
+          {
+            "id": "discount-range-2",
+            "passed": true
+          },
+          {
+            "id": "discount-range-3",
+            "passed": true
+          },
+          {
+            "id": "immutable",
+            "passed": true
+          },
+          {
+            "id": "generated-integer-cases",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "failedChecks": [],
+        "durationMs": 73
+      },
+      "changes": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "mechanical": [
+        {
+          "id": "public-tests",
+          "exitCode": 0,
+          "durationMs": 124,
+          "passed": true
+        }
+      ],
+      "tokens": 60341,
+      "durationMs": 71676,
+      "roles": []
+    },
+    "run": {
+      "method": "direct",
+      "role": "developer",
+      "status": "completed",
+      "reason": null,
+      "inputTokens": 58064,
+      "outputTokens": 2277,
+      "cachedInputTokens": 45184,
+      "durationMs": 71239,
+      "sessionMode": "new",
+      "subscriptionVerified": true,
+      "requestedModel": "gpt-6.1-sol",
+      "confirmedModel": null
+    }
+  },
+  "checks": {
+    "rejectsInitial": true,
+    "acceptsReference": true,
+    "count": 36
+  },
+  "decision": "Local chief must select exactly one developer; no AI chief, architect or reviewer.",
+  "limitation": "Historical reference uses medium effort and another engine/context; this is exploratory whole-product comparison, not isolated model-effort evidence.",
+  "tokenLimit": "Observed usage, not a provider-guaranteed generation ceiling.",
+  "inferenceCalls": 0,
+  "preparedAt": "2026-10-21T15:12:34.020Z"
+}

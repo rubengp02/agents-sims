@@ -309,6 +309,62 @@ describe('historical budget, no inference', () => {
 });
 
 describe('adaptive chief and local coverage', () => {
+  it('keeps deep review when sensitive work is labelled low-risk by the caller', () => {
+    const h = harness({ checked: true });
+    const tasks = h.team.addScopedWorkflow(
+      h.dir,
+      { ...packet, objective: 'Documenta y elimina el control de acceso' },
+      { ...assessment, acceptanceCoverage: 'complete' },
+      true,
+    );
+    expect(tasks.map((t) => t.role)).toEqual(['architect', 'developer', 'tester']);
+    expect(tasks.at(-1)?.reviewMode).toBe('deep');
+    expect(tasks.every((t) => t.assessment?.risk === 'high')).toBe(true);
+  });
+  it('assigns deep review for a direct sensitive request even if metadata says low', () => {
+    const h = harness({ checked: true });
+    const tasks = h.team.addScopedWorkflow(
+      h.dir,
+      { ...packet, objective: 'Modifica la autorización por roles' },
+      assessment,
+      true,
+    );
+    expect(tasks.at(-1)?.reviewMode).toBe('deep');
+  });
+  it('uses local selective review instead of an AI planner when only coverage is missing', async () => {
+    const h = harness();
+    await h.team.plan(h.dir, packet.objective, true, {
+      context: packet,
+      assessment: { ...assessment, scope: 'cross-module', modules: ['money', 'invoice'] },
+    });
+    expect(h.calls).toHaveLength(0);
+    expect(h.team.snapshot().tasks.map((t) => t.role)).toEqual(['developer', 'tester']);
+    const worker = await h.team.assign(h.team.snapshot().tasks[0].id);
+    expect(worker.choice?.effort).toBe('low');
+  });
+  it('does not let an AI plan downgrade risk explicitly supplied by the caller', async () => {
+    const output = JSON.stringify({
+      tasks: [
+        {
+          role: 'developer',
+          title: 'code',
+          prompt: packet.objective,
+          dependsOn: [],
+          context: packet,
+          assessment,
+        },
+      ],
+    });
+    const h = harness({ checked: true, seeded: true, output });
+    await expect(
+      h.team.plan(h.dir, packet.objective, true, {
+        context: packet,
+        assessment: { ...assessment, risk: 'high' },
+      }),
+    ).rejects.toMatchObject({ code: 'invalid_plan' });
+    expect(h.calls.map((c) => c.officeRole)).toEqual(['chief']);
+    expect(h.team.snapshot().tasks.some((t) => t.role === 'developer')).toBe(false);
+  });
   it('uses one programmer for a known two-module contract without an inference planner', async () => {
     const h = harness({ checked: true });
     await h.team.plan(h.dir, packet.objective, true, {
