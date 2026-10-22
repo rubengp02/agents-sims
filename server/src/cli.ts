@@ -24,6 +24,7 @@ import { MAX_PORT, MIN_PORT } from './constants.js';
 import { AdaptiveRuntime } from './execution/adaptiveRuntime.js';
 import { adaptiveStateDirectory } from './execution/adaptiveState.js';
 import { ClaudeExecutor } from './execution/claudeExecutor.js';
+import { ConversationLibrary } from './execution/conversationLibrary.js';
 import { createOfficeExecutor } from './execution/engine.js';
 import { pixelOfficeChecks } from './execution/localChecks.js';
 import { OfficeSessionFilter } from './execution/officeSessionFilter.js';
@@ -176,6 +177,7 @@ async function main(): Promise<void> {
         new UsageHistory(path.join(adaptiveState, 'usage-history.json')),
         path.join(adaptiveState, 'task-artifacts'),
       ),
+      new ConversationLibrary(path.join(adaptiveState, 'library')),
     );
     console.log(`[Pixel Agents] Enabled providers: ${providers.map((p) => p.id).join(', ')}`);
 

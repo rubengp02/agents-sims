@@ -76,11 +76,12 @@ export function TeamScopeForm({
   disabled: boolean;
   action: (path: string, body?: unknown) => Promise<boolean>;
 }) {
+  const savedContext = snapshot.library?.projects.find((p) => p.path === project)?.context;
   const [values, setValues] = useState({
-    files: '',
-    decisions: '',
-    acceptance: '',
-    checks: '',
+    files: savedContext?.files.join('\n') ?? '',
+    decisions: savedContext?.decisions.join('\n') ?? '',
+    acceptance: savedContext?.acceptance.join('\n') ?? '',
+    checks: savedContext?.checks.join('\n') ?? '',
     modules: '',
     shared: '',
   });

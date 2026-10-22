@@ -57,6 +57,47 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
       }),
     );
     routes.get('/api/team', async () => ({ ...team.snapshot(), controlToken }));
+    routes.post('/api/team/projects', async (request) => {
+      const body = object(request.body);
+      team.saveProject(
+        body.project as string,
+        body.name as string | undefined,
+        body.instructions as string | undefined,
+        body.context as TaskContext | undefined,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/projects/checks', async (request) => {
+      const body = object(request.body);
+      team.approveProjectChecks(
+        body.projectId as string,
+        body.fingerprint as string,
+        body.ids as string[],
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations', async (request) => {
+      team.createConversation(object(request.body).projectId as string);
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/select', async (request) => {
+      team.selectConversation(object(request.body).id as string);
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/draft', async (request) => {
+      const body = object(request.body);
+      team.saveConversationDraft(body.id as string, body.draft as string);
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/message', async (request) => {
+      const body = object(request.body);
+      team.sendConversation(
+        body.id as string,
+        body.message as string,
+        body.allowWrites as boolean | undefined,
+      );
+      return team.snapshot();
+    });
     routes.post('/api/team/check', async () => team.refresh());
     routes.post('/api/team/settings', async (request) => {
       team.configure(request.body as TeamSettings);

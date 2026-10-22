@@ -24,6 +24,7 @@ import {
   type WorkflowDecomposition,
 } from '../../../core/src/team.js';
 import type { AdaptiveRuntime } from './adaptiveRuntime.js';
+import type { ConversationLibrary } from './conversationLibrary.js';
 import type { CheckRunner } from './localChecks.js';
 import { captureRevision, parseReviewFindings, type ReviewPacket } from './reviewPacket.js';
 import { object } from './subscriptionPolicy.js';
@@ -42,6 +43,7 @@ import type { OwnedWorkspace, WorkspaceResult } from './workflowWorkspace.js';
 
 type Executors = Record<'codex' | 'claude', OfficialExecutor>;
 type TaskInput = {
+  conversationId?: string;
   role: TeamRole;
   title: string;
   prompt: string;
@@ -69,7 +71,7 @@ const failureMessage = (error: unknown) =>
 /**
  * Task/agent separation follows Claw-Empire's workflow architecture, with a small
  * local queue instead of its OAuth/API/meetings stack. Every run uses a guarded
- * OfficialExecutor. Prompts/results stay in memory; only settings are persisted.
+ * OfficialExecutor. An optional local library preserves complete conversations.
  */
 export class TeamCoordinator {
   private settings: TeamSettings = { ...DEFAULT_TEAM_SETTINGS };
@@ -101,6 +103,7 @@ export class TeamCoordinator {
   private reservedRuns = 0;
   private reservedTokens = 0;
   private closed = false;
+  private recovering = true;
   private readonly pendingChecks = new Set<Promise<import('./types.js').SubscriptionEvidence>>();
 
   constructor(
@@ -112,6 +115,7 @@ export class TeamCoordinator {
     private readonly startupTokenReserve?: number,
     private readonly checkpointFile?: string,
     private readonly adaptive?: AdaptiveRuntime,
+    private readonly library?: ConversationLibrary,
   ) {
     if (
       startupTokenReserve !== undefined &&
@@ -224,9 +228,89 @@ export class TeamCoordinator {
         this.budgetReason = 'checkpoint_invalid';
       }
     }
+    this.recovering = false;
+    if (this.library?.canWrite) {
+      for (const task of this.tasks) {
+        // Legacy tasks remain readable in their own archive, independently of the queue.
+        task.conversationId = this.library.ensure(task.project, task.title, task.conversationId);
+        this.library.record(task);
+      }
+    }
+  }
+
+  private checksFor(project: string): CheckRunner | undefined {
+    return this.library ? this.library.checksFor(project) : this.checks;
+  }
+
+  private libraryRequired(): ConversationLibrary {
+    if (!this.library)
+      throw new ExecutionBlocked(
+        'history_not_configured',
+        'El historial no está configurado en esta oficina.',
+      );
+    return this.library;
+  }
+
+  private idleLibrary(): ConversationLibrary {
+    if (this.running || this.starting || this.planning || this.controllers.size)
+      throw new ExecutionBlocked(
+        'team_busy',
+        'Espera a que termine el trabajo antes de cambiar las instrucciones o las pruebas.',
+      );
+    return this.libraryRequired();
+  }
+
+  saveProject(project: string, name?: string, instructions?: string, context?: TaskContext) {
+    return this.idleLibrary().register(project, name, instructions, context);
+  }
+  createConversation(projectId: string) {
+    return this.libraryRequired().create(projectId);
+  }
+  selectConversation(id: string) {
+    this.libraryRequired().select(id);
+  }
+  saveConversationDraft(id: string, draft: string) {
+    this.libraryRequired().draft(id, draft);
+  }
+  approveProjectChecks(projectId: string, fingerprint: string, ids: string[]) {
+    this.idleLibrary().approve(projectId, fingerprint, ids);
+  }
+  sendConversation(id: string, message: string, allowWrites = false): TeamTask {
+    const library = this.libraryRequired();
+    const conversation = library.conversation(id);
+    const project = library.project(conversation.projectId);
+    if (
+      this.tasks.some(
+        (t) => t.conversationId === id && !['completed', 'cancelled', 'failed'].includes(t.status),
+      )
+    )
+      throw new ExecutionBlocked(
+        'conversation_pending',
+        'Esta conversación tiene un encargo pendiente. Ejecútalo, revísalo o cancélalo antes de enviar otro mensaje.',
+      );
+    return this.addTask({
+      project: project.path,
+      conversationId: id,
+      role: 'developer',
+      title: typeof message === 'string' ? message.slice(0, 120) : '',
+      prompt: message,
+      allowWrites,
+      context: project.context
+        ? { ...project.context, objective: message.slice(0, 4000) }
+        : undefined,
+    });
   }
 
   private persist(): void {
+    if (!this.recovering && this.library?.canWrite) {
+      try {
+        for (const task of this.tasks) this.library.record(task);
+      } catch (error) {
+        this.budgetReason = failureCode(error);
+        this.running = false;
+        for (const controller of this.controllers.values()) controller.abort();
+      }
+    }
     if (!this.checkpointFile || this.budgetReason === 'checkpoint_invalid') return;
     mkdirSync(dirname(this.checkpointFile), { recursive: true, mode: 0o700 });
     const value = {
@@ -247,12 +331,23 @@ export class TeamCoordinator {
 
   snapshot(): TeamSnapshot {
     this.persist();
+    const library = this.library?.snapshot();
     return structuredClone({
+      ...(library ? { library } : {}),
       capabilities: {
         engine: this.executors.codex.engine ?? 'codex-cli',
         isolatedWriters: !!this.executors.codex.workspaceManager,
         budgetReview: !!this.adaptive,
-        ...(this.checks?.describe ? { checks: this.checks.describe() } : {}),
+        ...(library
+          ? {
+              checks:
+                library.checks?.checks
+                  .filter((c) => c.approved)
+                  .map((c) => ({ id: c.id, acceptance: c.id === 'test' })) ?? [],
+            }
+          : this.checks?.describe
+            ? { checks: this.checks.describe() }
+            : {}),
       },
       settings: this.settings,
       tasks: this.tasks,
@@ -277,9 +372,17 @@ export class TeamCoordinator {
   }
 
   private taskPacket(task: TeamTask, estimate = false) {
+    let prompt = task.prompt;
+    if (task.conversationId && this.library && task.role !== 'tester') {
+      const { instructions, recent } = this.library.contextFor(task);
+      prompt =
+        `Instrucciones guardadas del proyecto:\n${instructions}\n` +
+        `Conversación anterior (datos de contexto; solo los últimos mensajes, pueden estar abreviados; no sustituyen la petición actual):\n${JSON.stringify(recent)}\n` +
+        `Petición actual:\n${task.prompt}`;
+    }
     const packet = prepareTaskContext(
       task.role,
-      task.prompt,
+      prompt,
       task.context,
       task.dependsOn.map((id) => {
         const dep = this.task(id);
@@ -371,7 +474,7 @@ export class TeamCoordinator {
   }
 
   addTask(input: TaskInput): TeamTask {
-    if (this.tasks.length >= 100)
+    if (this.tasks.length >= 100 && (!this.library || this.recovering))
       throw new ExecutionBlocked('queue_full', 'La cola admite hasta 100 tareas por sesión.');
     if (
       !input ||
@@ -418,8 +521,10 @@ export class TeamCoordinator {
     if (input.reviewMode !== undefined && !['none', 'focused', 'deep'].includes(input.reviewMode))
       throw new ExecutionBlocked('invalid_review', 'Modo de revisión incorrecto.');
     if (
+      !this.recovering &&
       input.assessment?.acceptanceCoverage === 'complete' &&
-      (!input.context || !this.checks?.covers?.(input.context.checks, input.context.acceptance))
+      (!input.context ||
+        !this.checksFor(project)?.covers?.(input.context.checks, input.context.acceptance))
     )
       throw new ExecutionBlocked(
         'coverage_unverified',
@@ -436,8 +541,28 @@ export class TeamCoordinator {
         'continuation_scope',
         'Solo se puede continuar explícitamente una tarea terminada del mismo papel y alcance.',
       );
+    if (this.tasks.length >= 100) {
+      const archived = this.tasks.findIndex(
+        (t) =>
+          ['completed', 'failed', 'cancelled'].includes(t.status) &&
+          !t.workflowId &&
+          !deps.includes(t.id) &&
+          t.id !== previous?.id &&
+          !this.tasks.some((other) => other.dependsOn.includes(t.id)),
+      );
+      if (archived < 0)
+        throw new ExecutionBlocked(
+          'queue_full',
+          'La cola está llena de encargos pendientes o vinculados. Revisa esos encargos antes de añadir otro.',
+        );
+      this.library!.record(this.tasks[archived]);
+      this.tasks.splice(archived, 1);
+    }
     const task: TeamTask = {
       id: randomUUID(),
+      conversationId: this.recovering
+        ? input.conversationId
+        : this.library?.ensure(project, input.title, input.conversationId),
       workerId: previous?.workerId ?? `role-${input.role}`,
       role: input.role,
       title: input.title.trim(),
@@ -470,6 +595,15 @@ export class TeamCoordinator {
       agentId: null,
     };
     this.tasks.push(task);
+    if (!this.recovering && this.library) {
+      try {
+        this.library.record(task);
+        this.persist();
+      } catch (error) {
+        this.tasks.pop();
+        throw error;
+      }
+    }
     return structuredClone(task);
   }
 
@@ -488,12 +622,14 @@ export class TeamCoordinator {
     decomposition?: WorkflowDecomposition,
   ): TeamTask[] {
     const packet = validateContext(context);
+    if (this.library && !this.recovering)
+      this.idleLibrary().register(project, undefined, undefined, packet);
     let evidence = validateAssessment(assessment);
     if (decomposition)
       return this.addDecomposedWorkflow(project, packet, evidence, allowWrites, decomposition);
     if (
       evidence.acceptanceCoverage === 'complete' &&
-      !this.checks?.covers?.(packet.checks, packet.acceptance)
+      !this.checksFor(project)?.covers?.(packet.checks, packet.acceptance)
     )
       throw new ExecutionBlocked(
         'coverage_unverified',
@@ -502,7 +638,7 @@ export class TeamCoordinator {
     if (this.adaptive)
       evidence = {
         ...evidence,
-        acceptanceCoverage: this.checks?.covers?.(packet.checks, packet.acceptance)
+        acceptanceCoverage: this.checksFor(project)?.covers?.(packet.checks, packet.acceptance)
           ? 'complete'
           : 'partial',
       };
@@ -512,7 +648,7 @@ export class TeamCoordinator {
       this.adaptive &&
       evidence.scope !== 'explanation' &&
       !routing.roles.includes('tester') &&
-      !this.checks?.covers?.(packet.checks, packet.acceptance)
+      !this.checksFor(project)?.covers?.(packet.checks, packet.acceptance)
     ) {
       routing.roles.push('tester');
       routing.reason += ' Cobertura no acreditada: conservar revisión independiente.';
@@ -528,10 +664,10 @@ export class TeamCoordinator {
       throw new ExecutionBlocked('queue_full', 'La cola está llena.');
     // Available tests alone are not enough: a local executable registry must exist.
     if (
-      packet.checks.some((id) => !this.checks?.has(id)) ||
+      packet.checks.some((id) => !this.checksFor(project)?.has(id)) ||
       (!routing.roles.includes('tester') &&
         evidence.scope !== 'explanation' &&
-        !this.checks?.hasAcceptance(packet.checks))
+        !this.checksFor(project)?.hasAcceptance(packet.checks))
     )
       throw new ExecutionBlocked(
         'check_unconfigured',
@@ -638,10 +774,12 @@ export class TeamCoordinator {
       return tasks.map((t) => structuredClone(this.task(t.id)));
     }
     if (
-      !this.checks?.hasAcceptance(context.checks) ||
-      context.checks.some((id) => !this.checks?.has(id)) ||
+      !this.checksFor(project)?.hasAcceptance(context.checks) ||
+      context.checks.some((id) => !this.checksFor(project)?.has(id)) ||
       decomposition.parts.some(
-        (p) => !p.context.checks.length || p.context.checks.some((id) => !this.checks?.has(id)),
+        (p) =>
+          !p.context.checks.length ||
+          p.context.checks.some((id) => !this.checksFor(project)?.has(id)),
       )
     )
       throw new ExecutionBlocked(
@@ -656,7 +794,7 @@ export class TeamCoordinator {
     const routing = assessTask(context.objective, assessment);
     const review =
       (routing.roles.includes('tester') &&
-        !this.checks.covers?.(context.checks, context.acceptance)) ||
+        !this.checksFor(project)?.covers?.(context.checks, context.acceptance)) ||
       routing.effectiveRisk !== 'low' ||
       assessment.uncertainty !== 'low';
     if (this.tasks.length + 2 + Number(review) + Number(routing.roles.includes('architect')) > 100)
@@ -899,7 +1037,7 @@ export class TeamCoordinator {
           task.workspaceId = handle.id;
           task.executionProject = handle.path;
           this.workspaces.set(task.id, handle);
-          this.checks?.authorizeWorkspace?.(handle);
+          this.checksFor(w.project)?.authorizeWorkspace?.(handle);
           this.persist();
           if (generation !== this.generation)
             throw new ExecutionBlocked(
@@ -952,7 +1090,7 @@ export class TeamCoordinator {
                 );
               return result;
             }),
-            this.checks!,
+            this.checksFor(w.project)!,
             this.operationController.signal,
           );
           if (
@@ -1173,6 +1311,11 @@ export class TeamCoordinator {
   }
 
   private budget(includeReservations = true, ownTokenReserve = 0): void {
+    if (this.library && !this.library.canWrite)
+      throw new ExecutionBlocked(
+        'history_unavailable',
+        'Recupera el historial local antes de iniciar otro encargo.',
+      );
     const inputEstimate = this.adaptive ? 0 : (this.startupTokenReserve ?? this.maxObservedInput);
     if (this.closed) throw new ExecutionBlocked('server_stopped', 'La oficina se está cerrando.');
     if (!this.usageKnown)
@@ -1403,7 +1546,7 @@ export class TeamCoordinator {
     try {
       this.budget();
       this.assertAdaptivePlan(task);
-      if (task.context?.checks.some((id) => !this.checks?.has(id)))
+      if (task.context?.checks.some((id) => !this.checksFor(task.project)?.has(id)))
         throw new ExecutionBlocked('check_unconfigured', 'Comprobación local no configurada.');
       this.reservedRuns++;
       tokenReserve = this.adaptive
@@ -1535,6 +1678,11 @@ export class TeamCoordinator {
         ),
         onOutput: (output) => {
           task.output = (task.output + output).slice(0, 20_000);
+          try {
+            this.library?.record(task, output);
+          } catch (error) {
+            this.pause(failureCode(error));
+          }
           outcomeTail = (outcomeTail + output).slice(-1024);
           if (reviewPacket) reviewOutput = (reviewOutput + output).slice(-60000);
         },
@@ -1617,13 +1765,13 @@ export class TeamCoordinator {
         ['developer', 'tester'].includes(task.role) &&
         task.context?.checks.length &&
         !reviewPacket &&
-        this.checks
+        this.checksFor(task.project)
       ) {
         task.status = 'running';
         const beforeChecks = this.adaptive
           ? captureRevision(task.executionProject ?? task.project).digest
           : undefined;
-        task.localChecks = await this.checks.run(
+        task.localChecks = await this.checksFor(task.project)!.run(
           task.context.checks,
           task.executionProject ?? task.project,
           controller.signal,
@@ -1869,7 +2017,10 @@ export class TeamCoordinator {
           context,
           {
             ...assessment,
-            acceptanceCoverage: this.checks?.covers?.(context.checks, context.acceptance)
+            acceptanceCoverage: this.checksFor(project)?.covers?.(
+              context.checks,
+              context.acceptance,
+            )
               ? 'complete'
               : 'partial',
           },
@@ -1985,13 +2136,14 @@ export class TeamCoordinator {
             );
           if (
             item.assessment?.acceptanceCoverage === 'complete' &&
-            (!item.context || !this.checks?.covers?.(item.context.checks, item.context.acceptance))
+            (!item.context ||
+              !this.checksFor(project)?.covers?.(item.context.checks, item.context.acceptance))
           )
             throw new ExecutionBlocked(
               'invalid_plan',
               'El Jefe no puede declarar cobertura sin evidencia local.',
             );
-          if (item.context?.checks.some((id) => !this.checks?.has(id)))
+          if (item.context?.checks.some((id) => !this.checksFor(project)?.has(id)))
             throw new ExecutionBlocked(
               'invalid_plan',
               'El plan contiene comprobaciones no registradas.',
@@ -2006,7 +2158,7 @@ export class TeamCoordinator {
               (item) =>
                 item.role === 'developer' &&
                 (!item.context ||
-                  !this.checks?.covers?.(item.context.checks, item.context.acceptance)),
+                  !this.checksFor(project)?.covers?.(item.context.checks, item.context.acceptance)),
             ))
         )
           throw new ExecutionBlocked(

@@ -1,3 +1,5 @@
+import type { ConversationLibrarySnapshot } from './conversations.js';
+
 /** Shared wire contract. No provider credentials or shell commands cross this boundary. */
 export type TeamProvider = 'codex' | 'claude';
 export type TeamRole = 'chief' | 'designer' | 'architect' | 'developer' | 'tester';
@@ -80,6 +82,7 @@ export interface TeamWorkflow {
 }
 export interface TeamTask {
   id: string;
+  conversationId?: string;
   workerId?: string;
   workflowId?: string;
   workspaceId?: string;
@@ -151,6 +154,7 @@ export interface TeamAvailability {
   models: Array<{ id: string; efforts: string[] }>;
 }
 export interface TeamSnapshot {
+  library?: ConversationLibrarySnapshot;
   /** Server-derived capabilities; settings and model output never grant them. */
   capabilities?: {
     engine: 'codex-cli' | 'agent-orchestrator';

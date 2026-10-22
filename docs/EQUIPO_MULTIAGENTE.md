@@ -231,9 +231,13 @@ Cerrar el panel o el navegador permite que el servidor siga trabajando. Cerrar l
 oficina detiene los procesos administrados antes de finalizar el servidor.
 
 Los límites y el modo se guardan en `.local-office/team-settings.json` del
-directorio de arranque. Prompts, planes, respuestas y cola permanecen en memoria:
-al reiniciar el servidor se vacían. Los contadores son de esa sesión del servidor.
-Los registros del ejecutor conservan metadatos de ejecución, no esas respuestas.
+directorio de arranque. La cola, sus resultados y contadores se recuperan desde
+`.local-office/team-checkpoint.json`, sin reiniciar ejecuciones ni autorizaciones.
+Las conversaciones completas, los proyectos, instrucciones y pruebas aprobadas
+se guardan además en un archivo privado independiente, fuera de las carpetas de
+código. Se pueden abrir desde **Conversaciones guardadas**, aunque el proyecto
+ya no esté disponible. Detalles y límites en [CONVERSACIONES.md](CONVERSACIONES.md).
+Los registros del ejecutor conservan metadatos, no copias de los mensajes.
 El CLI oficial puede conservar su propio historial según su comportamiento.
 
 Los endpoints de control exigen origen/host local y un nonce local para modificar
