@@ -29,6 +29,52 @@ su proveedor, modelo y razonamiento antes de confirmarlas.
 selección proviene de la última comprobación; se valida otra vez antes de ejecutar.
 Una elección manual no puede eludir el control de suscripción.
 
+## Controles avanzados del panel
+
+Se utilizan las secciones desplegables y los componentes del panel existente;
+no se cambia el diseño de la oficina, sus personajes ni las animaciones.
+
+- **Organización del trabajo** muestra el motor y el aislamiento comunicados por
+  el servidor. Permite activar o desactivar expresamente los dos Programadores
+  experimentales cuando hay aislamiento disponible. Un Programador sigue siendo
+  el valor inicial. Este control no selecciona otro motor ni inicia llamadas.
+- **Encargo acotado y reparto de archivos** utiliza la carpeta, el objetivo y el
+  permiso de cambios de arriba. Permite indicar archivos, decisiones, aceptación,
+  comprobaciones, módulos, riesgo e incertidumbre. Riesgo y cobertura no se
+  presuponen favorables. **Preparar encargo sin IA** crea las tareas mediante
+  evaluación local y deja la ejecución pendiente de revisión y arranque.
+- Con la opción experimental y AO disponible se pueden proponer dos partes:
+  cada una tiene objetivo, archivos propios, aceptación y comprobaciones. Los
+  archivos compartidos son de solo lectura. El contrato global debe contener
+  todos esos elementos. El servidor rechaza un alcance incompatible y puede
+  conservar la ejecución secuencial aunque el reparto parezca independiente.
+- Las comprobaciones configuradas aparecen como casillas seleccionables tanto
+  para el conjunto como para cada parte. Los IDs también pueden escribirse, pero
+  siempre se validan localmente. El catálogo público contiene solo identificador
+  y condición de aceptación; no expone ejecutables, argumentos ni logs.
+- Cada tarjeta muestra trabajador, dependencias, carpeta de ejecución, archivos
+  propios y resultados locales. **Estimación y reserva de la tarea** permite
+  revisar cotas después de comprobar la asignación. No hay cifras favorables
+  precargadas: la revisión manual debe basarse en evidencia y cabe en los límites
+  globales ya existentes. Cambiar modelo o razonamiento invalida la vinculación
+  anterior, que el servidor vuelve a comprobar.
+- **Flujos e integración** muestra estado conjunto, razón de la organización,
+  candidato, huella, pruebas y duraciones. Antes de arrancar permite revisar
+  preparación, integración y alternativa secuencial, con todas las asignaciones
+  comprobadas. Guardar cotas no consume una llamada ni arranca el equipo.
+
+Los formularios de reservas se bloquean mientras hay actividad. Los flujos
+recuperados en pausa conservan su evidencia y no ofrecen el botón genérico de
+continuación como vía de reaceptación. Los límites muestran tiempo de pared,
+suma de duraciones y consumo desconocido sin presentarlo como un total definitivo.
+
+La selección del motor al arrancar y la definición de comandos del registro de
+pruebas siguen siendo configuración local. El panel utiliza esas capacidades;
+no añade cambio de motor en caliente, edición de comandos, publicación de parches
+ni recuperación automática de candidatos. Ninguno de estos controles autoriza
+nuevos pilotos reales por sí mismo. Su verificación inicial utiliza proveedores
+simulados, API local, worktrees Git y comprobaciones mecánicas reales.
+
 Las tareas son de solo lectura inicialmente. La casilla de cambios permite
 escritura en una tarea directa; en un plan solo se aplica al Programador. El Jefe
 planifica sin editar. Las decisiones creativas siguen correspondiendo al usuario.

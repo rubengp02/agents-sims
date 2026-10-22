@@ -139,6 +139,16 @@ test('team plans, assigns, runs dependencies and animates real office messages @
     const panel = page.getByRole('dialog', { name: 'Equipo de agentes' });
     await expect(panel.getByLabel('Modo de asignación')).toHaveValue('auto');
     await expect(panel.getByText('Habilitar comprobación de Claude')).toBeVisible();
+    await panel
+      .getByText('Organización del trabajo · un Programador por defecto', { exact: true })
+      .click();
+    await expect(
+      panel.getByRole('checkbox', { name: 'Activar dos Programadores experimentales' }),
+    ).toBeDisabled();
+    await expect(
+      panel.getByRole('checkbox', { name: 'Activar dos Programadores experimentales' }),
+    ).not.toBeChecked();
+    expect(runs).toBe(0);
     await page.getByLabel('Carpeta del proyecto', { exact: true }).fill(root);
     await page.getByLabel('Objetivo o tarea').fill('Prepara un cambio pequeño y compruébalo');
     await page

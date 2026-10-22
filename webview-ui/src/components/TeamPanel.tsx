@@ -7,6 +7,8 @@ import {
   type TeamSnapshot,
   type TeamTask,
 } from '../../../core/src/team.js';
+import { TeamScopeForm } from './TeamScopeForm.js';
+import { TaskBudgetControl, TeamWorkflowCard } from './TeamWorkflowCard.js';
 import { Button } from './ui/Button.js';
 
 const statuses: Record<TeamTask['status'], string> = {
@@ -171,6 +173,43 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
               Habilitar comprobación de Claude
             </label>
           </div>
+          <details className="border border-border p-4 mb-8">
+            <summary>Organización del trabajo · un Programador por defecto</summary>
+            <p className="my-4">
+              Motor actual:{' '}
+              {snapshot.capabilities?.engine === 'agent-orchestrator'
+                ? 'Agent Orchestrator'
+                : snapshot.capabilities
+                  ? 'Codex CLI'
+                  : 'no comunicado'}
+              . Aislamiento de escritores:{' '}
+              {snapshot.capabilities?.isolatedWriters ? 'disponible' : 'no disponible'}.
+            </p>
+            <label className="block">
+              <input
+                type="checkbox"
+                aria-label="Activar dos Programadores experimentales"
+                checked={snapshot.settings.experimentalParallelWriters === true}
+                disabled={
+                  !!active ||
+                  (!snapshot.capabilities?.isolatedWriters &&
+                    !snapshot.settings.experimentalParallelWriters)
+                }
+                onChange={(event) =>
+                  void action('settings', {
+                    ...snapshot.settings,
+                    experimentalParallelWriters: event.target.checked,
+                  })
+                }
+              />{' '}
+              Activar dos Programadores experimentales
+            </label>
+            <p className="text-text-muted mt-4">
+              Activarlo permite proponer repartos; no garantiza concurrencia ni inicia llamadas.
+              Requiere AO seleccionado y aislamiento disponible. Se mantienen el límite de dos
+              ejecuciones, las pruebas y el presupuesto. Este control no cambia de motor.
+            </p>
+          </details>
           <Button disabled={busy} onClick={() => void action('check')}>
             Comprobar suscripciones y modelos
           </Button>
@@ -221,8 +260,18 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
             </div>
             <p className="mt-8 text-text-muted">
               Los tokens se comprueban entre llamadas con el consumo comunicado. Una respuesta puede
-              superar el presupuesto. No es un importe en euros. Hasta dos tareas Codex
-              independientes de solo lectura; las escrituras se ejecutan de forma exclusiva.
+              superar el presupuesto. No es un importe en euros. Un Programador por defecto; dos
+              escritores requieren activación experimental y aislamiento acreditado.
+            </p>
+            <p>
+              Tiempo de pared: {((snapshot.elapsedMs ?? 0) / 1000).toFixed(1)} s · suma de
+              duraciones: {((snapshot.timeUsedMs ?? 0) / 1000).toFixed(1)} s. Consumo total:{' '}
+              {snapshot.usageKnown === false
+                ? 'desconocido; el contador no es un total definitivo'
+                : snapshot.usageKnown === true
+                  ? 'conocido'
+                  : 'no comunicado'}
+              .
             </p>
           </details>
           <div className="border border-border p-8 mb-8 space-y-8">
@@ -299,6 +348,14 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
               </Button>
             </div>
           </div>
+          <TeamScopeForm
+            project={project}
+            goal={goal}
+            allowWrites={allowWrites}
+            snapshot={snapshot}
+            disabled={!!active}
+            action={action}
+          />
           {snapshot.settings.mode === 'manual' && (
             <p>
               En modo manual, añade las tareas directamente y elige su modelo antes de ejecutarlas.
@@ -318,7 +375,7 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
             <Button disabled={busy} onClick={() => void action('pause')}>
               Pausar equipo
             </Button>
-            {snapshot.budgetReason && (
+            {snapshot.budgetReason && !snapshot.workflows?.some((w) => w.status === 'paused') && (
               <Button disabled={!!active} onClick={() => void action('resume')}>
                 Revisado: permitir continuar
               </Button>
@@ -329,18 +386,39 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
               Equipo en pausa: {snapshot.budgetReason}. No se cambiará a ningún sistema de pago.
             </p>
           )}
+          {!!snapshot.workflows?.length && (
+            <section aria-label="Flujos e integración">
+              <strong>Flujos e integración</strong>
+              {snapshot.workflows.map((workflow) => (
+                <TeamWorkflowCard
+                  key={workflow.id}
+                  workflow={workflow}
+                  snapshot={snapshot}
+                  disabled={!!active}
+                  action={action}
+                />
+              ))}
+            </section>
+          )}
           <div className={board ? 'grid gap-8 md:grid-cols-2' : 'space-y-8'}>
             {snapshot.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} snapshot={snapshot} busy={busy} action={action} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                snapshot={snapshot}
+                busy={busy}
+                active={!!active}
+                action={action}
+              />
             ))}
           </div>
           {snapshot.tasks.length === 0 && (
             <p>Añade una tarea o pide al Jefe un plan. Nada se ejecuta al abrir el panel.</p>
           )}
           <p className="text-text-muted mt-8">
-            Prompts, planes y respuestas se conservan solo durante esta sesión del servidor. Al
-            reiniciarlo se vacía la cola; los límites y el modo se guardan. Coordinación adaptada de
-            Claw-Empire (Apache-2.0).
+            Si hay un checkpoint configurado, se conservan cola, resultados y consumo. Al reiniciar,
+            los flujos requieren revisión y no recuperan aceptación automáticamente. Coordinación
+            adaptada de Claw-Empire (Apache-2.0).
           </p>
         </>
       )}
@@ -352,11 +430,13 @@ function TaskCard({
   task,
   snapshot,
   busy,
+  active,
   action,
 }: {
   task: TeamTask;
   snapshot: TeamSnapshot;
   busy: boolean;
+  active: boolean;
   action: (path: string, body?: unknown) => Promise<boolean>;
 }) {
   const [editing, setEditing] = useState(false);
@@ -394,6 +474,36 @@ function TaskCard({
         {task.dependsOn.length ? ` · Depende de ${task.dependsOn.length} tarea(s)` : ''}
       </p>
       {task.reasonCode && <p className="text-warning">Motivo: {task.reasonCode}</p>}
+      <details className="mt-4">
+        <summary>Trabajador, archivos y comprobaciones</summary>
+        <p className="break-words">
+          Trabajador: {task.workerId ?? 'no comunicado'} · flujo: {task.workflowId ?? 'individual'}
+        </p>
+        {task.executionProject && (
+          <p className="break-words">Carpeta de ejecución: {task.executionProject}</p>
+        )}
+        <p>Archivos propios: {task.ownedFiles?.join(', ') || 'sin reparto aislado'}</p>
+        <p>
+          Dependencias:{' '}
+          {task.dependsOn
+            .map((id) => snapshot.tasks.find((t) => t.id === id)?.title ?? id)
+            .join(', ') || 'ninguna'}
+        </p>
+        {task.context && (
+          <>
+            <p>Criterios: {task.context.acceptance.join('; ')}</p>
+            <p>
+              Comprobaciones requeridas: {task.context.checks.join(', ') || 'ninguna configurada'}
+            </p>
+          </>
+        )}
+        {task.localChecks?.map((c, i) => (
+          <p key={`${c.id}-${i}`}>
+            {c.id}: {c.passed ? 'Superada' : 'Fallida'} · {c.durationMs} ms
+          </p>
+        ))}
+      </details>
+      <TaskBudgetControl task={task} snapshot={snapshot} disabled={active} action={action} />
       <div className="flex flex-wrap gap-4 my-4">
         {!locked && (
           <>

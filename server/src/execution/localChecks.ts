@@ -9,6 +9,8 @@ import { ExecutionBlocked } from './types.js';
 import { type OwnedWorkspace, verifiedWorkspace } from './workflowWorkspace.js';
 
 export interface CheckRunner {
+  /** Public metadata only, never executable names, arguments or logs. */
+  describe?(): Array<{ id: string; acceptance: boolean }>;
   authorizeWorkspace?(workspace: OwnedWorkspace): void;
   has(id: string): boolean;
   hasAcceptance(ids: string[]): boolean;
@@ -41,6 +43,12 @@ export class LocalChecks implements CheckRunner {
     this.ownedWorkspaces.add(realpathSync(workspace.path));
   }
   private readonly commands: Readonly<Record<string, LocalCheckCommand>>;
+  describe() {
+    return Object.entries(this.commands).map(([id, command]) => ({
+      id,
+      acceptance: command.acceptance === true,
+    }));
+  }
   constructor(
     commands: Record<string, LocalCheckCommand>,
     private readonly logDir: string,

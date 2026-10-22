@@ -248,6 +248,12 @@ export class TeamCoordinator {
   snapshot(): TeamSnapshot {
     this.persist();
     return structuredClone({
+      capabilities: {
+        engine: this.executors.codex.engine ?? 'codex-cli',
+        isolatedWriters: !!this.executors.codex.workspaceManager,
+        budgetReview: !!this.adaptive,
+        ...(this.checks?.describe ? { checks: this.checks.describe() } : {}),
+      },
       settings: this.settings,
       tasks: this.tasks,
       providers: this.providers,

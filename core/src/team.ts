@@ -151,6 +151,13 @@ export interface TeamAvailability {
   models: Array<{ id: string; efforts: string[] }>;
 }
 export interface TeamSnapshot {
+  /** Server-derived capabilities; settings and model output never grant them. */
+  capabilities?: {
+    engine: 'codex-cli' | 'agent-orchestrator';
+    isolatedWriters: boolean;
+    budgetReview: boolean;
+    checks?: Array<{ id: string; acceptance: boolean }>;
+  };
   settings: TeamSettings;
   tasks: TeamTask[];
   providers: TeamAvailability[];

@@ -6,6 +6,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AgentStateStore } from '../src/agentStateStore.js';
+import { type CheckRunner, LocalChecks } from '../src/execution/localChecks.js';
 import { DisabledExecutor } from '../src/execution/optionalExecutors.js';
 import { TeamCoordinator } from '../src/execution/teamCoordinator.js';
 import { DEFAULT_TEAM_SETTINGS } from '../src/execution/teamPolicy.js';
@@ -19,7 +20,7 @@ afterEach(async () => {
   roots.splice(0).forEach((root) => rmSync(root, { recursive: true, force: true }));
 });
 
-async function harness() {
+async function harness(checks?: CheckRunner) {
   const root = mkdtempSync(join(tmpdir(), 'pixel-team-http-'));
   roots.push(root);
   const execute = vi.fn();
@@ -33,7 +34,12 @@ async function harness() {
     }),
     execute,
   };
-  const team = new TeamCoordinator({ codex, claude: new DisabledExecutor('claude') });
+  const team = new TeamCoordinator(
+    { codex, claude: new DisabledExecutor('claude') },
+    undefined,
+    undefined,
+    checks,
+  );
   const { app, port } = await createHttpServer({
     embedded: false,
     token: 'unrelated-hook-token',
@@ -48,6 +54,29 @@ async function harness() {
 }
 
 describe('local team HTTP control', () => {
+  it('exposes only configured check metadata, without commands or execution', async () => {
+    const checks = new LocalChecks(
+      {
+        types: { executable: 'PRIVATE_EXECUTABLE', args: ['PRIVATE_ARGS'], timeoutMs: 1000 },
+        acceptance: {
+          executable: 'PRIVATE_EXECUTABLE',
+          args: [],
+          timeoutMs: 1000,
+          acceptance: true,
+        },
+      },
+      join(tmpdir(), 'unused-office-check-logs'),
+    );
+    const h = await harness(checks);
+    const response = await h.app.inject({ url: '/api/team', headers: h.headers });
+    expect(response.json().capabilities.checks).toEqual([
+      { id: 'types', acceptance: false },
+      { id: 'acceptance', acceptance: true },
+    ]);
+    expect(response.body).not.toContain('PRIVATE_EXECUTABLE');
+    expect(response.body).not.toContain('PRIVATE_ARGS');
+    expect(h.execute).not.toHaveBeenCalled();
+  });
   it('protects decomposition and integration-budget routes with the same local control nonce', async () => {
     const h = await harness();
     for (const url of ['/api/team/scope', '/api/team/workflow-budget-review']) {
@@ -68,6 +97,11 @@ describe('local team HTTP control', () => {
     const response = await h.app.inject({ url: '/api/team', headers: h.headers });
     expect(response.statusCode).toBe(200);
     expect(response.json().settings.mode).toBe('auto');
+    expect(response.json().capabilities).toEqual({
+      engine: 'codex-cli',
+      isolatedWriters: false,
+      budgetReview: false,
+    });
     expect(response.headers['cache-control']).toBe('no-store');
     expect(h.execute).not.toHaveBeenCalled();
   });
