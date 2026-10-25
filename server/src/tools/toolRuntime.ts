@@ -273,7 +273,10 @@ export class OfficeToolSession {
     );
     await mkdir(directory, { recursive: true });
     const context = await chromium.launchPersistentContext(directory, {
-      channel: 'msedge',
+      // Windows uses its installed Edge. Other hosts use the managed Chromium
+      // installed by Playwright/CI rather than depending on an unrelated Edge
+      // installation and its first-run initialization.
+      ...(process.platform === 'win32' ? { channel: 'msedge' } : {}),
       headless: !visible,
       viewport: { width: 1440, height: 1000 },
       acceptDownloads: false,

@@ -260,6 +260,9 @@ jobs:
         run: npm run engine:prepare
       - name: Verify application, policy, supervision, native AO, 72 cases and standalone
         run: npm run parallel:verify
+      - name: Diagnose browser runtime failure (no model)
+        if: failure() && steps.prepare_ao.outcome == 'success'
+        run: npm run test -w server -- toolRuntime.test.ts
       - name: Diagnose fixture failures (no model)
         if: failure() && steps.prepare_ao.outcome == 'success'
         run: |

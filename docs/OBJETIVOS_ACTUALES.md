@@ -54,3 +54,13 @@ dos del filtro de diagnósticos. La batería de navegador detectó el fallo real
 presencia: once recorridos pasaron y uno falló; tras corregirlo, ese recorrido
 también pasó. Pendiente comprobar el conjunto corregido en CI y confirmar la causa
 del fallo inicial de aplicación. No se declara cerrado P0.
+
+La [validación de bb6ac31](https://github.com/rubengp02/agents-sims/actions/runs/40198697740)
+confirma los doce recorridos de navegador en Linux y las comprobaciones generales.
+El diagnóstico identifica el bloqueo restante en `toolRuntime.test.ts`; las
+comprobaciones nativas de AO también pasan en el diagnóstico adicional. Se ha
+corregido una dependencia de plataforma: el navegador exigía Edge en Linux aunque
+CI instala Chromium. Se conserva Edge en Windows y se usa Chromium administrado
+en otros sistemas. Las nueve pruebas del runtime pasan localmente; la validación
+Linux de este último cambio sigue pendiente. No se atribuye todavía todo el fallo
+a esta dependencia ni se ocultan las incidencias E2E de VS Code observadas en CI.
