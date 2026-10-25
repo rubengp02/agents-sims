@@ -19,9 +19,11 @@ import {
   TOOL_OVERLAY_VERTICAL_OFFSET,
 } from '../../constants.js';
 import type { SubagentCharacter } from '../../hooks/useExtensionMessages.js';
+import { transport } from '../../transport/index.js';
 import type { OfficeState } from '../engine/officeState.js';
 import type { ToolActivity } from '../types.js';
 import { CharacterState, TILE_SIZE } from '../types.js';
+import { EmployeeSignal } from './EmployeeSignal.js';
 
 // Both turn-end states show the green checkmark bubble. A finished turn (Stop)
 // shows ONLY the checkmark (the label falls through to its normal idle text);
@@ -31,6 +33,8 @@ const WAITING_INPUT_ACTIVITY_TEXT = 'Waiting for input';
 
 interface ToolOverlayProps {
   employees?: OfficePresence[];
+  presenceError?: string;
+  onOpenConversation?: () => void;
   officeState: OfficeState;
   agents: number[];
   agentTools: Record<number, ToolActivity[]>;
@@ -84,6 +88,8 @@ function getFuelColor(ratio: number): string {
 
 export function ToolOverlay({
   employees,
+  presenceError,
+  onOpenConversation,
   officeState,
   agents,
   agentTools,
@@ -96,6 +102,17 @@ export function ToolOverlay({
   alwaysShowOverlay,
 }: ToolOverlayProps) {
   const [, setTick] = useState(0);
+  const [connected, setConnected] = useState(transport.state === 'connected');
+  useEffect(() => transport.onStateChange((state) => setConnected(state === 'connected')), []);
+  useEffect(() => {
+    for (const employee of employees ?? []) {
+      if (!employee.signal) continue;
+      const ch = officeState.characters.get(employee.id);
+      if ((!connected || presenceError || !employee.signal.active) && ch?.isActive)
+        officeState.setAgentActive(employee.id, false);
+      if (ch?.bubbleType) officeState.dismissBubble(employee.id);
+    }
+  }, [connected, employees, officeState, presenceError]);
   useEffect(() => {
     let rafId = 0;
     const tick = () => {
@@ -133,9 +150,10 @@ export function ToolOverlay({
         const isSelected = selectedId === id;
         const isHovered = hoveredId === id;
         const isSub = ch.isSubagent;
+        const employee = employees?.find((employee) => employee.id === id);
 
         // Only show for hovered or selected agents (unless always-show is on)
-        if (!alwaysShowOverlay && !isSelected && !isHovered) return null;
+        if (!employee?.signal && !alwaysShowOverlay && !isSelected && !isHovered) return null;
 
         // Position above character
         const sittingOffset = ch.state === CharacterState.TYPE ? CHARACTER_SITTING_OFFSET_PX : 0;
@@ -150,7 +168,26 @@ export function ToolOverlay({
         // panel back. When always-show is off, the early return above already
         // keeps the panel hidden for idle agents.
         const isDone = ch.bubbleType === 'waiting' && !ch.waitingAwaitingInput;
-        const employee = employees?.find((employee) => employee.id === id);
+        if (employee?.signal)
+          return (
+            <div
+              key={id}
+              className="absolute -translate-x-1/2"
+              style={{
+                left: Math.max(75, Math.min(rect.width - 75, screenX)),
+                top: Math.max(40, screenY - 38),
+                zIndex: 41,
+              }}
+              data-testid="agent-overlay"
+              data-agent-id={id}
+            >
+              <EmployeeSignal
+                employee={employee}
+                disconnected={!!presenceError || !connected}
+                onOpenConversation={onOpenConversation}
+              />
+            </div>
+          );
         if (isDone && !isSelected && !isHovered && !employee) {
           return (
             <div

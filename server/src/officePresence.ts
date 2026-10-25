@@ -3,6 +3,7 @@ import { basename } from 'node:path';
 import type { OfficePresence, OfficePresenceSnapshot } from '../../core/src/officePresence.js';
 import { TEAM_ROLES } from '../../core/src/team.js';
 import type { AgentStateStore } from './agentStateStore.js';
+import { officeWorkSignal } from './execution/officeWorkSignal.js';
 import type { TeamCoordinator } from './execution/teamCoordinator.js';
 
 /** Observation never grants employee identity. Only the coordinator sets officeRole. */
@@ -16,6 +17,15 @@ export function officePresence(
   for (const agent of store.values()) {
     const task = [...snapshot.tasks].reverse().find((task) => task.agentId === agent.id);
     const project = snapshot.library?.projects.find((project) => project.path === agent.projectDir);
+    const signal = agent.officeRole ? officeWorkSignal(task, snapshot.tasks) : undefined;
+    if (
+      signal?.active &&
+      snapshot.toolApprovals?.some((approval) => approval.taskId === task?.id)
+    ) {
+      signal.label = 'Necesita aprobación';
+      signal.tone = 'paused';
+      signal.active = false;
+    }
     const status: OfficePresence['status'] = agent.officeRole
       ? task && ['paused', 'blocked', 'failed'].includes(task.status)
         ? 'En pausa'
@@ -40,6 +50,7 @@ export function officePresence(
         (agent.projectDir ? basename(agent.projectDir) : (agent.folderName ?? 'Sin proyecto')),
       provider: agent.providerId ?? 'claude',
       status,
+      ...(signal ? { signal } : {}),
     };
     (agent.officeRole ? employees : sessions).push(presence);
   }

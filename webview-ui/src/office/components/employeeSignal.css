@@ -1,0 +1,58 @@
+.employee-signal {
+  color: var(--color-text);
+  background: var(--color-bg, #202030);
+  border: 1px solid var(--color-border);
+  padding: 4px 7px;
+  max-width: min(210px, 60vw);
+  font-size: 16px;
+  line-height: 1.2;
+  text-align: center;
+  pointer-events: auto;
+}
+.employee-signal-name {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.employee-signal button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 2px;
+  cursor: pointer;
+  max-width: 100%;
+}
+.employee-signal button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.employee-signal-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  background: currentColor;
+}
+.employee-signal[data-tone='active'] {
+  color: var(--color-status-active);
+}
+.employee-signal[data-tone='paused'] {
+  color: var(--color-status-permission);
+}
+.employee-signal[data-tone='done'] {
+  color: var(--color-status-success);
+}
+.employee-signal[data-active='true'] .employee-signal-dot {
+  animation: employee-signal-pulse 1.8s ease-in-out infinite;
+}
+@keyframes employee-signal-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .employee-signal[data-active='true'] .employee-signal-dot {
+    animation: none;
+  }
+}

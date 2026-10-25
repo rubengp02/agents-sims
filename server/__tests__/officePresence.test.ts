@@ -35,7 +35,7 @@ describe('office employee presentation', () => {
   it('separates coordinated employees from observed sessions without promoting folder names', () => {
     const { store, team } = fixture();
     const result = officePresence(store, team);
-    expect(result.employees).toEqual([
+    expect(result.employees).toMatchObject([
       {
         id: 1,
         name: 'Programador',
@@ -92,6 +92,19 @@ describe('office employee presentation', () => {
     session.currentHookToolId = 'hook-read';
     session.isWaiting = true;
     expect(officePresence(store, team).sessions[0].status).toBe('Disponible');
+  });
+  it('shows a server approval as a stopped signal instead of active work', () => {
+    const { store, snapshot } = fixture();
+    const task = { ...snapshot.tasks[0], id: 'task', role: 'developer', status: 'running' };
+    const team = {
+      snapshot: () => ({ ...snapshot, tasks: [task], toolApprovals: [{ taskId: 'task' }] }),
+    } as unknown as TeamCoordinator;
+    expect(officePresence(store, team).employees[0].signal).toMatchObject({
+      label: 'Necesita aprobación',
+      active: false,
+      tone: 'paused',
+    });
+    expect(officePresence(store, team).sessions[0].signal).toBeUndefined();
   });
 
   it('filters initial and live presentation while preserving observations in the store', () => {

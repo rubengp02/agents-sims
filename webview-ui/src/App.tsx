@@ -424,6 +424,8 @@ function App() {
 
           <ToolOverlay
             employees={presence?.employees}
+            presenceError={presenceError}
+            onOpenConversation={() => setIsTeamOpen(true)}
             officeState={officeState}
             agents={agents}
             agentTools={agentTools}
