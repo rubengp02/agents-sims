@@ -48,13 +48,24 @@ describe('office employee presentation', () => {
       {
         id: 2,
         name: 'Sesión de Codex',
-        project: 'observed',
+        project: 'Jefe',
         provider: 'codex',
         status: 'Disponible',
       },
     ]);
     expect(JSON.stringify(result)).not.toContain('/private');
     expect(store.size).toBe(2);
+  });
+
+  it('shows the observed workspace label instead of the encoded private transcript directory', () => {
+    const { store, team } = fixture();
+    const session = store.get(2)!;
+    session.folderName = 'Proyecto visual';
+    session.projectDir = '/private/.claude/projects/C--Users-Private-Proyecto-visual';
+    const presence = officePresence(store, team);
+    expect(presence.sessions[0].project).toBe('Proyecto visual');
+    expect(JSON.stringify(presence)).not.toContain('C--Users-Private');
+    expect(presence.sessions[0].name).toBe('Sesión de Codex');
   });
 
   it('reports work, pauses and available employees using actual task and runtime state', () => {

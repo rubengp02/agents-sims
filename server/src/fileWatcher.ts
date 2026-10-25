@@ -1087,7 +1087,7 @@ export function adoptExternalSessionFromHook(
     const projectDir = path.dirname(transcriptPath);
     const folderName =
       folderNameResolver?.({ cwd, projectDir }) ??
-      (!watchTranscript && cwd ? path.basename(cwd) : undefined) ??
+      (cwd ? path.basename(cwd) : undefined) ??
       folderNameFromProjectDir(path.basename(projectDir));
 
     adoptExternalSession(

@@ -36,6 +36,7 @@ export function officePresence(
         : `Sesión de ${agent.providerId === 'codex' ? 'Codex' : (agent.providerId ?? 'Claude')}`,
       project:
         project?.name ??
+        (!agent.officeRole ? agent.folderName : undefined) ??
         (agent.projectDir ? basename(agent.projectDir) : (agent.folderName ?? 'Sin proyecto')),
       provider: agent.providerId ?? 'claude',
       status,

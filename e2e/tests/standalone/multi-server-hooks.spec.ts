@@ -50,6 +50,12 @@ test.describe('Standalone / multi-server hooks', () => {
         debugView: false,
       });
       await standalone.drainMessages();
+      const observedProjects = async () => {
+        const presence = await (
+          await page.request.get(`${standalone.hostUrl}/api/office/presence`)
+        ).json();
+        return presence.sessions.map((session: { project: string }) => session.project);
+      };
       await waitForClaudeHookSetup(tmpHome);
 
       const registryDir = path.join(tmpHome, '.pixel-agents', 'servers');
@@ -79,6 +85,9 @@ test.describe('Standalone / multi-server hooks', () => {
       await expectOverlayVisible(frame, `Running: ${extensionCommand}`);
       await page.waitForTimeout(500);
       await expectNoOverlay(page, `Running: ${extensionCommand}`);
+      // Hiding external avatars alone would not prove isolation. Check the
+      // standalone observation store also excludes the extension's project.
+      expect(await observedProjects()).toEqual([]);
 
       const standaloneSessionId = 'multi-server-standalone-owned';
       const standaloneCommand = 'npm run standalone-owned';
@@ -90,12 +99,22 @@ test.describe('Standalone / multi-server hooks', () => {
         scenario: hookDrivenScenario('multi-server standalone-owned session', standaloneCommand),
       });
 
-      await expectOverlayVisible(page, `Running: ${standaloneCommand}`);
+      await expect.poll(observedProjects).toEqual([path.basename(standalone.workspaceDir)]);
+      await page.getByRole('button', { name: 'Otras sesiones de Codex', exact: true }).click();
+      const sessions = page.getByRole('dialog', { name: 'Otras sesiones de Codex', exact: true });
+      await expect(
+        sessions.getByText(`Sesión de claude · ${path.basename(standalone.workspaceDir)}`, {
+          exact: true,
+        }),
+      ).toBeVisible();
       await frame.waitForTimeout(500);
       await expectNoOverlay(frame, `Running: ${standaloneCommand}`);
 
       await expectOverlayCount(frame, 1);
-      await expectOverlayCount(page, 1);
+      await expectOverlayCount(page, 0);
+      expect(
+        (await standalone.drainMessages()).some((message) => message.type === 'agentCreated'),
+      ).toBe(false);
     } finally {
       await standalone.cleanup();
     }

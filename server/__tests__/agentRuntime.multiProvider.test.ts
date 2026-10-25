@@ -68,6 +68,40 @@ describe('AgentRuntime -- multi-provider routing', () => {
     }
   });
 
+  it('labels a Claude transcript session with its actual workspace, preserving spaces and hyphens', () => {
+    store = new AgentStateStore();
+    runtime = new AgentRuntime(store, [claudeProvider]);
+    runtime.watchAllSessions.current = true;
+    const dir = trackedDir('claude-label');
+    const cwd = path.join(dir, 'Proyecto visual-con-guiones');
+    const transcripts = path.join(dir, '.claude', 'projects', 'C--Users-Private-project');
+    const transcript = path.join(transcripts, 'label-session.jsonl');
+    fs.mkdirSync(cwd);
+    fs.mkdirSync(transcripts, { recursive: true });
+    fs.writeFileSync(transcript, '{"type":"assistant"}\n');
+    try {
+      runtime.handleHookEvent('claude', {
+        hook_event_name: 'SessionStart',
+        session_id: 'label-session',
+        cwd,
+        transcript_path: transcript,
+        source: 'startup',
+      });
+      runtime.handleHookEvent('claude', {
+        hook_event_name: 'PreToolUse',
+        session_id: 'label-session',
+        tool_name: 'Read',
+        tool_input: { file_path: path.join(cwd, 'app.ts') },
+      });
+      const agent = [...store.values()][0];
+      expect(agent.folderName).toBe('Proyecto visual-con-guiones');
+      expect(agent.projectDir).toBe(transcripts);
+    } finally {
+      runtime.dispose();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('drops an event from an unregistered providerId without throwing', () => {
     store = new AgentStateStore();
     runtime = new AgentRuntime(store, [claudeProvider, hermesProvider, codexProvider]);

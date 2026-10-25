@@ -89,3 +89,19 @@ ejecutaba antes de construir `dist/extension.js`. Se reordena ese job para verif
 primero el paquete construido e instalado y ejecutar después sus contratos. Las
 pruebas E2E de esa revisión siguen siendo evidencia útil de la corrección de carga;
 no se declara todavía una ejecución global satisfactoria.
+
+La revisión 515f30d confirma los jobs general y runtime, las partes 1 y 2 de
+Linux y la parte 1 de Windows. La parte 3 de Linux y Windows solo falla en la
+prueba conjunta de servidores: todavía esperaba que la sesión externa del
+navegador fuera un empleado. Se adapta esa prueba manteniendo verificaciones de
+aislamiento por proyecto en el servidor, observación visible y ausencia de avatares
+externos. El recorrido revisado pasa en VS Code y navegador reales en Windows,
+con proveedores simulados, sin inferencia. También pasa el recorrido de todos los
+nombres de herramienta en VS Code. Los perfiles, servidores y proyectos son temporales.
+
+La prueba conjunta encontró que la lista de sesiones mostraba una carpeta de
+transcripciones codificada, con fragmentos de ruta privada. La adopción de hooks
+ahora conserva el nombre real de la carpeta de trabajo, y la presencia utiliza
+esa etiqueta para sesiones observadas. Se mantienen las identidades y las rutas
+internas para el seguimiento. Pasan 36 pruebas de presencia, adopción y descartes
+y ocho contratos de paquete. Pendiente comprobación completa de CI de esta revisión.
