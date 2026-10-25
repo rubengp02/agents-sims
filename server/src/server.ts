@@ -1,7 +1,6 @@
 import * as crypto from 'crypto';
 import type { FastifyInstance } from 'fastify';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 
 import type { AgentRuntime } from './agentRuntime.js';
@@ -19,6 +18,7 @@ import {
 } from './constants.js';
 import type { TeamCoordinator } from './execution/teamCoordinator.js';
 import { createHttpServer } from './httpServer.js';
+import { officeStateDirectory } from './officeStateDirectory.js';
 import type { ServerConfig } from './serverConfig.js';
 import { isServerConfig, isServerTarget } from './serverConfig.js';
 
@@ -156,7 +156,7 @@ export class PixelAgentsServer {
 
   /** Returns the absolute path to ~/.pixel-agents/server.json. */
   private getServerJsonPath(): string {
-    return path.join(os.homedir(), SERVER_JSON_DIR, SERVER_JSON_NAME);
+    return path.join(officeStateDirectory(SERVER_JSON_DIR), SERVER_JSON_NAME);
   }
 
   /** Write server.json atomically (tmp + rename) with mode 0o600. */
@@ -203,7 +203,7 @@ export class PixelAgentsServer {
 
   /** Returns the absolute path to ~/.pixel-agents/servers/. */
   private getRegistryDir(): string {
-    return path.join(os.homedir(), SERVER_JSON_DIR, SERVERS_DIR);
+    return path.join(officeStateDirectory(SERVER_JSON_DIR), SERVERS_DIR);
   }
 
   /** Returns the absolute path to this config's registry entry file. Keyed on

@@ -15,6 +15,7 @@ import { type CliRuntime, discoverCodex, stopProcess } from './cliProcess.js';
 import { CodexExecutor } from './codexExecutor.js';
 import { acquireCodexLease } from './executionLease.js';
 import { createExecutionMetrics } from './executionMetrics.js';
+import { isolatedProjectInstructions } from './projectInstructions.js';
 import { object, safeCliEnvironment, verifyChoice } from './subscriptionPolicy.js';
 import {
   type ExecuteOptions,
@@ -280,6 +281,7 @@ export class OrchestratorExecutor implements OfficialExecutor {
     );
     let child: ChildProcessWithoutNullStreams | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let quotaTimer: ReturnType<typeof setInterval> | undefined;
     const abort = () => {
       if (child) void stopProcess(child);
     };
@@ -323,6 +325,12 @@ export class OrchestratorExecutor implements OfficialExecutor {
           : project);
       if (options.ownedWorkspace && workspace !== options.ownedWorkspace.path)
         throw new ExecutionBlocked('ao_session_scope', 'La sesión apunta a otra copia de trabajo.');
+      const submittedPrompt = isolatedProjectInstructions(project, workspace) + options.prompt;
+      if (submittedPrompt.length > 90_000)
+        throw new ExecutionBlocked(
+          'ao_scope_invalid',
+          'El encargo y las instrucciones del proyecto superan el límite de contexto.',
+        );
       session ??= {
         version: 1,
         project,
@@ -359,7 +367,7 @@ export class OrchestratorExecutor implements OfficialExecutor {
         outputTokens: null,
         cachedInputTokens: null,
         toolCalls: 0,
-        metrics: createExecutionMetrics('ao-activity', options.prompt),
+        metrics: createExecutionMetrics('ao-activity', options.prompt, submittedPrompt),
         contextFingerprint: options.contextFingerprint,
       };
       this.save(file, session);
@@ -380,6 +388,19 @@ export class OrchestratorExecutor implements OfficialExecutor {
         record.reasonCode ??= code;
         abort();
       };
+      let quotaCheck: Promise<void> | undefined;
+      quotaTimer = setInterval(() => {
+        if (!authorized || invalid || finished || quotaCheck) return;
+        quotaCheck = (async () => {
+          try {
+            verifyChoice(await this.diagnose(), model, effort);
+          } catch {
+            fail('subscription_unverified');
+          }
+        })().finally(() => {
+          quotaCheck = undefined;
+        });
+      }, 8000);
       child.stdin.on('error', () => fail('ao_transport_closed'));
       const lines = createInterface({ input: child.stdout });
       lines.on('line', (line) => {
@@ -414,7 +435,7 @@ export class OrchestratorExecutor implements OfficialExecutor {
               authorized = true;
               record.status = 'running';
               notify();
-              child!.stdin.end(JSON.stringify({ action: 'turn', prompt: options.prompt }) + '\n');
+              child!.stdin.end(JSON.stringify({ action: 'turn', prompt: submittedPrompt }) + '\n');
             } catch {
               fail('subscription_unverified');
             }
@@ -461,10 +482,11 @@ export class OrchestratorExecutor implements OfficialExecutor {
         diagnostics = (diagnostics + chunk.toString()).slice(0, 32_000);
         writeFileSync(join(this.stateDir, record.id + '.stderr.log'), diagnostics, { mode: 0o600 });
       });
-      timer = setTimeout(
-        () => fail('time_budget'),
-        Math.min(900_000, options.timeoutMs ?? 180_000),
-      );
+      if (options.timeoutMs !== null)
+        timer = setTimeout(
+          () => fail('time_budget'),
+          Math.min(900_000, options.timeoutMs ?? 180_000),
+        );
       const closed = new Promise<number | null>((resolve, reject) => {
         child!.once('error', reject);
         child!.once('close', resolve);
@@ -480,10 +502,13 @@ export class OrchestratorExecutor implements OfficialExecutor {
           model,
           effort,
           allowWrites: !!options.allowWrites,
-          timeoutMs: Math.min(900_000, options.timeoutMs ?? 180_000),
+          timeoutMs:
+            options.timeoutMs === null ? 0 : Math.min(900_000, options.timeoutMs ?? 180_000),
         }) + '\n',
       );
       const code = await closed;
+      clearInterval(quotaTimer);
+      await quotaCheck;
       await verification;
       if (
         invalid ||
@@ -514,6 +539,7 @@ export class OrchestratorExecutor implements OfficialExecutor {
       this.save(join(this.stateDir, record.id + '.json'), record);
       return record;
     } finally {
+      if (quotaTimer) clearInterval(quotaTimer);
       if (timer) clearTimeout(timer);
       options.signal?.removeEventListener('abort', abort);
       if (child) await stopProcess(child);

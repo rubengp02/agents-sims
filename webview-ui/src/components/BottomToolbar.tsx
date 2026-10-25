@@ -14,6 +14,7 @@ interface BottomToolbarProps {
   onToggleSettings: () => void;
   workspaceFolders: WorkspaceFolder[];
   onToggleTeam?: () => void;
+  onOpenSessions?: () => void;
 }
 
 export function BottomToolbar({
@@ -24,6 +25,7 @@ export function BottomToolbar({
   onToggleSettings,
   workspaceFolders,
   onToggleTeam,
+  onOpenSessions,
 }: BottomToolbarProps) {
   const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
   const [isBypassMenuOpen, setIsBypassMenuOpen] = useState(false);
@@ -84,7 +86,8 @@ export function BottomToolbar({
   };
 
   return (
-    <div className="absolute bottom-10 left-10 z-20 flex items-center gap-4 pixel-panel p-4">
+    <div className="absolute bottom-10 left-10 z-20 flex flex-wrap items-center gap-4 pixel-panel p-4 max-w-[calc(100%-20px)]">
+      {onOpenSessions && <Button onClick={onOpenSessions}>Otras sesiones de Codex</Button>}
       {/* Hide + Agent in standalone browser mode (no terminal to interact with) */}
       {!isBrowserRuntime && (
         <div
@@ -136,7 +139,7 @@ export function BottomToolbar({
       >
         Settings
       </Button>
-      {onToggleTeam && <Button onClick={onToggleTeam}>Equipo</Button>}
+      {onToggleTeam && <Button onClick={onToggleTeam}>Conversaciones</Button>}
     </div>
   );
 }

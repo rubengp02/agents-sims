@@ -28,7 +28,7 @@ import {
 } from './types.js';
 
 export const CODEX_TASK_PREFIX =
-  'Cumple las instrucciones del proyecto. No hagas commits, push ni cambios de rama. No uses APIs de pago, créditos, recargas ni credenciales. No delegues en otros modelos o proveedores.\n\n';
+  'Cumple las instrucciones del proyecto. No hagas commits, push ni cambios de rama. No uses APIs de pago, créditos, recargas ni credenciales. No inicies CLIs de IA, subagentes ni proveedores por tu cuenta. Las asignaciones del Jefe al equipo mediante el contrato de la oficina están autorizadas y las ejecuta el servidor con sus controles.\n\n';
 
 export function buildCodexArguments(
   options: ExecuteOptions,
@@ -40,6 +40,7 @@ export function buildCodexArguments(
     'exec',
     '--ignore-user-config',
     '--json',
+    '--skip-git-repo-check',
     '--color',
     'never',
     '--cd',
@@ -159,6 +160,7 @@ export class CodexExecutor implements OfficialExecutor {
       );
     if (
       options.timeoutMs !== undefined &&
+      options.timeoutMs !== null &&
       (!Number.isFinite(options.timeoutMs) ||
         options.timeoutMs < 1 ||
         options.timeoutMs > 15 * 60_000)
@@ -365,7 +367,8 @@ export class CodexExecutor implements OfficialExecutor {
             polling = undefined;
           });
       }, this.dependencies.pollMs ?? 8000);
-      timeout = setTimeout(() => stop('time_limit', 'paused'), options.timeoutMs ?? 15 * 60_000);
+      if (options.timeoutMs !== null)
+        timeout = setTimeout(() => stop('time_limit', 'paused'), options.timeoutMs ?? 15 * 60_000);
       child.stdin.end(CODEX_TASK_PREFIX + options.prompt);
       const code = await exit;
       clearInterval(interval);

@@ -16,6 +16,7 @@ import { handleClientMessage } from './clientMessageHandler.js';
 import { HOOK_API_PREFIX, MAX_HOOK_BODY_SIZE } from './constants.js';
 import type { TeamCoordinator } from './execution/teamCoordinator.js';
 import { registerTeamRoutes } from './execution/teamRoutes.js';
+import { employeeMessage, officePresence } from './officePresence.js';
 import type { AgentState } from './types.js';
 
 /** Options for creating the HTTP + WebSocket server. */
@@ -75,7 +76,14 @@ export async function createHttpServer(options: HttpServerOptions): Promise<Http
       prefix: '/',
     });
     // HTML5 history fallback: serve index.html for unmatched routes
-    app.setNotFoundHandler((_req, reply) => {
+    app.setNotFoundHandler((request, reply) => {
+      if (request.url.split('?')[0].startsWith('/api/')) {
+        return reply.code(404).send({
+          code: 'api_not_found',
+          message:
+            'Esta función no está disponible en el servidor. Cierra y vuelve a abrir la oficina para actualizarlo.',
+        });
+      }
       reply.sendFile('index.html');
     });
   }
@@ -84,8 +92,12 @@ export async function createHttpServer(options: HttpServerOptions): Promise<Http
 
   registerHealthRoute(app);
   registerHookRoute(app, options);
+  if (process.env.PIXEL_OFFICE_PREVIEW === '1' && process.env.PIXEL_OFFICE_PREVIEW_NONCE)
+    app.get('/api/office/preview', async () => ({ nonce: process.env.PIXEL_OFFICE_PREVIEW_NONCE }));
   registerWebSocketRoute(app, options);
   if (!options.embedded && options.team) registerTeamRoutes(app, options.team);
+  if (!options.embedded && options.team)
+    app.get('/api/office/presence', async () => officePresence(options.store, options.team!));
 
   // ── Listen ──────────────────────────────────────────────────
 
@@ -143,9 +155,16 @@ function registerHookRoute(app: FastifyInstance, options: HttpServerOptions): vo
 
 function registerWebSocketRoute(app: FastifyInstance, options: HttpServerOptions): void {
   app.get('/ws', { websocket: true }, (socket, request) => {
-    // In standalone mode (not embedded), skip auth for WebSocket connections.
-    // The server binds to 127.0.0.1, so only local clients can connect.
-    // In embedded mode (VS Code), require Bearer token for security.
+    // Loopback alone does not prevent another website from opening this socket.
+    if (
+      !options.embedded &&
+      request.headers.origin &&
+      request.headers.origin !== `http://${request.headers.host}`
+    ) {
+      socket.close(4003, 'origin_not_allowed');
+      return;
+    }
+    // Embedded VS Code clients additionally require their bearer token.
     if (options.embedded) {
       const auth = request.headers.authorization ?? '';
       const expected = `Bearer ${options.token}`;
@@ -158,10 +177,15 @@ function registerWebSocketRoute(app: FastifyInstance, options: HttpServerOptions
     }
 
     const { store } = options;
+    const send = (message: Record<string, unknown>) => {
+      const projected =
+        !options.embedded && options.team ? employeeMessage(message, store) : message;
+      if (projected) safeSend(socket, projected);
+    };
 
     // Pipe store events to WebSocket client
     const onAgentAdded = (id: number, agent: AgentState) => {
-      safeSend(socket, {
+      send({
         type: 'agentCreated',
         id,
         folderName: agent.folderName,
@@ -177,11 +201,11 @@ function registerWebSocketRoute(app: FastifyInstance, options: HttpServerOptions
     };
 
     const onAgentRemoved = (id: number) => {
-      safeSend(socket, { type: 'agentClosed', id });
+      send({ type: 'agentClosed', id });
     };
 
     const onBroadcast = (message: Record<string, unknown>) => {
-      safeSend(socket, message);
+      send(message);
     };
 
     store.on('agentAdded', onAgentAdded);
@@ -192,10 +216,27 @@ function registerWebSocketRoute(app: FastifyInstance, options: HttpServerOptions
     socket.on('message', (data: Buffer | string) => {
       try {
         const msg = JSON.parse(data.toString()) as Record<string, unknown>;
+        if (
+          !options.embedded &&
+          options.team &&
+          msg.type === 'saveAgentSeats' &&
+          msg.seats &&
+          typeof msg.seats === 'object' &&
+          !Array.isArray(msg.seats)
+        ) {
+          // A filtered office only sends employee seats. Preserve preferences
+          // belonging to hidden sessions instead of replacing them with absence.
+          const hiddenSeats = Object.fromEntries(
+            Object.entries(store.getAdapter()?.loadSeats() ?? {}).filter(
+              ([id]) => !store.get(Number(id))?.officeRole,
+            ),
+          );
+          msg.seats = { ...hiddenSeats, ...msg.seats };
+        }
         if (!options.embedded && msg.type) {
           console.log('[Pixel Agents] WS client message:', msg.type);
         }
-        handleClientMessage(msg, (m) => safeSend(socket, m), {
+        handleClientMessage(msg, send, {
           store,
           runtime: options.runtime,
           cache: options.assetCache ?? null,

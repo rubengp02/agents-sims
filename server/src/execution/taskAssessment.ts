@@ -42,7 +42,9 @@ export function assessTask(
   reviewMode: 'none' | 'focused' | 'deep';
 } {
   const explanation =
-    /^\s*(explica|resume|lista|documenta|traduce|explain|summari[sz]e|list\b)/i.test(prompt) &&
+    /^\s*(explica|describe|resume|lista|documenta|traduce|explain|describe|summari[sz]e|list\b)/i.test(
+      prompt,
+    ) &&
     !/\b(?:(?:modifica|cambia|implementa|migra|refactoriza|elimina|borra|quita|desactiva|activa|habilita|repara|arregla|actualiza|ajusta)(?:r|s|n|mos)?|añade|añadir|añadan|anade|anadir|corrige|corregir|corrijan|sustituye|sustituir|add|remove|delete|disable|enable|fix|change|update|modify|implement|migrate)\b/i.test(
       prompt,
     );

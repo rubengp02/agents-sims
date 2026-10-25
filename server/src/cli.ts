@@ -30,6 +30,7 @@ import { pixelOfficeChecks } from './execution/localChecks.js';
 import { OfficeSessionFilter } from './execution/officeSessionFilter.js';
 import { TeamCoordinator } from './execution/teamCoordinator.js';
 import { TeamOfficeBridge } from './execution/teamOfficeBridge.js';
+import { ExecutionBlocked, type OfficialExecutor } from './execution/types.js';
 import { UsageHistory } from './execution/usageHistory.js';
 import { FileStateAdapter } from './fileStateAdapter.js';
 import { copyHermesPlugin } from './providers/hook/hermes/hermesHookInstaller.js';
@@ -40,6 +41,8 @@ import {
   hermesProvider,
 } from './providers/index.js';
 import { PixelAgentsServer } from './server.js';
+import { officeApprovalHandler } from './tools/appServerApprovals.js';
+import { OfficeServices } from './tools/officeServices.js';
 
 /** All providers this standalone server hosts, sharing one office. Claude stays
  *  first: AgentRuntime treats providers[0] as primary for its file-scanning
@@ -155,29 +158,65 @@ async function main(): Promise<void> {
 
   try {
     // Create runtime first (before server.start, so we can pass it in)
-    const providers = ALL_PROVIDERS.filter((p) => args.providers.includes(p.id));
-    const executionDirectory = path.resolve('.local-office', 'executions');
+    const preview = process.env.PIXEL_OFFICE_PREVIEW === '1';
+    // AgentRuntime needs a parser even without observation. Preview never installs
+    // hooks or starts scanners, so this does not connect to personal sessions.
+    const providers = preview
+      ? [codexProvider]
+      : ALL_PROVIDERS.filter((p) => args.providers.includes(p.id));
+    const localRuntime =
+      preview && process.env.PIXEL_OFFICE_STATE_DIR
+        ? path.join(process.env.PIXEL_OFFICE_STATE_DIR, 'execution-state')
+        : path.resolve('.local-office');
+    const executionDirectory = path.join(localRuntime, 'executions');
     const officeSessions = new OfficeSessionFilter(executionDirectory);
     const runtime = new AgentRuntime(store, providers, {
       ignoreObservedSession: (provider, session, transcript) =>
         officeSessions.shouldIgnore(provider, session, transcript),
     });
-    const adaptiveState = adaptiveStateDirectory(process.cwd());
+    const adaptiveState =
+      preview && process.env.PIXEL_OFFICE_STATE_DIR
+        ? path.join(process.env.PIXEL_OFFICE_STATE_DIR, 'adaptive')
+        : adaptiveStateDirectory(process.cwd());
+    const officeServices = new OfficeServices(
+      path.join(adaptiveState, 'office-tools'),
+      packageRoot,
+      path.join(distRoot, 'native', 'office-desktop.exe'),
+    );
+    await officeServices.initialize();
+    const previewBlock = async (): Promise<never> => {
+      throw new ExecutionBlocked(
+        'preview_execution_disabled',
+        'Esta es una vista previa aislada. Los modelos se ejecutan únicamente desde la oficina principal.',
+      );
+    };
+    const previewExecutor: OfficialExecutor = {
+      provider: 'codex',
+      diagnose: previewBlock,
+      execute: previewBlock,
+    };
     const team: TeamCoordinator = new TeamCoordinator(
       {
-        codex: createOfficeExecutor(process.cwd(), executionDirectory),
-        claude: new ClaudeExecutor(() => team.snapshot().settings.claudeEnabled),
+        codex: preview
+          ? previewExecutor
+          : createOfficeExecutor(process.cwd(), executionDirectory, {
+              approvals: officeApprovalHandler(officeServices),
+            }),
+        claude: preview
+          ? { ...previewExecutor, provider: 'claude' }
+          : new ClaudeExecutor(() => team.snapshot().settings.claudeEnabled),
       },
-      path.resolve('.local-office', 'team-settings.json'),
+      path.join(localRuntime, 'team-settings.json'),
       new TeamOfficeBridge(store, runtime),
       pixelOfficeChecks(process.cwd()),
       undefined,
-      path.resolve('.local-office', 'team-checkpoint.json'),
+      path.join(localRuntime, 'team-checkpoint.json'),
       new AdaptiveRuntime(
         new UsageHistory(path.join(adaptiveState, 'usage-history.json')),
         path.join(adaptiveState, 'task-artifacts'),
       ),
       new ConversationLibrary(path.join(adaptiveState, 'library')),
+      officeServices,
     );
     console.log(`[Pixel Agents] Enabled providers: ${providers.map((p) => p.id).join(', ')}`);
 
@@ -193,6 +232,7 @@ async function main(): Promise<void> {
     // block the others (graceful degradation: one broken provider can't take
     // down hook delivery for the rest).
     const installAllHooks = async (serverUrl: string, authToken: string): Promise<void> => {
+      if (preview) return;
       if (args.providers.includes('claude')) {
         const copied = copyHookScript(packageRoot);
         try {
@@ -230,6 +270,7 @@ async function main(): Promise<void> {
     };
 
     const uninstallAllHooks = async (): Promise<void> => {
+      if (preview) return;
       await Promise.all(
         providers.map((provider) =>
           provider
@@ -319,9 +360,10 @@ async function main(): Promise<void> {
 
     // Start scanning for external sessions (Claude running in user's terminal)
     const cwd = process.cwd();
-    const dirs = args.providers.includes('claude')
-      ? claudeProvider.getSessionDirs?.(cwd)
-      : undefined;
+    const dirs =
+      !preview && args.providers.includes('claude')
+        ? claudeProvider.getSessionDirs?.(cwd)
+        : undefined;
     if (dirs && dirs[0]) {
       const projectDir = dirs[0];
       console.log(`[Pixel Agents] Scanning project dir: ${projectDir}`);

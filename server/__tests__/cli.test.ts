@@ -151,6 +151,43 @@ describe('parseArgs', () => {
  * dist/cli.js first; skips gracefully if it hasn't.
  */
 describe('dist/cli.js entry-point guard', () => {
+  it('keeps a preview isolated from personal configuration and installs no session observers', async () => {
+    if (!fs.existsSync(CLI_BUNDLE)) throw new Error('Build the CLI before running this test');
+    const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), 'pxl-preview-only-'));
+    const privateState = path.join(tmpHome, 'private-preview');
+    const port = await getFreePort();
+    const child = spawn(process.execPath, [CLI_BUNDLE, '--port', String(port)], {
+      cwd: tmpHome,
+      env: {
+        ...process.env,
+        HOME: tmpHome,
+        USERPROFILE: tmpHome,
+        PIXEL_OFFICE_PREVIEW: '1',
+        PIXEL_OFFICE_STATE_DIR: privateState,
+        PIXEL_OFFICE_PREVIEW_NONCE: 'owned-preview-nonce',
+      },
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let output = '';
+    child.stdout.on('data', (chunk: Buffer) => (output += chunk.toString()));
+    child.stderr.on('data', (chunk: Buffer) => (output += chunk.toString()));
+    try {
+      await waitForCondition(() => output.includes('Pixel Agents server running')).catch(() => {
+        throw new Error(`Preview startup failed: ${output}`);
+      });
+      const response = await fetch(`http://127.0.0.1:${port}/api/office/preview`);
+      expect(await response.json()).toEqual({ nonce: 'owned-preview-nonce' });
+      expect(output).not.toContain('tailer started');
+      expect(output).not.toContain('hooks installed');
+      for (const name of ['.claude', '.hermes', '.pixel-agents'])
+        expect(fs.existsSync(path.join(tmpHome, name))).toBe(false);
+      expect(fs.existsSync(privateState)).toBe(true);
+    } finally {
+      await stopChild(child);
+      fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  });
   it('runs Codex alone without creating Claude or Hermes configuration, including after toggling hooks', async () => {
     if (!fs.existsSync(CLI_BUNDLE)) throw new Error('Build the CLI before running this test');
     const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), 'pxl-codex-only-'));

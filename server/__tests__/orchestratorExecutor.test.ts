@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -38,7 +38,7 @@ function fixture(mode = 'ok') {
       if(q.action==='open') console.log(JSON.stringify({kind:'ready',threadId:q.threadId||'test-thread'}));
       else if(q.action==='turn') {
         if(${JSON.stringify(mode)}==='hang') { setInterval(()=>{},1000);return; }
-        console.log(JSON.stringify({kind:'text',text:'OFFICE_RESULT {"status":"completed"}'}));
+        console.log(JSON.stringify({kind:'text',text:${JSON.stringify(mode)}==='show-prompt'?q.prompt:'OFFICE_RESULT {"status":"completed"}'}));
         if(${JSON.stringify(mode)}!=='no-usage') console.log(JSON.stringify({kind:'usage',input:${mode === 'second' ? 200 : 100},output:${mode === 'second' ? 40 : 20},cached:${mode === 'bad-cache' ? 999 : mode === 'second' ? 80 : 40}}));
         console.log(JSON.stringify({kind:'finished',status:'completed'}));
       }
@@ -69,6 +69,43 @@ afterEach(() => {
 });
 
 describe('restricted Agent Orchestrator boundary (simulated provider)', () => {
+  it('hands missing original instructions to the isolated turn without storing their contents', async () => {
+    const h = fixture('show-prompt');
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-C', h.project, ...args], { windowsHide: true, stdio: 'pipe' });
+    git('init');
+    writeFileSync(join(h.project, 'AGENTS.md'), 'TRACKED_PROJECT_GUIDANCE');
+    git('add', 'AGENTS.md');
+    git(
+      '-c',
+      'user.name=Fixture',
+      '-c',
+      'user.email=fixture@example.invalid',
+      'commit',
+      '-m',
+      'fixture',
+    );
+    const parent = join(h.root, '.local-office/agent-orchestrator/workspaces');
+    mkdirSync(parent, { recursive: true });
+    const workspace = join(parent, 'inherited');
+    git('worktree', 'add', '--detach', workspace, 'HEAD');
+    writeFileSync(join(h.project, '.git/info/exclude'), 'AGENTS.override.md\n');
+    writeFileSync(join(h.project, 'AGENTS.override.md'), 'LOCAL_IGNORED_GUIDANCE');
+    const output: string[] = [];
+    const result = await h.executor.execute({
+      project: h.project,
+      inheritedWorkspace: workspace,
+      prompt: 'Encargo',
+      onOutput: (text) => output.push(text),
+    });
+    expect(result.status).toBe('completed');
+    expect(output.join('')).toContain('LOCAL_IGNORED_GUIDANCE');
+    expect(output.join('')).not.toContain('TRACKED_PROJECT_GUIDANCE');
+    expect(result.metrics!.submittedCharacters).toBeGreaterThan(result.metrics!.promptCharacters);
+    expect(readFileSync(join(h.root, 'receipts', result.id + '.json'), 'utf8')).not.toContain(
+      'LOCAL_IGNORED_GUIDANCE',
+    );
+  });
   it('checks subscription before launch and again before the turn; reports cache separately', async () => {
     const h = fixture();
     const r = await h.executor.execute({
@@ -173,6 +210,32 @@ describe('restricted Agent Orchestrator boundary (simulated provider)', () => {
         allowWrites: true,
       }),
     ).rejects.toMatchObject({ code: 'ao_scope_invalid' });
+  });
+  it('passes an explicit unbounded native timeout to the bridge while keeping cancellation', async () => {
+    const h = fixture('hang');
+    const original = h.launch.getMockImplementation()!;
+    h.launch.mockImplementation(() => {
+      const child = original();
+      vi.spyOn(child.stdin, 'write');
+      return child;
+    });
+    const controller = new AbortController();
+    let running = false;
+    const task = h.executor.execute({
+      project: h.project,
+      prompt: 'long work',
+      timeoutMs: null,
+      signal: controller.signal,
+      onState: (state) => {
+        running ||= state.status === 'running';
+      },
+    });
+    await vi.waitFor(() => expect(running).toBe(true));
+    const child = h.launch.mock.results[0].value;
+    const open = JSON.parse(String(vi.mocked(child.stdin.write).mock.calls[0][0]));
+    expect(open.timeoutMs).toBe(0);
+    controller.abort();
+    expect((await task).status).toBe('cancelled');
   });
   it('rejects payment environment and a missing or changed artifact before launch', async () => {
     const h = fixture();

@@ -1,71 +1,47 @@
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
-import { isAbsolute, join, relative } from 'node:path';
+import {
+  appendFileSync,
+  closeSync,
+  copyFileSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  readSync,
+  realpathSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
+import { join } from 'node:path';
 
 import type { TaskContext, TeamTask } from '../../../core/src/team.js';
+import { captureFiles, type FileRevision, gitFileNames, revisionFile } from './revisionStore.js';
+export type { FileRevision } from './revisionStore.js';
 import { ExecutionBlocked } from './types.js';
 
 const hash = (bytes: string | Buffer) => createHash('sha256').update(bytes).digest('hex');
-export interface FileRevision {
-  digest: string;
-  files: Record<string, string>;
-}
 export function captureRevision(project: string): FileRevision {
   const root = realpathSync(project);
   let names: string[];
   try {
-    names = execFileSync(
-      'git',
-      ['-C', root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard'],
-      { encoding: 'utf8', windowsHide: true, maxBuffer: 2_000_000 },
-    )
-      .split('\0')
-      .filter(Boolean);
+    names = gitFileNames(root).filter(
+      (name) =>
+        name &&
+        !name
+          .split('/')
+          .some(
+            (part, i, parts) =>
+              ['dist', 'out', '.vscode-test'].includes(part) ||
+              (part === 'generated_images' && parts[i - 1] === '.codex'),
+          ),
+    );
   } catch {
     throw new ExecutionBlocked(
       'review_git_required',
       'La revisión por cambios necesita un repositorio Git verificable.',
     );
   }
-  if (names.length > 10000)
-    throw new ExecutionBlocked(
-      'review_scope_large',
-      'El repositorio requiere una revisión de alcance antes de capturar cambios.',
-    );
-  const files: Record<string, string> = Object.create(null);
-  let size = 0;
-  for (const name of [...new Set(names)].sort()) {
-    const file = join(root, name);
-    let stat;
-    try {
-      stat = lstatSync(file);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
-      throw new ExecutionBlocked(
-        'review_file_unreadable',
-        'Un archivo no se pudo inspeccionar; no se omite de la revisión.',
-      );
-    } // tracked deletion
-    if (stat.isSymbolicLink())
-      throw new ExecutionBlocked(
-        'review_symlink',
-        'Revisa los enlaces antes de capturar el alcance.',
-      );
-    if (!stat.isFile()) continue;
-    const resolved = realpathSync(file),
-      rel = relative(root, resolved);
-    if (!rel || rel.startsWith('..') || isAbsolute(rel))
-      throw new ExecutionBlocked('review_path', 'Archivo fuera del alcance de revisión.');
-    size += stat.size;
-    if (size > 32_000_000)
-      throw new ExecutionBlocked(
-        'review_scope_large',
-        'La captura excede el alcance local permitido.',
-      );
-    files[name] = readFileSync(file).toString('base64');
-  }
-  return { digest: hash(JSON.stringify(files)), files };
+  return captureFiles(root, names);
 }
 
 export interface ReviewPacket {
@@ -77,6 +53,27 @@ export interface ReviewPacket {
   checks: NonNullable<TeamTask['localChecks']>;
   files: Array<{ path: string; lines: number }>;
   diff: string;
+  diffArtifact?: { path: string; bytes: number };
+}
+
+function saveRevisionFile(revision: FileRevision, name: string, destination: string): number {
+  if (revision.format === 'sha256-v1') {
+    const source = revisionFile(revision, name);
+    if (source) copyFileSync(source, destination);
+    else writeFileSync(destination, '', { mode: 0o600 });
+  } else
+    writeFileSync(destination, Buffer.from(revision.files[name] ?? '', 'base64'), { mode: 0o600 });
+  const fd = openSync(destination, 'r'),
+    buffer = Buffer.allocUnsafe(64 * 1024);
+  let lines = 1,
+    count: number;
+  try {
+    while ((count = readSync(fd, buffer, 0, buffer.length, null)) > 0)
+      for (let i = 0; i < count; i++) if (buffer[i] === 10) lines++;
+  } finally {
+    closeSync(fd);
+  }
+  return lines;
 }
 
 export function buildReviewPacket(
@@ -105,37 +102,66 @@ export function buildReviewPacket(
   mkdirSync(privateDirectory, { recursive: true, mode: 0o700 });
   const files: ReviewPacket['files'] = [];
   let diff = '';
+  const fullDiff = join(privateDirectory, 'complete.diff');
+  writeFileSync(fullDiff, '', { mode: 0o600 });
+  const inlineSize = mode === 'deep' ? 60000 : 30000;
+  let externalDiff = false;
   const changed = [...new Set([...Object.keys(base.files), ...Object.keys(candidate.files)])]
     .sort()
-    .filter((name) => base.files[name] !== candidate.files[name]);
+    .filter((name) => {
+      const fingerprint = (revision: FileRevision) =>
+        revision.files[name] === undefined
+          ? undefined
+          : revision.format === 'sha256-v1'
+            ? revision.files[name]
+            : hash(Buffer.from(revision.files[name], 'base64'));
+      return fingerprint(base) !== fingerprint(candidate);
+    });
   for (const [index, name] of changed.entries()) {
     const before = join(privateDirectory, `before-${index}`),
       after = join(privateDirectory, `after-${index}`);
-    const bytes = Buffer.from(candidate.files[name] ?? '', 'base64');
-    writeFileSync(before, Buffer.from(base.files[name] ?? '', 'base64'), { mode: 0o600 });
-    writeFileSync(after, bytes, { mode: 0o600 });
-    const result = spawnSync(
-      'git',
-      ['diff', '--no-index', '--no-ext-diff', '--no-textconv', '--binary', '--', before, after],
-      { encoding: 'utf8', windowsHide: true, maxBuffer: 1000000 },
-    );
+    saveRevisionFile(base, name, before);
+    const lines = saveRevisionFile(candidate, name, after);
+    const perFileDiff = join(privateDirectory, `diff-${index}`),
+      diffFd = openSync(perFileDiff, 'w', 0o600);
+    let result;
+    try {
+      result = spawnSync(
+        'git',
+        ['diff', '--no-index', '--no-ext-diff', '--no-textconv', '--binary', '--', before, after],
+        { encoding: 'utf8', windowsHide: true, stdio: ['ignore', diffFd, 'pipe'] },
+      );
+    } finally {
+      closeSync(diffFd);
+    }
     if (result.error || ![0, 1].includes(result.status ?? -1))
       throw new ExecutionBlocked(
         'review_diff_failed',
         'No se pudo construir el diff independiente.',
       );
-    diff +=
-      `\nArchivo ${JSON.stringify(name)}:\n` +
-      result.stdout
-        .replaceAll(before.replaceAll('\\', '/'), `a/${name}`)
-        .replaceAll(after.replaceAll('\\', '/'), `b/${name}`);
-    files.push({ path: name, lines: Math.max(1, bytes.toString('utf8').split(/\r?\n/).length) });
+    const header = `\nArchivo ${JSON.stringify(name)}:\n`;
+    appendFileSync(fullDiff, header);
+    const fd = openSync(perFileDiff, 'r'),
+      buffer = Buffer.allocUnsafe(64 * 1024);
+    try {
+      let count: number;
+      while ((count = readSync(fd, buffer, 0, buffer.length, null)) > 0)
+        appendFileSync(fullDiff, buffer.subarray(0, count));
+    } finally {
+      closeSync(fd);
+    }
+    if (!externalDiff && diff.length + header.length + statSync(perFileDiff).size <= inlineSize)
+      diff +=
+        header +
+        readFileSync(perFileDiff, 'utf8')
+          .replaceAll(before.replaceAll('\\', '/'), `a/${name}`)
+          .replaceAll(after.replaceAll('\\', '/'), `b/${name}`);
+    else externalDiff = true;
+    files.push({ path: name, lines });
   }
-  if (diff.length > (mode === 'deep' ? 60000 : 30000))
-    throw new ExecutionBlocked(
-      'review_packet_too_large',
-      'El diff completo requiere dividir la revisión o revisar su alcance; no se ha truncado.',
-    );
+  if (externalDiff)
+    diff =
+      'El diff completo se conserva en diffArtifact.path. Lee ese archivo por bloques y contrasta todos los cambios antes de declarar la revisión completada. No asumas una revisión completa a partir de este índice.';
   return {
     version: 1,
     base: base.digest,
@@ -145,6 +171,7 @@ export function buildReviewPacket(
     checks,
     files,
     diff,
+    ...(externalDiff ? { diffArtifact: { path: fullDiff, bytes: statSync(fullDiff).size } } : {}),
   };
 }
 

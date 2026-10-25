@@ -10,7 +10,21 @@ reales de paralelismo quedan pausados hasta una autorización nueva. Detalles en
 
 ## Cómo utilizarlo
 
-1. Abre la oficina con el lanzador habitual y pulsa **Equipo**.
+El recorrido principal es **Conversaciones**: seleccionar proyecto, escribir,
+enviar para iniciar con permisos permanentes del proyecto, y recibir el resultado en el mismo chat. La cola es
+una vista avanzada accesible con **Ver cola**; confirmar un mensaje no ejecuta
+otros encargos pendientes. Consulta [CONVERSACIONES.md](CONVERSACIONES.md).
+
+El chat normal usa la gestión de contexto de Codex y la cuota de suscripción sin
+pedir cotas técnicas. Los límites numéricos descritos para la cola avanzada se
+mantienen en esa cola y al seleccionar expresamente presupuesto manual en el chat.
+El modo normal no corta por duración; conserva permisos, cancelación, comprobación
+de cuota y revisión de las pausas. La [oficina iterativa](OFICINA_ITERATIVA.md)
+permite al Jefe asignar sucesivos encargos dentro del mismo objetivo confirmado.
+
+Para utilizar los controles avanzados:
+
+1. Abre la oficina con el lanzador habitual y entra en **Ver cola**.
 2. Deja **Automático**, que es el modo inicial. **Comprobar suscripciones y
    modelos** consulta los CLIs sin enviar una tarea a la IA.
 3. Escribe la carpeta completa de tu proyecto y lo que quieres conseguir.
@@ -24,6 +38,10 @@ El plan del Jefe no se ejecuta automáticamente. En modo automático, **Ejecutar
 cola** autoriza las asignaciones propuestas. En modo mixto, debes comprobar y
 confirmar cada asignación. En modo manual, añade tareas directamente y selecciona
 su proveedor, modelo y razonamiento antes de confirmarlas.
+
+Los mensajes preparados desde el chat conservan además su confirmación de cuota
+y archivos. **Ejecutar cola** no omite esa confirmación. TURBO solo recuerda el
+permiso de archivos del proyecto; no elimina controles de ejecución ni presupuesto.
 
 **Cambiar modelo** conserva el control manual en cualquier modo. El catálogo de
 selección proviene de la última comprobación; se valida otra vez antes de ejecutar.

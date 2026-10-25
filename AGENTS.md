@@ -6,8 +6,30 @@
   personajes, animaciones o experiencia visual de forma importante. No rediseñes
   por iniciativa propia. Decide y ejecuta la implementación técnica con autonomía.
 - Conserva las funcionalidades, el editor visual y la personalización existentes.
+- Conversaciones usa la tipografía del sistema (`system-ui`) para facilitar la
+  lectura, con mensajes de 16 px. Conserva la fuente pixelada en el resto de la oficina.
+- El usuario ha autorizado autonomía permanente en el proyecto: en el chat normal,
+  Enviar autoriza escritura, herramientas locales, pruebas y cuota incluida sin
+  confirmaciones adicionales. Conserva la preferencia por proyecto y la opción
+  manual. No reintroduzcas confirmaciones habituales. Mantén comprobación de cuota,
+  cancelación y revisión de pausas reales; abrir el historial nunca ejecuta trabajo.
 - Los personajes representan actividad real; distingue observación, ejecución y
   simulación. No presentes capacidades pendientes como implementadas.
+- El Jefe ajusta el equipo a la petición: descripciones, traducciones y resúmenes
+  breves se resuelven directamente, con las lecturas mínimas y sin Tester por
+  rutina. Reutiliza contexto vigente y agrupa lecturas. Un permiso de escritura
+  no implica que haya que editar. Cambios de código, investigación completa,
+  riesgos relevantes y trabajo delegado conservan revisión independiente.
+  Añadir un especialista exige identificar la incertidumbre que resolverá.
+- Los seguimientos de presentación («incluye los siguientes pasos», «resúmelo»,
+  «reformúlalo en cinco puntos») reutilizan la respuesta y las fuentes anteriores.
+  No repitas su verificación por rutina. Una indicación de formato no cancela
+  requisitos de implementación ni revisiones pendientes de cambios reales.
+- Publicar, enviar mensajes o modificar servicios externos requiere aprobación
+  humana de la operación concreta. La autonomía local no concede permisos externos.
+- Las asignaciones del Jefe mediante el contrato de la oficina están autorizadas.
+  Distingue esa coordinación de lanzar CLIs de IA o subagentes por cuenta propia;
+  no introduzcas una prohibición general de delegar en los prompts del Jefe.
 
 ## Suscripciones y proveedores
 
@@ -17,6 +39,10 @@
 - Codex utiliza Codex CLI con sesión de ChatGPT. Antes de cada ejecución verifica
   el consumo incluido mediante el control existente. Si la verificación falla o
   se alcanza un límite, bloquea o pausa. Nunca uses un sistema de pago alternativo.
+- Un recibo sin contadores se conserva como desconocido y pausa ese intento. Un
+  envío o reintento explícito del chat normal puede continuar tras verificar cuota
+  actual, sin borrar el recibo ni reiniciar contadores. La cola y el presupuesto
+  manual siguen necesitando totales históricos verificables.
 - Claude permanece opcional y desactivado inicialmente. Conserva su adaptador;
   habilitarlo no permite eludir sus comprobaciones oficiales ni su bloqueo actual
   de inferencia por falta de verificación del consumo adicional.
@@ -59,5 +85,9 @@
   de usuario. Las pruebas con IA real deben estar autorizadas, tener límites y
   pasar el control de suscripción; nunca las ejecutes implícitamente en CI.
 - Respeta cualquier bloqueo de herramientas o de acceso al navegador; no lo eludas.
+- La captura de revisiones y la copia de trabajo no tienen topes artificiales de
+  megabytes, número de archivos o profundidad. Procesa contenido por bloques y
+  guarda evidencia completa fuera del proyecto; los diffs grandes se consultan
+  desde un artefacto completo. Excluye dependencias, cachés y `.vscode-test`.
 - Informa qué se probó realmente, los resultados y las limitaciones. Una salida
   exitosa del CLI o un resultado simulado no sustituyen la aceptación de la tarea.

@@ -54,6 +54,18 @@ function harness(mode = 'success', changed?: (method: string, count: number) => 
 }
 
 describe('official Codex executor (fake CLI, no inference)', () => {
+  it('allows the selected project folder without Git while retaining workspace permissions', () => {
+    const args = buildCodexArguments(
+      { project: 'C:/project', prompt: 'work', allowWrites: true },
+      'gpt-6.1-sol',
+      'low',
+      'win32',
+    );
+    expect(args).toContain('--skip-git-repo-check');
+    expect(args).toContain('default_permissions=":workspace"');
+    expect(args).toContain('approval_policy="never"');
+    expect(args).not.toContain('--dangerously-bypass-approvals-and-sandbox');
+  });
   it.each([
     ['cache', 12],
     ['bad-cache', null],
@@ -218,6 +230,25 @@ describe('official Codex executor (fake CLI, no inference)', () => {
     await vi.waitFor(() => expect(h.launch).toHaveBeenCalled());
     controller.abort();
     expect((await task).status).toBe('cancelled');
+  });
+  it('keeps native long work cancellable and verifies quota without installing a wall-clock cutoff', async () => {
+    const h = harness('hang');
+    const controller = new AbortController();
+    const timer = vi.spyOn(globalThis, 'setTimeout');
+    const task = h.executor.execute({
+      project: h.root,
+      prompt: 'long work',
+      timeoutMs: null,
+      signal: controller.signal,
+    });
+    await vi.waitFor(() => expect(h.launch).toHaveBeenCalled());
+    await vi.waitFor(() =>
+      expect(vi.mocked(h.client.request).mock.calls.length).toBeGreaterThan(3),
+    );
+    expect(timer.mock.calls.some((call) => call[1] === 900000)).toBe(false);
+    controller.abort();
+    expect((await task).status).toBe('cancelled');
+    timer.mockRestore();
   });
   it('pauses on account change and enforces the time limit', async () => {
     const h = harness('hang');

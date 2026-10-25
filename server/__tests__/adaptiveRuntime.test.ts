@@ -496,8 +496,16 @@ describe('independent diff review', () => {
       ).toThrow();
     expect(() => parseReviewFindings('OFFICE_RESULT {"status":"completed"}', p)).toThrow();
     writeFileSync(join(dir, 'code.mjs'), 'long line '.repeat(5000));
-    expect(() =>
-      buildReviewPacket(base, captureRevision(dir), packet, [], 'focused', join(root(), 'large')),
-    ).toThrow();
+    const large = buildReviewPacket(
+      base,
+      captureRevision(dir),
+      packet,
+      [],
+      'focused',
+      join(root(), 'large'),
+    );
+    expect(large.diffArtifact).toBeDefined();
+    expect(readFileSync(large.diffArtifact!.path, 'utf8')).toContain('long line '.repeat(5000));
+    expect(large.diff).toContain('por bloques');
   });
 });

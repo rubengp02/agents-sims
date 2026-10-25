@@ -242,7 +242,7 @@ This section is auto-generated. Do not edit between the markers; CI fails on dri
 
 ### `@area:standalone` (11 tests)
 
-- `e2e/standalone/conversations.spec.ts:38` — saved conversations survive panel reopening and a real server process restart
+- `e2e/standalone/conversations.spec.ts:38` — chat prepares, confirms and executes one message, persists history and scopes TURBO
 - `e2e/standalone/hooks.spec.ts:10` — propagates hook-driven lifecycle into the browser UI (Standalone / hooks)
 - `e2e/standalone/multi-server-hooks.spec.ts:31` — extension and standalone both stay hook-driven without cross-contamination (Standalone / multi-server hooks)
 - `e2e/standalone/team-workflows.spec.ts:19` — visual controls prepare, reserve, integrate and recover an experimental workflow

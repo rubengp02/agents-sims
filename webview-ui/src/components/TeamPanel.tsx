@@ -7,6 +7,7 @@ import {
   type TeamSnapshot,
   type TeamTask,
 } from '../../../core/src/team.js';
+import { ConversationWorkspace } from './ConversationWorkspace.js';
 import { ProjectChecksApproval, SavedConversations } from './SavedConversations.js';
 import { TeamScopeForm } from './TeamScopeForm.js';
 import { TaskBudgetControl, TeamWorkflowCard } from './TeamWorkflowCard.js';
@@ -77,7 +78,7 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
     const abort = new AbortController();
     let pending = false;
     const poll = async () => {
-      if (pending || mutating.current) return;
+      if (pending) return;
       pending = true;
       try {
         await load(abort.signal);
@@ -127,6 +128,17 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
     planning ||
     snapshot?.running ||
     snapshot?.tasks.some((task) => task.status === 'running' || task.status === 'checking');
+  if (snapshot?.library && !board)
+    return (
+      <ConversationWorkspace
+        snapshot={snapshot}
+        busy={busy}
+        error={error}
+        action={action}
+        onClose={onClose}
+        onQueue={() => setBoard(true)}
+      />
+    );
   return (
     <section
       ref={panel}
@@ -150,7 +162,7 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex flex-wrap gap-4 mb-8" aria-label="Vistas del equipo">
         <Button variant={!board ? 'active' : 'default'} onClick={() => setBoard(false)}>
-          Oficina y panel
+          {snapshot?.library ? 'Volver a la conversación' : 'Oficina y panel'}
         </Button>
         <Button variant={board ? 'active' : 'default'} onClick={() => setBoard(true)}>
           Mesa de asignaciones

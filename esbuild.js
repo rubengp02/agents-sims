@@ -130,6 +130,12 @@ async function main() {
     copyAssets();
     buildHooks();
     copyHermesPlugin();
+    require('./scripts/build-folder-picker.cjs')();
+    require('node:child_process').execFileSync(
+      process.execPath,
+      [require('node:path').join(__dirname, 'scripts/build-office-desktop.cjs')],
+      { windowsHide: true, stdio: 'inherit' },
+    );
     await buildCli();
   }
 }
@@ -144,7 +150,16 @@ async function buildCli() {
     sourcemap: !production,
     platform: 'node',
     outdir: 'dist',
-    external: ['fastify', '@fastify/websocket', '@fastify/static', '@fastify/cors'],
+    external: [
+      'fastify',
+      '@fastify/websocket',
+      '@fastify/static',
+      '@fastify/cors',
+      'sharp',
+      'playwright',
+      '@modelcontextprotocol/sdk',
+      'zod',
+    ],
     define: versionDefine,
     logLevel: 'silent',
   });

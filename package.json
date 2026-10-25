@@ -41,6 +41,7 @@
     "dist/extension.js",
     "dist/hooks/claude-hook.js",
     "dist/hooks/pixel_agents_bridge_plugin.py",
+    "dist/native/",
     "dist/assets/",
     "dist/webview/",
     "icon.png"
@@ -101,6 +102,7 @@
     "benchmark:v2:test": "node --test --test-concurrency=1 scripts/benchmark.test.mjs scripts/benchmark-v2.test.mjs",
     "benchmark:v2:run": "node scripts/benchmark-v2.mjs execute",
     "agent:check": "node dist/execute.js check",
+    "verify:instructions": "tsx scripts/verify-project-instructions.ts",
     "agent": "node dist/execute.js",
     "vscode:prepublish": "npm run package",
     "prepack": "npm run package",
@@ -186,7 +188,11 @@
     "@fastify/cors": "^11.2.0",
     "@fastify/static": "^10.1.2",
     "@fastify/websocket": "^11.2.0",
-    "fastify": "^5.8.5"
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "fastify": "^5.8.5",
+    "playwright": "^1.62.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
   },
   "overrides": {
     "jsonpath-plus": "^10.4.0",

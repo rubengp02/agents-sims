@@ -6,6 +6,7 @@ import path from 'node:path';
 import { AgentStateStore } from '../../../server/src/agentStateStore.js';
 import { buildAssetCache } from '../../../server/src/assetReload.js';
 import type { AgentRuntime } from '../../../server/src/agentRuntime.js';
+import type { AgentState } from '../../../server/src/types.js';
 import { DisabledExecutor } from '../../../server/src/execution/optionalExecutors.js';
 import { TeamCoordinator } from '../../../server/src/execution/teamCoordinator.js';
 import { TeamOfficeBridge } from '../../../server/src/execution/teamOfficeBridge.js';
@@ -18,15 +19,36 @@ test('team plans, assigns, runs dependencies and animates real office messages @
 }, testInfo) => {
   const root = mkdtempSync(path.join(tmpdir(), 'pixel-team-browser-'));
   const store = new AgentStateStore();
+  let seats: Record<string, { palette?: number; hueShift?: number; seatId?: string }> = {
+    90: { palette: 1, hueShift: 12 },
+  };
   store.setAdapter({
     loadAgents: () => [],
     saveAgents: () => {},
-    loadSeats: () => ({}),
-    saveSeats: () => {},
+    loadSeats: () => seats,
+    saveSeats: (next) => {
+      seats = next;
+    },
     getSetting: (_key, fallback) => fallback,
     setSetting: () => {},
   });
   const runtime = { registerAgent: () => {}, unregisterAgent: () => {} } as unknown as AgentRuntime;
+  // Observing an unrelated Codex session must never create an office employee.
+  store.set(90, {
+    id: 90,
+    sessionId: 'observed-fixture',
+    providerId: 'codex',
+    projectDir: root,
+    isExternal: true,
+    isWaiting: true,
+    activeToolIds: new Set(),
+    activeToolStatuses: new Map(),
+    activeToolNames: new Map(),
+    activeSubagentToolIds: new Map(),
+    activeSubagentToolNames: new Map(),
+    backgroundAgentToolIds: new Set(),
+    seenUnknownRecordTypes: new Set(),
+  } as AgentState);
   let runs = 0;
   let active = 0;
   let peakActive = 0;
@@ -135,7 +157,21 @@ test('team plans, assigns, runs dependencies and animates real office messages @
       (window as unknown as { __PIXEL_AGENTS_E2E: boolean }).__PIXEL_AGENTS_E2E = true;
     });
     await page.goto(`http://127.0.0.1:${port}`);
-    await page.getByRole('button', { name: 'Equipo', exact: true }).click();
+    await page.getByRole('button', { name: 'Otras sesiones de Codex', exact: true }).click();
+    const sessions = page.getByRole('dialog', { name: 'Otras sesiones de Codex' });
+    await expect(sessions.getByText(/Sesión de Codex/)).toBeVisible();
+    await expect(sessions.getByText('Disponible', { exact: true })).toBeVisible();
+    expect(runs).toBe(0);
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as unknown as { __pixelAgentsTestHooks?: { getCharacters?: () => unknown[] } }
+          ).__pixelAgentsTestHooks?.getCharacters?.().length ?? 0,
+      ),
+    ).toBe(0);
+    await sessions.getByRole('button', { name: 'Volver a la oficina' }).click();
+    await page.getByRole('button', { name: 'Conversaciones', exact: true }).click();
     const panel = page.getByRole('dialog', { name: 'Equipo de agentes' });
     await expect(panel.getByLabel('Modo de asignación')).toHaveValue('auto');
     await expect(panel.getByText('Habilitar comprobación de Claude')).toBeVisible();
@@ -197,7 +233,24 @@ test('team plans, assigns, runs dependencies and animates real office messages @
     await page.screenshot({ path: testInfo.outputPath('equipo-fixture-mobile.png') });
     await panel.press('Escape');
     await expect(panel).not.toBeVisible();
+    await page.reload();
+    await expect
+      .poll(async () =>
+        page.evaluate(
+          () =>
+            (
+              window as unknown as { __pixelAgentsTestHooks?: { getCharacters?: () => unknown[] } }
+            ).__pixelAgentsTestHooks?.getCharacters?.().length ?? 0,
+        ),
+      )
+      .toBe(5);
+    await page.getByRole('button', { name: 'Otras sesiones de Codex', exact: true }).click();
+    await expect(
+      page.getByRole('dialog', { name: 'Otras sesiones de Codex' }).getByText(/Sesión de Codex/),
+    ).toBeVisible();
+    expect(runs).toBe(5);
     expect(errors).toEqual([]);
+    expect(seats[90]).toEqual({ palette: 1, hueShift: 12 });
   } finally {
     await app.close();
     rmSync(root, { recursive: true, force: true });

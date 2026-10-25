@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import type { OfficePresence } from '../../../../core/src/officePresence.js';
 import { Button } from '../../components/ui/Button.js';
 import {
   CHARACTER_SITTING_OFFSET_PX,
@@ -29,6 +30,7 @@ import { CharacterState, TILE_SIZE } from '../types.js';
 const WAITING_INPUT_ACTIVITY_TEXT = 'Waiting for input';
 
 interface ToolOverlayProps {
+  employees?: OfficePresence[];
   officeState: OfficeState;
   agents: number[];
   agentTools: Record<number, ToolActivity[]>;
@@ -81,6 +83,7 @@ function getFuelColor(ratio: number): string {
 }
 
 export function ToolOverlay({
+  employees,
   officeState,
   agents,
   agentTools,
@@ -147,7 +150,8 @@ export function ToolOverlay({
         // panel back. When always-show is off, the early return above already
         // keeps the panel hidden for idle agents.
         const isDone = ch.bubbleType === 'waiting' && !ch.waitingAwaitingInput;
-        if (isDone && !isSelected && !isHovered) {
+        const employee = employees?.find((employee) => employee.id === id);
+        if (isDone && !isSelected && !isHovered && !employee) {
           return (
             <div
               key={id}
@@ -204,7 +208,16 @@ export function ToolOverlay({
         }
 
         // Team info
-        const teamRoleLabel = ch.isTeamLead ? 'LEAD' : ch.agentName || null;
+        if (employee) {
+          activityText = employee.status;
+          dotColor =
+            employee.status === 'En pausa'
+              ? 'var(--color-status-permission)'
+              : employee.status === 'Disponible'
+                ? null
+                : 'var(--color-status-active)';
+        }
+        const teamRoleLabel = employee?.name ?? (ch.isTeamLead ? 'LEAD' : ch.agentName || null);
         const hasExtraLines = !!(ch.folderName || teamRoleLabel);
 
         // Context gauge. Every agent gets one — lead, teammate, adopted,
@@ -258,7 +271,7 @@ export function ToolOverlay({
                 </span>
                 {ch.folderName && (
                   <span className="text-2xs leading-none overflow-hidden text-ellipsis block">
-                    {ch.folderName}
+                    {employee?.project ?? ch.folderName}
                   </span>
                 )}
               </div>

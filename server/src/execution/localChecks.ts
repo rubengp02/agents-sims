@@ -5,6 +5,7 @@ import { dirname, isAbsolute, join, relative } from 'node:path';
 
 import type { TeamTask } from '../../../core/src/team.js';
 import { stopProcess } from './cliProcess.js';
+import { inspectSelfWorkspace } from './selfWorkspace.js';
 import { ExecutionBlocked } from './types.js';
 import { type OwnedWorkspace, verifiedWorkspace } from './workflowWorkspace.js';
 
@@ -12,6 +13,7 @@ export interface CheckRunner {
   /** Public metadata only, never executable names, arguments or logs. */
   describe?(): Array<{ id: string; acceptance: boolean }>;
   authorizeWorkspace?(workspace: OwnedWorkspace): void;
+  authorizeSelfWorkspace?(receiptPath: string): Promise<void>;
   has(id: string): boolean;
   hasAcceptance(ids: string[]): boolean;
   covers?(ids: string[], criteria: string[]): boolean;
@@ -33,6 +35,15 @@ export interface LocalCheckCommand {
 /** Registry is supplied by local application code, never by a task/model/HTTP request. */
 export class LocalChecks implements CheckRunner {
   private readonly ownedWorkspaces = new Set<string>();
+  async authorizeSelfWorkspace(receiptPath: string): Promise<void> {
+    const { receipt } = await inspectSelfWorkspace(receiptPath);
+    if (!this.allowedProject || realpathSync(this.allowedProject) !== receipt.sourceRoot)
+      throw new ExecutionBlocked(
+        'check_project_mismatch',
+        'La copia no pertenece al proyecto de estas comprobaciones.',
+      );
+    this.ownedWorkspaces.add(realpathSync(receipt.workspaceRoot));
+  }
   authorizeWorkspace(workspace: OwnedWorkspace) {
     verifiedWorkspace(workspace);
     if (this.allowedProject && realpathSync(this.allowedProject) !== workspace.project)

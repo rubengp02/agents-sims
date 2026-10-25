@@ -14,14 +14,13 @@
  */
 
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 
 import type { StateAdapter } from '../../core/src/adapter.js';
 import type { PersistedAgent } from '../../core/src/schemas.js';
 import type { AdapterSettingKey, AdapterSettings, ConfigNamespace } from './configPersistence.js';
 import { ADAPTER_SETTING_KEYS, readConfig, writeConfig } from './configPersistence.js';
-import { LAYOUT_FILE_DIR } from './constants.js';
+import { officeStateDirectory } from './officeStateDirectory.js';
 
 const ADAPTER_SETTING_KEY_SET: ReadonlySet<string> = new Set(ADAPTER_SETTING_KEYS);
 
@@ -48,11 +47,7 @@ export class FileStateAdapter implements StateAdapter {
 
   constructor(options: FileStateAdapterOptions) {
     this.namespace = options.namespace;
-    this.stateFilePath = path.join(
-      os.homedir(),
-      LAYOUT_FILE_DIR,
-      `${options.namespace}-state.json`,
-    );
+    this.stateFilePath = path.join(officeStateDirectory(), `${options.namespace}-state.json`);
   }
 
   // ── Settings (shared config.json, per-namespace section) ────

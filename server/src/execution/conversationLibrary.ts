@@ -11,8 +11,10 @@ import {
 } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
+import { type OfficeArtifact, validateArtifactReference } from '../../../core/src/artifacts.js';
 import type {
   ConversationLibrarySnapshot,
+  PendingConversationInput,
   ProjectCheckCatalog,
   SavedConversation,
   SavedProject,
@@ -39,6 +41,73 @@ const empty = (): LibraryData => ({
 const hash = (text: string) => createHash('sha256').update(text).digest('hex');
 const scriptIds = ['check-types', 'lint', 'test', 'package'] as const;
 const MAX_BYTES = 64 * 1024 * 1024;
+const inputIdPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
+type NewPendingInput = Pick<PendingConversationInput, 'id' | 'content' | 'officeMode'> &
+  Partial<Pick<PendingConversationInput, 'attachments' | 'allowWrites' | 'budgetMode'>>;
+
+function validateInputId(id: unknown): asserts id is string {
+  if (typeof id !== 'string' || !inputIdPattern.test(id))
+    throw new ExecutionBlocked(
+      'invalid_pending_input',
+      'El identificador del mensaje no es válido.',
+    );
+}
+function validateAttachments(
+  attachments: unknown,
+  conversationId: string,
+): asserts attachments is OfficeArtifact[] | undefined {
+  if (attachments === undefined) return;
+  if (
+    !Array.isArray(attachments) ||
+    attachments.length > 10 ||
+    attachments.some((a) => !validateArtifactReference(a) || a.conversationId !== conversationId) ||
+    new Set(attachments.map((a: OfficeArtifact) => a.id)).size !== attachments.length
+  )
+    throw new ExecutionBlocked('invalid_pending_attachments', 'Revisa las imágenes del mensaje.');
+}
+function validatePending(input: PendingConversationInput, conversationId: string): void {
+  if (
+    !input ||
+    typeof input !== 'object' ||
+    Array.isArray(input) ||
+    Object.keys(input).some(
+      (key) =>
+        ![
+          'id',
+          'content',
+          'attachments',
+          'officeMode',
+          'allowWrites',
+          'budgetMode',
+          'createdAt',
+          'updatedAt',
+          'status',
+          'revision',
+          'reason',
+          'taskId',
+        ].includes(key),
+    )
+  )
+    throw new ExecutionBlocked('invalid_pending_input', 'Revisa el mensaje pendiente.');
+  validateInputId(input.id);
+  text(input.content, 12000, 'el mensaje');
+  validateAttachments(input.attachments, conversationId);
+  if (
+    typeof input.officeMode !== 'boolean' ||
+    (input.allowWrites !== undefined && typeof input.allowWrites !== 'boolean') ||
+    (input.budgetMode !== undefined && !['codex', 'manual'].includes(input.budgetMode)) ||
+    !Number.isSafeInteger(input.createdAt) ||
+    input.createdAt < 0 ||
+    !Number.isSafeInteger(input.updatedAt) ||
+    input.updatedAt < input.createdAt ||
+    !['queued', 'dispatching', 'needs_review'].includes(input.status) ||
+    !Number.isSafeInteger(input.revision) ||
+    input.revision < 1
+  )
+    throw new ExecutionBlocked('invalid_pending_input', 'Revisa el mensaje pendiente.');
+  if (input.reason !== undefined) text(input.reason, 2000, 'el motivo', true);
+  if (input.taskId !== undefined) text(input.taskId, 100, 'la tarea');
+}
 
 function text(value: unknown, limit: number, label: string, blank = false): string {
   if (typeof value !== 'string' || (!blank && !value.trim()) || value.length > limit)
@@ -87,12 +156,25 @@ export class ConversationLibrary {
           'No se puede leer el historial ni su copia de seguridad. Se conservan los archivos; no se guardarán cambios hasta recuperarlos.';
       }
     }
-    for (const conversation of this.data.conversations)
+    for (const conversation of this.data.conversations) {
+      if (conversation.pendingInputs?.length) {
+        conversation.pendingHold = true;
+        for (const input of conversation.pendingInputs) {
+          if (input.status === 'dispatching') {
+            input.status = 'needs_review';
+            input.reason =
+              'La oficina se reinició durante el envío. Revisa su resultado antes de continuar.';
+            input.updatedAt = Math.max(Date.now(), input.createdAt);
+            input.revision++;
+          }
+        }
+      }
       for (const message of conversation.messages)
         if (['running', 'checking', 'queued', 'planned'].includes(message.status)) {
           message.status = 'paused';
           message.reasonCode = 'server_restarted';
         }
+    }
   }
 
   private read(file: string): LibraryData {
@@ -107,6 +189,10 @@ export class ConversationLibrary {
       ids.add(project.id);
       text(project.name, 160, 'el nombre');
       text(project.instructions, 8000, 'las instrucciones', true);
+      if (project.turbo !== undefined && typeof project.turbo !== 'boolean')
+        throw new Error('invalid_turbo');
+      if (project.autonomy !== undefined && typeof project.autonomy !== 'boolean')
+        throw new Error('invalid_autonomy');
       if (project.context) validateContext(project.context);
       if (
         project.checksApproval &&
@@ -120,6 +206,12 @@ export class ConversationLibrary {
         throw new Error('invalid_approval');
     }
     const conversationIds = new Set<string>();
+    const inputOwners = new Map<string, string>();
+    const inputOwner = (inputId: string, conversationId: string) => {
+      if (inputOwners.has(inputId) && inputOwners.get(inputId) !== conversationId)
+        throw new Error('invalid_input_owner');
+      inputOwners.set(inputId, conversationId);
+    };
     for (const conversation of data.conversations) {
       if (!/^[\w-]{1,100}$/.test(conversation.id)) throw new Error('invalid_id');
       if (
@@ -131,6 +223,28 @@ export class ConversationLibrary {
       conversationIds.add(conversation.id);
       text(conversation.title, 160, 'el título');
       text(conversation.draft, 12000, 'el borrador', true);
+      if (conversation.pendingHold !== undefined && typeof conversation.pendingHold !== 'boolean')
+        throw new Error('invalid_pending_hold');
+      if (conversation.pendingInputs !== undefined) {
+        if (!Array.isArray(conversation.pendingInputs) || conversation.pendingInputs.length > 100)
+          throw new Error('invalid_pending');
+        const pendingIds = new Set<string>();
+        for (const input of conversation.pendingInputs) {
+          validatePending(input, conversation.id);
+          inputOwner(input.id, conversation.id);
+          if (pendingIds.has(input.id)) throw new Error('duplicate_pending');
+          pendingIds.add(input.id);
+        }
+      }
+      if (
+        conversation.draftAttachments !== undefined &&
+        (!Array.isArray(conversation.draftAttachments) ||
+          conversation.draftAttachments.length > 10 ||
+          conversation.draftAttachments.some(
+            (a) => !validateArtifactReference(a) || a.conversationId !== conversation.id,
+          ))
+      )
+        throw new Error('invalid_artifact');
       for (const message of conversation.messages) {
         if (
           !['request', 'response'].includes(message.kind) ||
@@ -151,6 +265,23 @@ export class ConversationLibrary {
         text(message.id, 120, 'el mensaje');
         text(message.taskId, 100, 'la tarea');
         text(message.content, MAX_BYTES, 'el contenido', true);
+        if (message.origin !== undefined && !['user', 'internal'].includes(message.origin))
+          throw new Error('invalid_message_origin');
+        if (message.inputId !== undefined) {
+          validateInputId(message.inputId);
+          inputOwner(message.inputId, conversation.id);
+        }
+        for (const key of ['attachments', 'artifacts'] as const)
+          if (
+            message[key] !== undefined &&
+            (!Array.isArray(message[key]) ||
+              message[key]!.some(
+                (a) => !validateArtifactReference(a) || a.conversationId !== conversation.id,
+              ))
+          )
+            throw new Error('invalid_artifact');
+        if (message.officeAssignment !== undefined)
+          text(message.officeAssignment, 160, 'el encargo');
       }
     }
     if (data.selectedId !== null && !conversationIds.has(data.selectedId))
@@ -268,17 +399,291 @@ export class ConversationLibrary {
     this.save(next);
     return structuredClone(conversation);
   }
+  setTurbo(projectId: string, enabled: boolean): void {
+    this.project(projectId);
+    if (typeof enabled !== 'boolean')
+      throw new ExecutionBlocked(
+        'invalid_turbo',
+        'Indica si quieres activar o desactivar TURBO para este proyecto.',
+      );
+    const next = structuredClone(this.data);
+    next.projects.find((p) => p.id === projectId)!.turbo = enabled;
+    this.save(next);
+  }
+  setAutonomy(projectId: string, enabled: boolean): void {
+    this.project(projectId);
+    if (typeof enabled !== 'boolean')
+      throw new ExecutionBlocked(
+        'invalid_autonomy',
+        'Indica si quieres autonomía en este proyecto.',
+      );
+    const next = structuredClone(this.data);
+    next.projects.find((p) => p.id === projectId)!.autonomy = enabled;
+    this.save(next);
+  }
+  selectProject(projectId: string): void {
+    this.project(projectId);
+    const conversation = this.data.conversations
+      .filter((c) => c.projectId === projectId)
+      .sort((a, b) => b.updatedAt - a.updatedAt)[0];
+    if (conversation) this.select(conversation.id);
+    else this.create(projectId);
+  }
   select(id: string): void {
     const conversation = this.conversation(id);
     this.save({ ...this.data, selectedId: id, selectedProjectId: conversation.projectId });
   }
-  draft(id: string, draft: string): void {
+  draft(id: string, draft: string, attachments?: OfficeArtifact[]): void {
     const next = structuredClone(this.data);
     const conversation = next.conversations.find((c) => c.id === id);
     if (!conversation)
       throw new ExecutionBlocked('conversation_unknown', 'La conversación no existe.');
     conversation.draft = text(draft, 12000, 'el mensaje', true);
+    if (attachments !== undefined) conversation.draftAttachments = structuredClone(attachments);
     this.save(next);
+  }
+  enqueue(id: string, input: NewPendingInput): PendingConversationInput {
+    const current = this.conversation(id);
+    if (
+      !input ||
+      typeof input !== 'object' ||
+      Object.keys(input).some(
+        (key) =>
+          !['id', 'content', 'officeMode', 'attachments', 'allowWrites', 'budgetMode'].includes(
+            key,
+          ),
+      )
+    )
+      throw new ExecutionBlocked('invalid_pending_input', 'Revisa el mensaje pendiente.');
+    const now = Date.now();
+    const candidate: PendingConversationInput = {
+      ...structuredClone(input),
+      createdAt: now,
+      updatedAt: now,
+      status: 'queued',
+      revision: 1,
+    };
+    validatePending(candidate, id);
+    const payload = (value: NewPendingInput) =>
+      JSON.stringify({
+        id: value.id,
+        content: value.content,
+        officeMode: value.officeMode,
+        attachments: value.attachments ?? [],
+        allowWrites: value.allowWrites,
+        budgetMode: value.budgetMode,
+      });
+    const previous = current.pendingInputs?.find((p) => p.id === input.id);
+    if (previous) {
+      if (payload(previous) !== payload(input))
+        throw new ExecutionBlocked(
+          'pending_conflict',
+          'Este mensaje ya existe con otro contenido. Actualiza la conversación.',
+        );
+      if (this.dirty) this.save(this.data);
+      return previous;
+    }
+    if (
+      current.messages.some((m) => m.inputId === input.id) ||
+      this.data.conversations.some(
+        (c) =>
+          c.id !== id &&
+          (c.pendingInputs?.some((p) => p.id === input.id) ||
+            c.messages.some((m) => m.inputId === input.id)),
+      )
+    )
+      throw new ExecutionBlocked(
+        'pending_already_delivered',
+        'Este mensaje ya se ha entregado o pertenece a otra conversación.',
+      );
+    if ((current.pendingInputs?.length ?? 0) >= 100)
+      throw new ExecutionBlocked(
+        'pending_full',
+        'Hay 100 mensajes pendientes. Retira alguno antes de añadir otro.',
+      );
+    const next = structuredClone(this.data);
+    const conversation = next.conversations.find((c) => c.id === id)!;
+    (conversation.pendingInputs ??= []).push(candidate);
+    conversation.updatedAt = now;
+    this.save(next);
+    return structuredClone(candidate);
+  }
+  updatePending(
+    id: string,
+    inputId: string,
+    revision: number,
+    patch: {
+      content?: string;
+      attachments?: OfficeArtifact[];
+    },
+  ): PendingConversationInput {
+    const next = structuredClone(this.data);
+    const input = this.pendingForUpdate(next, id, inputId, revision);
+    if (input.status === 'dispatching' || input.taskId)
+      throw new ExecutionBlocked(
+        'pending_busy',
+        'El mensaje ya está siendo enviado o necesita revisar su entrega.',
+      );
+    if (
+      !patch ||
+      typeof patch !== 'object' ||
+      Object.keys(patch).some((key) => !['content', 'attachments'].includes(key))
+    )
+      throw new ExecutionBlocked('invalid_pending_input', 'Revisa el mensaje pendiente.');
+    if (patch.content !== undefined) input.content = text(patch.content, 12000, 'el mensaje');
+    if (patch.attachments !== undefined) {
+      validateAttachments(patch.attachments, id);
+      input.attachments = structuredClone(patch.attachments);
+    }
+    this.touchPending(input);
+    this.save(next);
+    return structuredClone(input);
+  }
+  removePending(id: string, inputId: string, revision: number): void {
+    const next = structuredClone(this.data);
+    const input = this.pendingForUpdate(next, id, inputId, revision);
+    if (input.status === 'dispatching')
+      throw new ExecutionBlocked('pending_busy', 'El mensaje ya está siendo enviado.');
+    const conversation = next.conversations.find((c) => c.id === id)!;
+    conversation.pendingInputs = conversation.pendingInputs!.filter((p) => p.id !== inputId);
+    this.save(next);
+  }
+  pendingInputs(conversationId?: string): PendingConversationInput[] {
+    if (conversationId) return this.conversation(conversationId).pendingInputs ?? [];
+    return structuredClone(this.data.conversations.flatMap((c) => c.pendingInputs ?? []));
+  }
+  setPendingState(
+    id: string,
+    inputId: string,
+    status: PendingConversationInput['status'],
+    reason?: string,
+    taskId?: string,
+  ): PendingConversationInput {
+    const next = structuredClone(this.data);
+    const input = this.pendingForUpdate(next, id, inputId);
+    input.status = status;
+    input.reason = reason;
+    // Retain the task association while an uncertain dispatch is under review.
+    if (taskId !== undefined) input.taskId = taskId;
+    this.touchPending(input);
+    validatePending(input, id);
+    this.save(next);
+    return structuredClone(input);
+  }
+  holdPending(id: string, held: boolean): void {
+    this.conversation(id);
+    if (typeof held !== 'boolean')
+      throw new ExecutionBlocked(
+        'invalid_pending_input',
+        'Revisa el estado de los mensajes pendientes.',
+      );
+    const next = structuredClone(this.data);
+    next.conversations.find((c) => c.id === id)!.pendingHold = held;
+    this.save(next);
+  }
+  completePending(id: string, inputId: string): void {
+    const next = structuredClone(this.data);
+    const conversation = next.conversations.find((c) => c.id === id);
+    if (!conversation)
+      throw new ExecutionBlocked('conversation_unknown', 'La conversación no existe.');
+    const input = conversation.pendingInputs?.find((p) => p.id === inputId);
+    if (!input) {
+      if (conversation.messages.some((m) => m.kind === 'request' && m.inputId === inputId)) return;
+      throw new ExecutionBlocked('pending_unknown', 'El mensaje pendiente ya no existe.');
+    }
+    const request = conversation.messages.find(
+      (m) =>
+        m.kind === 'request' &&
+        m.content === input.content &&
+        JSON.stringify((m.attachments ?? []).map((a) => a.id)) ===
+          JSON.stringify((input.attachments ?? []).map((a) => a.id)) &&
+        (m.inputId === inputId || (m.taskId === input.taskId && m.inputId === undefined)),
+    );
+    if (!request)
+      throw new ExecutionBlocked(
+        'pending_not_delivered',
+        'El mensaje aún no se ha guardado en la conversación.',
+      );
+    request.inputId = inputId;
+    conversation.pendingInputs = conversation.pendingInputs!.filter((p) => p.id !== inputId);
+    this.save(next);
+  }
+  recordUserInstruction(
+    task: TeamTask,
+    inputId: string,
+    content: string,
+    attachments?: OfficeArtifact[],
+  ): void {
+    validateInputId(inputId);
+    text(content, 12000, 'el mensaje');
+    if (!task.conversationId)
+      throw new ExecutionBlocked('conversation_unknown', 'La conversación no existe.');
+    validateAttachments(attachments, task.conversationId);
+    if (
+      this.data.conversations.some(
+        (c) =>
+          c.id !== task.conversationId &&
+          (c.messages.some((m) => m.inputId === inputId) ||
+            c.pendingInputs?.some((p) => p.id === inputId)),
+      )
+    )
+      throw new ExecutionBlocked('pending_conflict', 'El mensaje pertenece a otra conversación.');
+    const next = structuredClone(this.data);
+    const conversation = next.conversations.find((c) => c.id === task.conversationId);
+    if (!conversation)
+      throw new ExecutionBlocked('conversation_unknown', 'La conversación no existe.');
+    const existing = conversation.messages.find((m) => m.inputId === inputId);
+    if (existing) {
+      if (
+        existing.content !== content ||
+        existing.taskId !== task.id ||
+        JSON.stringify(existing.attachments ?? []) !== JSON.stringify(attachments ?? [])
+      )
+        throw new ExecutionBlocked(
+          'pending_conflict',
+          'Este mensaje ya se ha guardado con otros datos.',
+        );
+      if (this.dirty) this.save(this.data);
+      return;
+    }
+    conversation.messages.push({
+      id: `${inputId}-instruction`,
+      inputId,
+      origin: 'user',
+      taskId: task.id,
+      kind: 'request',
+      role: task.role,
+      content,
+      attachments: structuredClone(attachments),
+      createdAt: Date.now(),
+      status: task.status,
+      reasonCode: task.reasonCode,
+    });
+    conversation.updatedAt = Date.now();
+    this.save(next);
+  }
+  private pendingForUpdate(
+    data: LibraryData,
+    id: string,
+    inputId: string,
+    revision?: number,
+  ): PendingConversationInput {
+    const conversation = data.conversations.find((c) => c.id === id);
+    if (!conversation)
+      throw new ExecutionBlocked('conversation_unknown', 'La conversación no existe.');
+    validateInputId(inputId);
+    const input = conversation.pendingInputs?.find((p) => p.id === inputId);
+    if (!input) throw new ExecutionBlocked('pending_unknown', 'El mensaje pendiente ya no existe.');
+    if (revision !== undefined && (!Number.isSafeInteger(revision) || input.revision !== revision))
+      throw new ExecutionBlocked(
+        'pending_conflict',
+        'El mensaje ha cambiado. Actualiza la conversación antes de editarlo.',
+      );
+    return input;
+  }
+  private touchPending(input: PendingConversationInput): void {
+    input.updatedAt = Math.max(Date.now(), input.createdAt);
+    input.revision++;
   }
   ensure(projectPath: string, title: string, id?: string): string {
     if (id) {
@@ -305,7 +710,17 @@ export class ConversationLibrary {
       existing &&
       chunk === undefined &&
       existing.status === task.status &&
-      existing.reasonCode === task.reasonCode
+      existing.reasonCode === task.reasonCode &&
+      current.messages
+        .filter((m) => m.taskId === task.id && m.kind === 'request')
+        .every((m) => m.status === task.status && m.reasonCode === task.reasonCode) &&
+      existing.role === task.role &&
+      JSON.stringify(existing.artifacts ?? []) === JSON.stringify(task.artifacts ?? []) &&
+      JSON.stringify(
+        current.messages.find((m) => m.id === `${task.id}-request`)?.attachments ?? [],
+      ) === JSON.stringify(task.attachments ?? []) &&
+      existing.officeAssignment === (task.officeParentId ? task.title : undefined) &&
+      (!task.office || existing.content === task.output)
     ) {
       if (this.dirty) this.save(this.data);
       return;
@@ -315,6 +730,8 @@ export class ConversationLibrary {
     if (!conversation.messages.some((m) => m.id === `${task.id}-request`)) {
       conversation.messages.push({
         id: `${task.id}-request`,
+        inputId: task.inputId,
+        origin: task.officeParentId ? 'internal' : 'user',
         taskId: task.id,
         kind: 'request',
         role: task.role,
@@ -325,12 +742,27 @@ export class ConversationLibrary {
       });
       if (conversation.title === 'Nueva conversación')
         conversation.title = task.title.slice(0, 160);
-      conversation.draft = '';
+      if (!task.officeParentId && (!task.inputId || conversation.draft === task.prompt)) {
+        conversation.draft = '';
+        conversation.draftAttachments = [];
+      }
     }
     let response = conversation.messages.find((m) => m.id === `${task.id}-response`);
+    const request = conversation.messages.find((m) => m.id === `${task.id}-request`)!;
+    for (const message of conversation.messages.filter(
+      (m) => m.taskId === task.id && m.kind === 'request',
+    )) {
+      message.status = task.status;
+      message.reasonCode = task.reasonCode;
+    }
+    request.role = task.role;
+    request.origin = task.officeParentId ? 'internal' : 'user';
+    request.attachments = task.attachments ? structuredClone(task.attachments) : undefined;
+    request.officeAssignment = task.officeParentId ? task.title : undefined;
     if (!response) {
       response = {
         id: `${task.id}-response`,
+        origin: task.officeParentId ? 'internal' : 'user',
         taskId: task.id,
         kind: 'response',
         role: task.role,
@@ -342,6 +774,11 @@ export class ConversationLibrary {
       conversation.messages.push(response);
     }
     if (chunk !== undefined) response.content += chunk;
+    else if (task.office) response.content = task.output;
+    response.role = task.role;
+    response.origin = task.officeParentId ? 'internal' : 'user';
+    response.artifacts = task.artifacts ? structuredClone(task.artifacts) : undefined;
+    response.officeAssignment = task.officeParentId ? task.title : undefined;
     response.status = task.status;
     response.reasonCode = task.reasonCode;
     conversation.updatedAt = Date.now();
@@ -381,7 +818,11 @@ export class ConversationLibrary {
       const scripts = JSON.parse(manifest).scripts ?? {};
       const fingerprint = hash(project.path + '\n' + resolve(this.npmCli) + '\n' + manifest);
       const approved =
-        project.checksApproval?.fingerprint === fingerprint ? project.checksApproval.ids : [];
+        project.autonomy === true
+          ? scriptIds
+          : project.checksApproval?.fingerprint === fingerprint
+            ? project.checksApproval.ids
+            : [];
       const ids = scriptIds.filter((id) => typeof scripts[id] === 'string' && scripts[id].trim());
       return {
         public: {

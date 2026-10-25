@@ -81,7 +81,7 @@ describe('opt-in minimal renderer', () => {
       ...packet.checks,
       ROLE_PROFILES.developer,
       roleOutcomeInstruction('developer'),
-      'No delegues ni uses otros proveedores',
+      'No inicies CLIs de IA, subagentes ni proveedores por tu cuenta',
     ])
       expect(minimal.prompt).toContain(text);
     expect(minimal.utf8Bytes).toBe(Buffer.byteLength(minimal.prompt));

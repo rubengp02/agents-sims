@@ -1,13 +1,12 @@
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 
 import {
-  LAYOUT_FILE_DIR,
   LAYOUT_FILE_NAME,
   LAYOUT_FILE_POLL_INTERVAL_MS,
   LAYOUT_REVISION_KEY,
 } from './constants.js';
+import { officeStateDirectory } from './officeStateDirectory.js';
 
 export interface LayoutWatcher {
   markOwnWrite(): void;
@@ -15,7 +14,7 @@ export interface LayoutWatcher {
 }
 
 function getLayoutFilePath(): string {
-  return path.join(os.homedir(), LAYOUT_FILE_DIR, LAYOUT_FILE_NAME);
+  return path.join(officeStateDirectory(), LAYOUT_FILE_NAME);
 }
 
 export function readLayoutFromFile(): Record<string, unknown> | null {

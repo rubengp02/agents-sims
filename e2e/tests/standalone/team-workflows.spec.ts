@@ -155,7 +155,7 @@ test('visual controls prepare, reserve, integrate and recover an experimental wo
   page.on('pageerror', (e) => errors.push(e.message));
   try {
     await page.goto(`http://127.0.0.1:${server.port}`);
-    await page.getByRole('button', { name: 'Equipo', exact: true }).click();
+    await page.getByRole('button', { name: 'Conversaciones', exact: true }).click();
     const panel = page.getByRole('dialog', { name: 'Equipo de agentes' });
     await panel
       .getByText('Organización del trabajo · un Programador por defecto', { exact: true })
@@ -250,7 +250,11 @@ test('visual controls prepare, reserve, integrate and recover an experimental wo
     expect(runs).toBe(0);
     expect(team.snapshot().settings.maxTokens).toBe(10000);
     await panel.getByRole('button', { name: 'Ejecutar cola', exact: true }).click();
-    await expect(flow.getByText('Estado del conjunto: Aceptado', { exact: true })).toBeVisible();
+    // Real Git workspaces and local integration checks can exceed the default
+    // five-second assertion window, while remaining inside the reviewed budgets.
+    await expect(flow.getByText('Estado del conjunto: Aceptado', { exact: true })).toBeVisible({
+      timeout: 20000,
+    });
     await expect(flow.getByRole('list', { name: 'Comprobaciones del conjunto' })).toContainText(
       'joint: Superada',
     );
@@ -272,7 +276,7 @@ test('visual controls prepare, reserve, integrate and recover an experimental wo
     );
     server = await open(restored);
     await page.goto(`http://127.0.0.1:${server.port}`);
-    await page.getByRole('button', { name: 'Equipo', exact: true }).click();
+    await page.getByRole('button', { name: 'Conversaciones', exact: true }).click();
     await expect(
       panel.getByText('Estado del conjunto: En pausa: requiere revisión', { exact: true }),
     ).toBeVisible();

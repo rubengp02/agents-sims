@@ -53,7 +53,7 @@ export interface RunRecord {
   subscriptionCheckedAt?: number;
   contextFingerprint?: string;
   sessionMode?: 'new' | 'resume';
-  engine?: 'codex-cli' | 'agent-orchestrator';
+  engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator';
   executionProject?: string;
   toolCalls?: number;
   /** Safe aggregates, absent on historical receipts. No raw event payloads. */
@@ -61,6 +61,13 @@ export interface RunRecord {
 }
 
 export interface ExecuteOptions {
+  /** Trusted paths resolved from private attachment IDs, never accepted from HTTP. */
+  imagePaths?: string[];
+  artifactDirectory?: string;
+  toolServer?: { url: string; token: string };
+  onToolActivity?: (activity: string) => void;
+  onArtifact?: (path: string) => void;
+  onCapabilityVerified?: (capability: 'images' | 'web-search') => void;
   /** In-process capability. Never reconstructed from request JSON. */
   ownedWorkspace?: OwnedWorkspace;
   officeRole?: TeamRole;
@@ -71,16 +78,24 @@ export interface ExecuteOptions {
   allowWrites?: boolean;
   /** Only independently scheduled read-only work may share the two Codex slots. */
   parallelReadOnly?: boolean;
-  timeoutMs?: number;
+  /** null: no wall-clock cutoff for a user-authorized normal chat/office objective. */
+  timeoutMs?: number | null;
   /** Observed CLI usage, checked at turn completion; not a provider generation cap. */
   maxReportedTokens?: number;
   contextFingerprint?: string;
   /** Stable ownership key; continuing a character alone never resumes a conversation. */
   executionSessionKey?: string;
+  /** Server-owned objective identity. Only the Chief may reuse this conversation. */
+  objectiveSessionKey?: string;
   /** Workspace returned by a completed dependency, never a caller-chosen extra root. */
   inheritedWorkspace?: string;
   signal?: AbortSignal;
+  /** Backend-owned interruption reason, never taken directly from request JSON. */
+  interruptionReason?: () => string;
   onOutput?: (text: string) => void;
+  /** Backend-owned tool lifecycle. A model turn ending does not settle pending approvals or OAuth. */
+  waitForTools?: (signal: AbortSignal) => Promise<void>;
+  onProgress?: (event: { id: string; title: string; detail?: string; completed: boolean }) => void;
   onState?: (record: Readonly<RunRecord>) => void;
   /** Sanitized activity only: never tool arguments, commands or file contents. */
   onActivity?: (activity: 'thinking' | 'reading' | 'working') => void;
@@ -90,8 +105,52 @@ export interface ExecuteOptions {
 export interface OfficialExecutor {
   readonly workspaceManager?: WorkflowWorkspaceManager;
   readonly provider: ProviderId;
-  readonly engine?: 'codex-cli' | 'agent-orchestrator';
+  readonly engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator';
   readonly maxConcurrentReadOnly?: 1 | 2;
+  readonly supportsSteering?: boolean;
+  steer?(executionSessionKey: string, input: SteeringInput): Promise<SteeringResult>;
+  releaseObjectiveSession?(key: string): void;
+  openIntegrations?(
+    project: string,
+    signal: AbortSignal,
+  ): Promise<import('../tools/officialIntegrations.js').IntegrationClient>;
+  openPluginMcp?(
+    project: string,
+    selection: import('../tools/pluginMcpSession.js').PluginMcpSelection,
+    signal: AbortSignal,
+  ): Promise<import('../tools/pluginMcpSession.js').PluginMcpClient>;
+  openAuthentication?(
+    signal: AbortSignal,
+  ): Promise<import('../tools/officialAuthentication.js').AuthenticationClient>;
+  openApplications?(
+    signal: AbortSignal,
+  ): Promise<import('../tools/officialApplications.js').ApplicationClient>;
+  openMcpRegistration?(
+    signal: AbortSignal,
+  ): Promise<import('../tools/officialMcpRegistration.js').ManagedMcpRegistrationClient>;
+  openManagedMcp?(
+    project: string,
+    target: import('../tools/officialMcpRegistration.js').ManagedMcpTarget,
+    signal: AbortSignal,
+  ): Promise<import('../tools/connectionManager.js').RemoteClient>;
+  openManagedAuthentication?(
+    target: import('../tools/officialMcpRegistration.js').ManagedMcpTarget,
+    signal: AbortSignal,
+  ): Promise<import('../tools/officialAuthentication.js').AuthenticationClient>;
+  openPluginManagement?(
+    signal: AbortSignal,
+  ): Promise<import('../tools/officialPlugins.js').PluginClient>;
   diagnose(): Promise<SubscriptionEvidence>;
   execute(options: ExecuteOptions): Promise<RunRecord>;
+}
+
+export interface SteeringInput {
+  id: string;
+  text: string;
+  imagePaths?: string[];
+}
+
+export interface SteeringResult {
+  status: 'accepted' | 'not_running' | 'unknown';
+  turnId?: string;
 }

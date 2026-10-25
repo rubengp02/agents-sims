@@ -86,10 +86,14 @@ func run(r *bufio.Reader, q request) error {
 		emit(map[string]any{"kind": "workspace", "path": info.Path, "branch": info.Branch, "baseSHA": info.BaseSHA})
 		return nil
 	}
-	if q.Action != "open" || !filepath.IsAbs(q.Binary) || q.Model == "" || q.Effort == "" || q.TimeoutMs < 1 || q.TimeoutMs > 900000 {
+	if q.Action != "open" || !filepath.IsAbs(q.Binary) || q.Model == "" || q.Effort == "" || q.TimeoutMs < 0 || q.TimeoutMs > 900000 {
 		return errors.New("invalid launch")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(q.TimeoutMs)*time.Millisecond)
+	ctx, cancel := context.WithCancel(context.Background())
+	if q.TimeoutMs > 0 {
+		cancel()
+		ctx, cancel = context.WithTimeout(context.Background(), time.Duration(q.TimeoutMs)*time.Millisecond)
+	}
 	defer cancel()
 	d := codexappserver.NewPixelOffice(q.Binary)
 	var c ports.ChatConversation

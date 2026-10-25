@@ -50,6 +50,12 @@ function harness() {
 }
 
 describe('execution to existing office bridge', () => {
+  it('updates the project when an existing employee receives another assignment', () => {
+    const h = harness();
+    const id = h.bridge.state(h.task, h.record)!;
+    expect(h.bridge.state({ ...h.task, project: 'another-project' }, h.record)).toBe(id);
+    expect(h.store.get(id)!.projectDir).toBe('another-project');
+  });
   it('keeps two real worker instances of the same role independent without changing sprites', () => {
     const h = harness();
     const a = { ...h.task, workerId: 'worker-a' },

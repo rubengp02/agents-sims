@@ -79,6 +79,7 @@ export class TeamOfficeBridge implements TeamObserver {
     }
     if (record.sessionId) this.runtime.registerAgent(record.sessionId, id, record.provider);
     agent.providerId = record.provider;
+    agent.projectDir = task.project;
     agent.folderName = `${TEAM_ROLES[task.role]} · ${record.requestedModel}`;
     agent.lastDataAt = Date.now();
     agent.isWaiting = record.status !== 'running';

@@ -2,6 +2,7 @@ import { randomUUID, timingSafeEqual } from 'node:crypto';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
+import { MAX_IMAGE_BYTES } from '../../../core/src/artifacts.js';
 import type {
   TaskAssessment,
   TaskContext,
@@ -9,6 +10,8 @@ import type {
   TeamSettings,
   WorkflowDecomposition,
 } from '../../../core/src/team.js';
+import { InvalidOfficeImage } from '../tools/artifactStore.js';
+import { pickProjectFolder } from './projectFolderPicker.js';
 import { object } from './subscriptionPolicy.js';
 import type { TeamCoordinator } from './teamCoordinator.js';
 import { ExecutionBlocked } from './types.js';
@@ -52,19 +55,193 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
     });
     routes.setErrorHandler((error, _request, reply) =>
       reply.code(error instanceof ExecutionBlocked ? 409 : 400).send({
-        code: error instanceof ExecutionBlocked ? error.code : 'invalid_request',
-        message: error instanceof ExecutionBlocked ? error.message : 'Solicitud incorrecta.',
+        code:
+          error instanceof ExecutionBlocked
+            ? error.code
+            : error instanceof InvalidOfficeImage
+              ? 'invalid_image'
+              : 'invalid_request',
+        message:
+          error instanceof ExecutionBlocked || error instanceof InvalidOfficeImage
+            ? error.message
+            : 'Solicitud incorrecta.',
       }),
     );
     routes.get('/api/team', async () => ({ ...team.snapshot(), controlToken }));
+    routes.get('/api/team/tools', async () => ({
+      capabilities: team.services?.capabilities() ?? [],
+      approvals: team.services?.runtime.approvals.list() ?? [],
+    }));
+    routes.get('/api/team/tool-operations', async () => {
+      const snapshot = team.snapshot();
+      const operations = ((await team.services?.operationReviews.list()) ?? []).map((operation) => {
+        const conversationId =
+          operation.conversationId ??
+          snapshot.tasks.find((task) => task.id === operation.taskId)?.conversationId;
+        return { ...operation, ...(conversationId ? { conversationId } : {}) };
+      });
+      return { operations, officeRunning: snapshot.running };
+    });
+    routes.post('/api/team/tool-operations/:id/review', async (request) => {
+      if (!team.services)
+        throw new ExecutionBlocked(
+          'tools_not_configured',
+          'Las herramientas no están configuradas.',
+        );
+      const operation = (await team.services.operationReviews.list()).find(
+        (entry) => entry.id === (request.params as { id: string }).id,
+      );
+      if (team.snapshot().running && operation?.originalStatus === 'dispatching')
+        throw new ExecutionBlocked(
+          'office_still_running',
+          'Esta operación aún no tiene un recibo cerrado. Espera a que termine o detén la oficina antes de revisarla.',
+        );
+      const body = object(request.body);
+      if (body.reviewed !== true || !['completed', 'not_completed'].includes(String(body.outcome)))
+        throw new ExecutionBlocked(
+          'operation_review_required',
+          'Indica si has comprobado que la operación se realizó o que no se realizó.',
+        );
+      await team.services.operationReviews.acknowledge(
+        (request.params as { id: string }).id,
+        body.outcome as 'completed' | 'not_completed',
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/tools/check', async () => {
+      await team.refreshTools();
+      return team.snapshot();
+    });
+    routes.post('/api/team/connections/:id/disable', async (request) => {
+      if (!team.services)
+        throw new ExecutionBlocked('tools_not_configured', 'Las conexiones no están configuradas.');
+      await team.services.connections.disable((request.params as { id: string }).id);
+      return team.snapshot();
+    });
+    routes.get('/api/team/connections/:id/operations', async (request) => {
+      if (!team.services)
+        throw new ExecutionBlocked('tools_not_configured', 'Las conexiones no están configuradas.');
+      const id = (request.params as { id: string }).id;
+      if (!team.services.connections.list().some((entry) => entry.id === id))
+        throw new ExecutionBlocked('connection_unknown', 'La conexión no existe.');
+      return team.services.connections.operations(id);
+    });
+    routes.post('/api/team/connections/:id/review', async (request) => {
+      if (!team.services)
+        throw new ExecutionBlocked('tools_not_configured', 'Las conexiones no están configuradas.');
+      if (object(request.body).reviewed !== true)
+        throw new ExecutionBlocked(
+          'connection_review_required',
+          'Confirma que has comprobado el resultado en el proveedor.',
+        );
+      await team.services.connections.acknowledge((request.params as { id: string }).id);
+      return team.snapshot();
+    });
+    routes.post('/api/team/tool-approvals/:id', async (request) => {
+      const body = object(request.body);
+      if (typeof body.approved !== 'boolean')
+        throw new ExecutionBlocked('invalid_approval', 'Elige aprobar o rechazar la operación.');
+      const id = (request.params as { id: string }).id;
+      if (!team.services?.runtime.approvals.resolve(id, body.approved, body.values))
+        throw new ExecutionBlocked(
+          'approval_expired',
+          'La solicitud ya terminó o no está disponible. No se ha ejecutado otra operación.',
+        );
+      return team.snapshot();
+    });
+    routes.post('/api/team/authentication/:id/check', async (request) => {
+      const id = (request.params as { id: string }).id;
+      if (!team.services)
+        throw new ExecutionBlocked('auth_unavailable', 'El inicio de sesión no está disponible.');
+      if (
+        !team.services.authentications
+          .list()
+          .some(
+            (entry) =>
+              entry.id === id &&
+              entry.kind === 'application' &&
+              ['awaiting_user', 'verifying'].includes(entry.status),
+          )
+      )
+        throw new ExecutionBlocked(
+          'auth_expired',
+          'Esta conexión ya terminó o no está disponible.',
+        );
+      await team.services.authentications.checkApplication(id);
+      return team.snapshot();
+    });
+    routes.post('/api/team/authentication/:id/cancel', async (request) => {
+      const id = (request.params as { id: string }).id;
+      if (!team.services?.authentications.cancel(id))
+        throw new ExecutionBlocked(
+          'auth_expired',
+          'Esta autorización ya terminó o no está disponible.',
+        );
+      return team.snapshot();
+    });
+    routes.post(
+      '/api/team/attachments',
+      { bodyLimit: Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 8192 },
+      async (request) => {
+        const body = object(request.body);
+        if (!team.services)
+          throw new ExecutionBlocked('tools_not_configured', 'Las imágenes no están configuradas.');
+        team.assertConversation(body.conversationId as string);
+        if (
+          typeof body.data !== 'string' ||
+          !/^[A-Za-z0-9+/]+={0,2}$/.test(body.data) ||
+          body.data.length > Math.ceil((MAX_IMAGE_BYTES * 4) / 3)
+        )
+          throw new ExecutionBlocked(
+            'invalid_image',
+            'El adjunto no contiene una imagen válida dentro del tamaño permitido.',
+          );
+        const bytes = Buffer.from(body.data, 'base64');
+        if (bytes.toString('base64') !== body.data)
+          throw new ExecutionBlocked('invalid_image', 'El archivo no se ha recibido completo.');
+        const artifact = await team.services.artifacts.put({
+          name: body.name as string,
+          bytes,
+          kind: 'attachment',
+          conversationId: body.conversationId as string,
+        });
+        return { artifact };
+      },
+    );
+    routes.get('/api/team/artifacts/:id', async (request, reply) => {
+      if (!team.services)
+        throw new ExecutionBlocked(
+          'tools_not_configured',
+          'El almacén de imágenes no está disponible.',
+        );
+      const { artifact, bytes } = await team.services.artifacts.read(
+        (request.params as { id: string }).id,
+      );
+      if (artifact.conversationId) team.assertConversation(artifact.conversationId);
+      reply.header('Cross-Origin-Resource-Policy', 'same-origin');
+      reply.header('X-Content-Type-Options', 'nosniff');
+      reply.header(
+        'Content-Disposition',
+        `${(request.query as { download?: string }).download === '1' ? 'attachment' : 'inline'}; filename*=UTF-8''${encodeURIComponent(artifact.name)}`,
+      );
+      return reply.type(artifact.mime).send(bytes);
+    });
+    routes.post('/api/team/projects/pick-folder', async () => ({
+      path: await pickProjectFolder(),
+    }));
     routes.post('/api/team/projects', async (request) => {
       const body = object(request.body);
-      team.saveProject(
+      const saved = team.saveProject(
         body.project as string,
         body.name as string | undefined,
         body.instructions as string | undefined,
         body.context as TaskContext | undefined,
       );
+      if (body.openConversation === true) team.selectProject(saved.id);
+      return team.snapshot();
+    });
+    routes.post('/api/team/projects/select', async (request) => {
+      team.selectProject(object(request.body).projectId as string);
       return team.snapshot();
     });
     routes.post('/api/team/projects/checks', async (request) => {
@@ -73,6 +250,107 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
         body.projectId as string,
         body.fingerprint as string,
         body.ids as string[],
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/projects/turbo', async (request) => {
+      const body = object(request.body);
+      team.setProjectTurbo(body.projectId as string, body.enabled as boolean);
+      return team.snapshot();
+    });
+    routes.post('/api/team/projects/autonomy', async (request) => {
+      const body = object(request.body);
+      team.setProjectAutonomy(body.projectId as string, body.enabled as boolean);
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/send', async (request) => {
+      const body = object(request.body);
+      await team.submitConversation(
+        body.id as string,
+        body.message as string,
+        body.officeMode as boolean | undefined,
+        body.attachmentIds as string[] | undefined,
+        body.inputId as string | undefined,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/queue', async (request) => {
+      const body = object(request.body);
+      await team.queueConversation(
+        body.id as string,
+        body as unknown as Parameters<TeamCoordinator['queueConversation']>[1],
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/queue/update', async (request) => {
+      const body = object(request.body);
+      await team.updateQueuedConversation(
+        body.id as string,
+        body.inputId as string,
+        body.revision as number,
+        body.message as string,
+        body.attachmentIds as string[] | undefined,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/queue/remove', async (request) => {
+      const body = object(request.body);
+      await team.removeQueuedConversation(
+        body.id as string,
+        body.inputId as string,
+        body.revision as number,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/queue/continue', async (request) => {
+      await team.continueQueuedConversation(object(request.body).id as string);
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/apply-now', async (request) => {
+      const body = object(request.body);
+      await team.applyConversationNow(
+        body.id as string,
+        body as unknown as Parameters<TeamCoordinator['applyConversationNow']>[1],
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/run-pending', async (request) => {
+      const body = object(request.body);
+      await team.executeProjectConversation(
+        body.taskId as string,
+        body.resumeConfirmed as boolean | undefined,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/answer', async (request) => {
+      const body = object(request.body);
+      await team.answerOfficeQuestion(
+        body.taskId as string,
+        body.requestId as string,
+        body.answer as string,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/prepare', async (request) => {
+      const body = object(request.body);
+      await team.prepareConversation(
+        body.id as string,
+        body.message as string,
+        body.allowWrites as boolean | undefined,
+        body.budgetMode as 'codex' | 'manual' | undefined,
+        body.officeMode as boolean | undefined,
+        body.attachmentIds as string[] | undefined,
+      );
+      return team.snapshot();
+    });
+    routes.post('/api/team/conversations/execute', async (request) => {
+      const body = object(request.body);
+      await team.confirmConversation(
+        body.taskId as string,
+        body.quotaConfirmed as boolean,
+        body.writesConfirmed as boolean,
+        body.resumeConfirmed as boolean,
+        body.fingerprint as string,
       );
       return team.snapshot();
     });
@@ -86,7 +364,13 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
     });
     routes.post('/api/team/conversations/draft', async (request) => {
       const body = object(request.body);
-      team.saveConversationDraft(body.id as string, body.draft as string);
+      if (body.attachmentIds !== undefined)
+        await team.saveConversationAttachments(
+          body.id as string,
+          body.draft as string,
+          body.attachmentIds as string[],
+        );
+      else team.saveConversationDraft(body.id as string, body.draft as string);
       return team.snapshot();
     });
     routes.post('/api/team/conversations/message', async (request) => {
@@ -104,6 +388,11 @@ export function registerTeamRoutes(app: FastifyInstance, team: TeamCoordinator):
       return team.snapshot();
     });
     routes.post('/api/team/tasks', async (request) => {
+      if (object(request.body).inputId !== undefined)
+        throw new ExecutionBlocked(
+          'invalid_task',
+          'Los identificadores de mensajes se gestionan desde Conversaciones.',
+        );
       team.addTask(request.body as Parameters<TeamCoordinator['addTask']>[0]);
       return team.snapshot();
     });

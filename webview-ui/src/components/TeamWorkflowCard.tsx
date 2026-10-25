@@ -75,14 +75,16 @@ export function TaskBudgetControl({
   snapshot,
   disabled,
   action,
+  defaultOpen = false,
 }: {
   task: TeamTask;
   snapshot: TeamSnapshot;
   disabled: boolean;
   action: Action;
+  defaultOpen?: boolean;
 }) {
   return (
-    <details className="mt-4">
+    <details className="mt-4" open={defaultOpen || undefined}>
       <summary>Estimación y reserva de la tarea</summary>
       <p>
         {task.estimate

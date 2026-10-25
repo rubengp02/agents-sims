@@ -1,5 +1,10 @@
 # Primer ejecutor oficial de Codex
 
+La oficina utiliza ahora Codex App Server por defecto. Consulta
+[Herramientas de la oficina](HERRAMIENTAS_OFICINA.md) para adjuntos, navegador,
+generación de imágenes, conexiones y sus comprobaciones. Este documento conserva
+también el uso del ejecutor anterior desde terminal.
+
 Implementado: una tarea real por vez mediante el CLI oficial local, con modelo y razonamiento explícitos. No hay SDK de inferencia, claves API, compras, recargas, cambios de cuenta, resets de cuota ni proveedor alternativo. No se ha modificado el diseño de la oficina.
 
 ## Uso sencillo
@@ -19,7 +24,7 @@ npm run agent -- run --project "RUTA_DEL_PROYECTO" --task-file "TAREA.txt" --mod
 
 Para permitir modificaciones dentro de la carpeta del proyecto, añadir `--write`. Conserva el sandbox `workspace-write` y no habilita permisos ilimitados. No es un permiso para commits, push o cambios de rama. Una acción que requiera permisos adicionales no se acepta automáticamente.
 
-El texto se entrega por stdin, nunca se convierte en un comando shell. La interfaz del navegador también inicia y cancela tareas desde **Equipo**, mediante endpoints locales protegidos. El WebSocket original sigue dedicado a la oficina. Consulta [Equipo multiagente](EQUIPO_MULTIAGENTE.md) para el planificador, las asignaciones y los límites de la cola.
+El texto se entrega por stdin, nunca se convierte en un comando shell. La interfaz del navegador inicia y cancela encargos desde **Conversaciones**, con confirmación de permisos y cuota; **Ver cola** conserva los controles avanzados. Los endpoints locales siguen protegidos. El WebSocket original sigue dedicado a la oficina. Consulta [Equipo multiagente](EQUIPO_MULTIAGENTE.md) para el planificador, las asignaciones y los límites de la cola.
 
 ## Comprobaciones obligatorias
 
@@ -35,9 +40,13 @@ Antes de cada tarea y periódicamente durante ella:
 
 La ejecución usa `codex exec --ignore-user-config`, proveedor oficial OpenAI, método de sesión ChatGPT y esfuerzo explícitos. No hereda claves, URLs alternativas ni variables arbitrarias: usa una lista reducida de variables de sistema y bloquea nombres de variables incompatibles sin mostrar sus valores. Desactiva aplicaciones/MCP, plugins, delegación adicional y búsqueda web en esta primera versión, y no solicita modos Fast/Ultrafast. Conserva las instrucciones de proyecto y las reglas de ejecución del CLI; no utiliza `--ignore-rules` ni opciones de bypass de permisos.
 
-Una notificación de cambio de cuenta, pérdida de verificación, límite del proveedor, tiempo máximo o cancelación detiene el proceso propio. No hay reintentos automáticos. El ejecutor admite una tarea exclusiva o hasta dos lectores independientes autorizados por el coordinador, con quince minutos como máximo por tarea. El proveedor sigue siendo la autoridad sobre la cuota: el 10% es un margen prudente, no una predicción exacta de tokens o garantía de corte instantáneo. La cuota se comparte con los demás clientes. La aplicación no cambia las preferencias de facturación de la cuenta ni promete reservar cuota frente a cambios externos; revalida el estado comunicado y no permite iniciar con evidencia de saldo adicional o datos desconocidos.
+Una notificación de cambio de cuenta, pérdida de verificación, límite del proveedor, tiempo máximo o cancelación detiene el proceso propio. No hay reintentos automáticos. El ejecutor admite una tarea exclusiva o hasta dos lectores independientes autorizados por el coordinador, con un límite de quince minutos por tarea en la cola avanzada y sin corte fijo en el chat normal autorizado. El proveedor sigue siendo la autoridad sobre la cuota: el 10% es un margen prudente, no una predicción exacta de tokens o garantía de corte instantáneo. La cuota se comparte con los demás clientes. La aplicación no cambia las preferencias de facturación de la cuenta ni promete reservar cuota frente a cambios externos; revalida el estado comunicado y no permite iniciar con evidencia de saldo adicional o datos desconocidos.
 
 ## Registro y privacidad
+
+El lanzador utiliza también `--skip-git-repo-check` para trabajar sobre la carpeta
+elegida aunque no sea un repositorio. Esta opción no cambia los permisos de archivos
+ni las comprobaciones de suscripción. Los flujos con copias Git conservan sus controles.
 
 Los registros viven en `.local-office/executions/`, ignorados por Git. Guardan identificador de tarea/sesión, carpeta, estados, modelo y esfuerzo solicitados, tiempos, motivos locales y tokens que comunique el CLI. No guardan prompt, respuesta, herramientas, stderr, email ni credenciales. Codex gestiona por su cuenta sus transcripciones y autenticación habituales.
 

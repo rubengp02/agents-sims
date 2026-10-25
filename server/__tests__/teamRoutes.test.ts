@@ -54,6 +54,17 @@ async function harness(checks?: CheckRunner) {
 }
 
 describe('local team HTTP control', () => {
+  it('protects manual app verification with the office control token', async () => {
+    const h = await harness();
+    const response = await h.app.inject({
+      method: 'POST',
+      url: '/api/team/authentication/unknown/check',
+      headers: h.headers,
+      payload: {},
+    });
+    expect(response.statusCode).toBe(403);
+    expect(h.execute).not.toHaveBeenCalled();
+  });
   it('exposes only configured check metadata, without commands or execution', async () => {
     const checks = new LocalChecks(
       {
@@ -98,6 +109,7 @@ describe('local team HTTP control', () => {
     expect(response.statusCode).toBe(200);
     expect(response.json().settings.mode).toBe('auto');
     expect(response.json().capabilities).toEqual({
+      steering: false,
       engine: 'codex-cli',
       isolatedWriters: false,
       budgetReview: false,

@@ -7,6 +7,7 @@ import { ConnectionIndicator } from './components/ConnectionIndicator.js';
 import { DebugView } from './components/DebugView.js';
 import { EditActionBar } from './components/EditActionBar.js';
 import { MigrationNotice } from './components/MigrationNotice.js';
+import { ObservedSessions } from './components/ObservedSessions.js';
 import { SettingsModal } from './components/SettingsModal.js';
 import { TeamPanel } from './components/TeamPanel.js';
 import { Tooltip } from './components/Tooltip.js';
@@ -16,6 +17,7 @@ import { ZoomControls } from './components/ZoomControls.js';
 import { useEditorActions } from './hooks/useEditorActions.js';
 import { useEditorKeyboard } from './hooks/useEditorKeyboard.js';
 import { useExtensionMessages } from './hooks/useExtensionMessages.js';
+import { useOfficePresence } from './hooks/useOfficePresence.js';
 import { OfficeCanvas } from './office/components/OfficeCanvas.js';
 import { ToolOverlay } from './office/components/ToolOverlay.js';
 import { EditorState } from './office/editor/editorState.js';
@@ -47,6 +49,8 @@ function getOfficeState(): OfficeState {
 }
 
 function App() {
+  const { presence, error: presenceError } = useOfficePresence();
+  const [sessionsOpen, setSessionsOpen] = useState(false);
   // Browser runtime (dev or static dist): dispatch mock messages after the
   // useExtensionMessages listener has been registered.
   useEffect(() => {
@@ -101,6 +105,17 @@ function App() {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTeamOpen, setIsTeamOpen] = useState(false);
+  useEffect(() => {
+    if (!isBrowserRuntime || import.meta.env.DEV) return;
+    const abort = new AbortController();
+    void fetch('/api/team', { signal: abort.signal, cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((state) => {
+        if (state?.library && !abort.signal.aborted) setIsTeamOpen(true);
+      })
+      .catch(() => {});
+    return () => abort.abort();
+  }, []);
   const [isHooksInfoOpen, setIsHooksInfoOpen] = useState(false);
   const [hooksTooltipDismissed, setHooksTooltipDismissed] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
@@ -408,6 +423,7 @@ function App() {
             })()}
 
           <ToolOverlay
+            employees={presence?.employees}
             officeState={officeState}
             agents={agents}
             agentTools={agentTools}
@@ -492,6 +508,7 @@ function App() {
       </Modal>
 
       <BottomToolbar
+        onOpenSessions={presence ? () => setSessionsOpen(true) : undefined}
         isEditMode={editor.isEditMode}
         onOpenClaude={editor.handleOpenClaude}
         onToggleEditMode={editor.handleToggleEditMode}
@@ -504,6 +521,14 @@ function App() {
             : undefined
         }
       />
+
+      {sessionsOpen && (
+        <ObservedSessions
+          presence={presence}
+          error={presenceError}
+          onClose={() => setSessionsOpen(false)}
+        />
+      )}
 
       <VersionIndicator
         currentVersion={extensionVersion}

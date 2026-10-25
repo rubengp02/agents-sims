@@ -1,4 +1,6 @@
+import type { OfficeArtifact } from './artifacts.js';
 import type { ConversationLibrarySnapshot } from './conversations.js';
+import type { OfficeAuthentication, OfficeCapability, OfficeToolApproval } from './officeTools.js';
 
 /** Shared wire contract. No provider credentials or shell commands cross this boundary. */
 export type TeamProvider = 'codex' | 'claude';
@@ -81,8 +83,34 @@ export interface TeamWorkflow {
   };
 }
 export interface TeamTask {
+  inputId?: string;
+  objectiveRevision?: number;
+  userInstructions?: Array<{ id: string; content: string; createdAt: number }>;
   id: string;
+  attachments?: OfficeArtifact[];
+  referenceImages?: OfficeArtifact[];
+  artifacts?: OfficeArtifact[];
+  toolActivity?: string;
+  humanRequest?: { id: string; question: string; responseType: 'text' | 'approval' };
+  liveActivity?: { id: string; title: string; detail?: string; at: number; completed: boolean }[];
+  selfWorkspaceReceipt?: string;
   conversationId?: string;
+  requiresConfirmation?: boolean;
+  /** Only explicit chat preparation selects provider-managed budgeting; queue tasks stay bounded. */
+  budgetMode?: 'codex' | 'manual';
+  office?: {
+    memory?: OfficeObjectiveMemory;
+    phase:
+      'prepared' | 'coordinating' | 'working' | 'reviewing' | 'paused' | 'completed' | 'cancelled';
+    rounds: number;
+    summary: string;
+    currentTaskId?: string;
+    lastActivityAt?: number;
+  };
+  /** Server-created link. Never accepted as authority from HTTP task input. */
+  officeParentId?: string;
+  /** Digest of the current summary, not execution authority. */
+  confirmationFingerprint?: string;
   workerId?: string;
   workflowId?: string;
   workspaceId?: string;
@@ -145,6 +173,26 @@ export interface TeamTask {
   confirmedModel: string | null;
   agentId: number | null;
 }
+
+export interface OfficeObjectiveMemory {
+  version: 1;
+  objectiveId: string;
+  objective: string;
+  revision: number;
+  instructions: Array<{ id: string; content: string; createdAt: number }>;
+  team: { size: 'small' | 'standard' | 'extended'; reason: string; guidance: string };
+  deliveries: Array<{
+    taskId: string;
+    role: TeamRole;
+    status: TeamTask['status'];
+    title: string;
+    summary: string;
+    shortened: boolean;
+    decision?: { action: string; message: string; task?: string; role?: TeamRole };
+    reason?: string;
+  }>;
+  checks: NonNullable<TeamTask['localChecks']>;
+}
 export interface TeamAvailability {
   provider: TeamProvider;
   enabled: boolean;
@@ -154,10 +202,24 @@ export interface TeamAvailability {
   models: Array<{ id: string; efforts: string[] }>;
 }
 export interface TeamSnapshot {
+  toolCapabilities?: OfficeCapability[];
+  toolApprovals?: OfficeToolApproval[];
+  authentications?: OfficeAuthentication[];
+  connections?: Array<{
+    engine?: 'sdk' | 'codex';
+    id: string;
+    name: string;
+    url: string;
+    enabled: boolean;
+    uncertain?: { tool: string; at: string };
+    state: OfficeCapability['state'];
+    reason: string;
+  }>;
   library?: ConversationLibrarySnapshot;
   /** Server-derived capabilities; settings and model output never grant them. */
   capabilities?: {
-    engine: 'codex-cli' | 'agent-orchestrator';
+    steering?: boolean;
+    engine: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator';
     isolatedWriters: boolean;
     budgetReview: boolean;
     checks?: Array<{ id: string; acceptance: boolean }>;
