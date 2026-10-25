@@ -4,18 +4,11 @@ import path from 'node:path';
 
 import { expect, test } from '../../fixtures/standalone';
 import type { TestHooksWindow } from '../../helpers/editor';
-import { sendHookEvent, sessionStartStartup } from '../../helpers/hooks';
+import { sendHookEvent, sessionEndExit, sessionStartStartup } from '../../helpers/hooks';
 import { buildSeedLayout } from '../../helpers/layout-seed';
-import {
-  closeAgentFromOverlay,
-  expectOverlayCount,
-  expectOverlayVisible,
-} from '../../helpers/office';
+import { expectOverlayCount } from '../../helpers/office';
 import { openSettingsModal, setSettings } from '../../helpers/webview';
 
-// The DebugView diagnostics block polls every 2s (see DebugView.tsx); allow a
-// few polling rounds plus IPC/render slop.
-const DIAGNOSTICS_POLL_TIMEOUT_MS = 15_000;
 // onReloadAssets does its filesystem work after the externalAssetDirectoriesUpdated
 // reply, so the re-broadcast lands slightly later than the dir-list update.
 const ASSET_RELOAD_TIMEOUT_MS = 15_000;
@@ -24,7 +17,10 @@ const ASSET_RELOAD_TIMEOUT_MS = 15_000;
 const CONNECTION_STATE_TIMEOUT_MS = 15_000;
 
 test.describe('Standalone / UI', () => {
-  test('closeAgent despawns the character @area:standalone', async ({ page, standalone }) => {
+  test('external sessions stay outside the office and disappear after ending @area:standalone', async ({
+    page,
+    standalone,
+  }) => {
     await setSettings(page, {
       alwaysShowLabels: true,
       hooksEnabled: true,
@@ -47,18 +43,23 @@ test.describe('Standalone / UI', () => {
       tool_input: { file_path: filePath },
     });
 
-    await expectOverlayCount(page, 1);
-    await expectOverlayVisible(page, 'Reading close-agent.ts');
+    await page.getByRole('button', { name: 'Otras sesiones de Codex', exact: true }).click();
+    const panel = page.getByRole('dialog', { name: 'Otras sesiones de Codex', exact: true });
+    await expect(panel.getByText(/Sesión de claude/)).toBeVisible();
+    await expectOverlayCount(page, 0);
     await standalone.drainMessages();
 
-    await closeAgentFromOverlay(page, { text: 'Reading close-agent.ts' });
+    // Observation must not grant the office control over a personal session.
+    await expect(panel.getByRole('button')).toHaveCount(1);
+    await sendHookEvent(standalone.hookServerConfig, sessionEndExit(sessionId));
+    await expect(panel.getByText('No hay otras sesiones detectadas.')).toBeVisible();
 
     await expectOverlayCount(page, 0);
     const messages = await standalone.drainMessages();
     expect(messages.some((message) => message.type === 'agentClosed')).toBe(true);
   });
 
-  test('Debug View renders JSONL diagnostics in standalone @area:standalone', async ({
+  test('Debug View does not expose external session diagnostics in the office @area:standalone', async ({
     page,
     standalone,
   }) => {
@@ -83,13 +84,12 @@ test.describe('Standalone / UI', () => {
       tool_input: { file_path: filePath },
     });
 
-    // Presence of the diagnostics block (either branch) is the proof that the
-    // agentDiagnostics reply reached the webview via transport.onMessage; do
-    // not assert a specific jsonlExists branch (a hook-only session may or may
-    // not have a materialized transcript file).
-    await expect(page.getByText(/JSONL (connected|not found)/)).toBeVisible({
-      timeout: DIAGNOSTICS_POLL_TIMEOUT_MS,
-    });
+    await page.getByRole('button', { name: 'Otras sesiones de Codex', exact: true }).click();
+    const panel = page.getByRole('dialog', { name: 'Otras sesiones de Codex', exact: true });
+    await expect(panel.getByText(/Sesión de claude/)).toBeVisible();
+    await panel.getByRole('button', { name: 'Volver a la oficina', exact: true }).click();
+    await expectOverlayCount(page, 0);
+    await expect(page.getByText(/JSONL (connected|not found)/)).toHaveCount(0);
   });
 
   test('adding an external asset directory triggers a live asset reload @area:standalone', async ({

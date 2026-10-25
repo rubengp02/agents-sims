@@ -1,5 +1,8 @@
 # Objetivo cerrado: ecosistema autónomo de la oficina
 
+Las nuevas prioridades se registran en [Objetivos actuales](OBJETIVOS_ACTUALES.md).
+Este documento conserva el cierre y la evidencia de la entrega anterior.
+
 ## Aceptación de cierre del 25 de octubre de 2026
 
 Tras conocer la diferencia entre cierre local y revocación en el proveedor, el

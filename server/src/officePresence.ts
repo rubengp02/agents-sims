@@ -26,7 +26,7 @@ export function officePresence(
             : 'Disponible'
       : agent.isWaiting
         ? 'Disponible'
-        : agent.activeToolIds.size
+        : agent.activeToolIds.size || agent.currentHookToolId
           ? 'Trabajando'
           : 'Disponible';
     const presence: OfficePresence = {

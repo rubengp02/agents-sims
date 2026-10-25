@@ -1,5 +1,7 @@
 # Estado verificable del ecosistema
 
+Para el trabajo posterior al cierre, consulta [Objetivos actuales](OBJETIVOS_ACTUALES.md).
+
 ## Entrega aceptada y objetivo cerrado
 
 El 25 de octubre el usuario consideró completado el objetivo después de conocer

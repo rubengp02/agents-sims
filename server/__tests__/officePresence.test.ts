@@ -69,6 +69,20 @@ describe('office employee presentation', () => {
     expect(officePresence(store, team).employees[0].status).toBe('Disponible');
   });
 
+  it('reports hook-only tools as working without a JSONL tool entry', () => {
+    const { store, team } = fixture();
+    const session = store.get(2)!;
+    session.isWaiting = false;
+    session.currentHookToolId = 'hook-read';
+    expect(session.activeToolIds.size).toBe(0);
+    expect(officePresence(store, team).sessions[0].status).toBe('Trabajando');
+    session.currentHookToolId = undefined;
+    expect(officePresence(store, team).sessions[0].status).toBe('Disponible');
+    session.currentHookToolId = 'hook-read';
+    session.isWaiting = true;
+    expect(officePresence(store, team).sessions[0].status).toBe('Disponible');
+  });
+
   it('filters initial and live presentation while preserving observations in the store', () => {
     const { store } = fixture();
     expect(

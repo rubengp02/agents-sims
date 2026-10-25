@@ -2,98 +2,55 @@ import path from 'node:path';
 
 import { expect, test } from '../../fixtures/standalone';
 import { sendHookEvent, sessionEndExit, sessionStartStartup } from '../../helpers/hooks';
-import { expectOverlayCount, expectOverlayVisible } from '../../helpers/office';
-import type { RecordedServerMessage } from '../../helpers/standalone';
+import { expectOverlayCount } from '../../helpers/office';
 import { setSettings } from '../../helpers/webview';
 
 test.describe('Standalone / hooks', () => {
-  test('propagates hook-driven lifecycle into the browser UI @area:standalone', async ({
+  test('observes hook-driven lifecycle without promoting external sessions to employees @area:standalone', async ({
     page,
     standalone,
   }) => {
-    await setSettings(page, {
-      alwaysShowLabels: true,
-      watchAllSessions: true,
-    });
+    await setSettings(page, { alwaysShowLabels: true, watchAllSessions: true });
     await standalone.drainMessages();
-
     const sessionId = 'standalone-hooks-test-session';
-    const filePath = path.join(standalone.workspaceDir, 'demo.ts');
+    const event = (hook_event_name: string, extra = {}) =>
+      sendHookEvent(standalone.hookServerConfig, {
+        session_id: sessionId,
+        hook_event_name,
+        ...extra,
+      });
+    const presence = async () =>
+      (await (await page.request.get(`${standalone.hostUrl}/api/office/presence`)).json()).sessions;
 
     await sendHookEvent(
       standalone.hookServerConfig,
       sessionStartStartup(sessionId, standalone.workspaceDir),
     );
-    // Settle wait before the negative assertion: SessionStart only stages a
-    // pending session, so no overlay should appear. Without the wait,
-    // toHaveCount(0) passes instantly just because the overlay has not been
-    // created yet, which would not actually prove SessionStart stays invisible.
-    // See e2e/helpers/office.ts wait-strategy conventions (negative assertion).
-    await page.waitForTimeout(500);
-    await expectOverlayCount(page, 0);
-
-    await sendHookEvent(standalone.hookServerConfig, {
-      session_id: sessionId,
-      hook_event_name: 'PreToolUse',
+    expect(await presence()).toHaveLength(0);
+    await event('PreToolUse', {
       tool_name: 'Read',
-      tool_input: { file_path: filePath },
+      tool_input: { file_path: path.join(standalone.workspaceDir, 'demo.ts') },
     });
-
-    await expectOverlayCount(page, 1);
-    await expectOverlayVisible(page, 'Reading demo.ts');
-    const preToolMessages = await standalone.drainMessages();
-    const toolStart = preToolMessages.find(
-      (message): message is RecordedServerMessage & { type: 'agentToolStart' } =>
-        message.type === 'agentToolStart',
-    );
-    expect(preToolMessages.some((message) => message.type === 'agentCreated')).toBe(true);
-    expect(toolStart).toBeTruthy();
+    await expect.poll(async () => (await presence())[0]?.status).toBe('Trabajando');
+    await page.getByRole('button', { name: 'Otras sesiones de Codex', exact: true }).click();
+    const panel = page.getByRole('dialog', { name: 'Otras sesiones de Codex', exact: true });
+    await expect(panel.getByText('Trabajando', { exact: true })).toBeVisible();
+    await expect(panel.getByText(/Sesión de claude/)).toBeVisible();
+    await expectOverlayCount(page, 0);
+    const messages = await standalone.drainMessages();
     expect(
-      preToolMessages.some(
-        (message) => message.type === 'agentStatus' && message.status === 'active',
-      ),
-    ).toBe(true);
+      messages.some((message) => ['agentCreated', 'agentToolStart'].includes(message.type)),
+    ).toBe(false);
 
-    await sendHookEvent(standalone.hookServerConfig, {
-      session_id: sessionId,
-      hook_event_name: 'PermissionRequest',
-    });
-    await expectOverlayVisible(page, 'Needs approval');
-    const permissionMessages = await standalone.drainMessages();
-    expect(permissionMessages.some((message) => message.type === 'agentToolPermission')).toBe(true);
-
-    await sendHookEvent(standalone.hookServerConfig, {
-      session_id: sessionId,
-      hook_event_name: 'PostToolUse',
-    });
-    const postToolMessages = await standalone.drainMessages();
-    expect(
-      postToolMessages.some(
-        (message) =>
-          message.type === 'agentToolDone' &&
-          message.toolId === toolStart?.toolId &&
-          message.id === toolStart?.id,
-      ),
-    ).toBe(true);
-    await expectOverlayVisible(page, 'Needs approval');
-
-    await sendHookEvent(standalone.hookServerConfig, {
-      session_id: sessionId,
-      hook_event_name: 'Notification',
-      notification_type: 'idle_prompt',
-    });
-    await expectOverlayVisible(page, 'Waiting for input');
-    const notificationMessages = await standalone.drainMessages();
-    expect(notificationMessages.some((message) => message.type === 'agentToolsClear')).toBe(true);
-    expect(
-      notificationMessages.some(
-        (message) => message.type === 'agentStatus' && message.status === 'waiting',
-      ),
-    ).toBe(true);
+    await event('PermissionRequest');
+    await event('PostToolUse');
+    await event('Notification', { notification_type: 'idle_prompt' });
+    await expect.poll(async () => (await presence())[0]?.status).toBe('Disponible');
+    await expect(panel.getByText('Disponible', { exact: true })).toBeVisible();
 
     await sendHookEvent(standalone.hookServerConfig, sessionEndExit(sessionId));
+    await expect.poll(async () => (await presence()).length).toBe(0);
+    await expect(panel.getByText('No hay otras sesiones detectadas.')).toBeVisible();
     await expectOverlayCount(page, 0);
-    const sessionEndMessages = await standalone.drainMessages();
-    expect(sessionEndMessages.some((message) => message.type === 'agentClosed')).toBe(true);
   });
 });

@@ -436,6 +436,14 @@ async function setCheckbox(modal: Locator, label: string, checked: boolean): Pro
 }
 
 export async function openSettingsModal(frame: WebviewSurface): Promise<Locator> {
+  // Conversations is the default surface. Follow the visible navigation before
+  // opening office settings instead of clicking through its modal overlay.
+  const conversations = frame.getByRole('dialog', { name: 'Conversaciones', exact: true });
+  if (await conversations.isVisible()) {
+    await conversations.getByLabel('Menú de conversación', { exact: true }).click();
+    await conversations.getByRole('button', { name: 'Ver oficina', exact: true }).click();
+    await expect(conversations).toBeHidden({ timeout: WEBVIEW_TIMEOUT_MS });
+  }
   const settingsButton = frame.locator('button', { hasText: 'Settings' });
   await expect(settingsButton).toBeVisible({ timeout: WEBVIEW_TIMEOUT_MS });
   await settingsButton.click();

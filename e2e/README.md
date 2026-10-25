@@ -245,12 +245,12 @@ This section is auto-generated. Do not edit between the markers; CI fails on dri
 - `e2e/standalone/conversation-tools.spec.ts:72` — images persist in draft and history, reach the executor, and tools remain honest
 - `e2e/standalone/conversation-tools.spec.ts:335` — clean conversation keeps composer visible and persists queued edits before immediate steering
 - `e2e/standalone/conversations.spec.ts:63` — chat prepares, confirms and executes one message, persists history and scopes TURBO
-- `e2e/standalone/hooks.spec.ts:10` — propagates hook-driven lifecycle into the browser UI (Standalone / hooks)
+- `e2e/standalone/hooks.spec.ts:9` — observes hook-driven lifecycle without promoting external sessions to employees (Standalone / hooks)
 - `e2e/standalone/multi-server-hooks.spec.ts:31` — extension and standalone both stay hook-driven without cross-contamination (Standalone / multi-server hooks)
 - `e2e/standalone/team-workflows.spec.ts:19` — visual controls prepare, reserve, integrate and recover an experimental workflow
 - `e2e/standalone/team.spec.ts:17` — team plans, assigns, runs dependencies and animates real office messages
-- `e2e/standalone/ui.spec.ts:27` — closeAgent despawns the character (Standalone / UI)
-- `e2e/standalone/ui.spec.ts:61` — Debug View renders JSONL diagnostics in standalone (Standalone / UI)
+- `e2e/standalone/ui.spec.ts:20` — external sessions stay outside the office and disappear after ending (Standalone / UI)
+- `e2e/standalone/ui.spec.ts:62` — Debug View does not expose external session diagnostics in the office (Standalone / UI)
 - `e2e/standalone/ui.spec.ts:95` — adding an external asset directory triggers a live asset reload (Standalone / UI)
 - `e2e/standalone/ui.spec.ts:125` — browser Export Layout downloads the layout file (Standalone / UI)
 - `e2e/standalone/ui.spec.ts:140` — browser Import Layout applies the chosen file (Standalone / UI)

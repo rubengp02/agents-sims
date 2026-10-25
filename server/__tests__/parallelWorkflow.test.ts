@@ -360,7 +360,9 @@ describe('isolated workflow, no inference', () => {
       h.calls.find((c) => c.officeRole === 'developer')!.executionSessionKey,
     );
     expect(state.tasks.find((t) => t.role === 'tester')!.checkedRevision).toBe(w.candidateHash);
-  });
+    // Several real Git worktrees and a fresh review need a bounded allowance
+    // for filesystem contention. This does not change any model budget.
+  }, 30_000);
   it('preserves both patches on textual conflict and never changes the source', async () => {
     const h = fixture(),
       a = await h.manager.prepare(h.project, 'conflict', 'a'),

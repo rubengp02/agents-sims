@@ -5,6 +5,7 @@ import path from 'node:path';
 import { root, sourceFingerprint } from './optimization-tools.mjs';
 import { identityOf, stopOwned } from './pilot-supervision.mjs';
 import { futureProtocols } from './parallel-protocol.mjs';
+import { validationDiagnostics } from './validation-diagnostics.mjs';
 
 const id = randomUUID().slice(0, 8),
   privateDir = path.join(root, '.local-office', 'parallel-validation', id);
@@ -47,6 +48,7 @@ const jobs = [
       'scripts/chief-pilot.test.mjs',
       'scripts/parallel-evaluation.test.mjs',
       'scripts/parallel-real-pilot.test.mjs',
+      'scripts/validation-diagnostics.test.mjs',
     ],
   ],
   ['supervision', process.execPath, ['--test', 'scripts/pilot-supervision.test.mjs']],
@@ -100,17 +102,9 @@ for (const [name, exe, args] of jobs) {
   if (result !== 0 || timedOut) {
     // Publish only TAP failure names and scalar assertions, never raw private
     // logs, provider output, stack traces, file paths or arbitrary messages.
-    const diagnostics = fs
-      .readFileSync(path.join(privateDir, name + '.log'), 'utf8')
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(
-        (line) =>
-          /^not ok \d+ - [a-zA-Z0-9 ,.:()/_-]+$/.test(line) ||
-          /^(?:expected|actual): (?:true|false|null|\d+)$/.test(line) ||
-          /^code: '[A-Z_]+'$/.test(line),
-      )
-      .slice(0, 40);
+    const diagnostics = validationDiagnostics(
+      fs.readFileSync(path.join(privateDir, name + '.log'), 'utf8'),
+    );
     console.log(JSON.stringify({ check: name, diagnostics }));
     process.exitCode = 1;
     break;
