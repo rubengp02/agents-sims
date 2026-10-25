@@ -64,3 +64,21 @@ CI instala Chromium. Se conserva Edge en Windows y se usa Chromium administrado
 en otros sistemas. Las nueve pruebas del runtime pasan localmente; la validación
 Linux de este último cambio sigue pendiente. No se atribuye todavía todo el fallo
 a esta dependencia ni se ocultan las incidencias E2E de VS Code observadas en CI.
+
+El fallo de carga de VS Code se reprodujo localmente al importar el bundle real:
+`createRequire` recibía una ruta indefinida. La ruta HTTP importaba el error de
+validación de imágenes desde el almacén y arrastraba Sharp al bundle CommonJS de
+la extensión; Sharp usa `import.meta.url`. Se separó la clase de error sin cargar
+procesamiento nativo en esa ruta y se conserva su exportación anterior para
+compatibilidad. El nuevo contrato carga el bundle construido en un proceso limpio,
+con solo la API de VS Code sustituida, y comprueba sus exportaciones. Pasan ocho
+contratos de paquete y 59 pruebas de adjuntos/conversaciones. La aceptación real en
+VS Code sigue pendiente. El job general de CI instala explícitamente el Chromium
+administrado que necesitan las pruebas de navegador del servidor.
+
+El [job Agent runtime de 520edd4](https://github.com/rubengp02/agents-sims/actions/runs/40199468861/job/121187637020)
+ha terminado correctamente en Linux: paquete, aplicación, políticas, supervisión,
+AO nativo, matriz y doce recorridos standalone; informe `VALIDACION-4de9fb62.json`,
+`passed: true`, cero inferencias. El fallo del runtime queda corregido en esa
+revisión; P0 permanece abierto hasta validar también los demás jobs de la gran
+integración con las correcciones de carga de VS Code y de instalación de Chromium.

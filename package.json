@@ -126,7 +126,7 @@
     "test:webview": "cd webview-ui && npm test",
     "test:server": "cd server && npm test",
     "test:standalone": "playwright test --config e2e/playwright.standalone.config.ts",
-    "test:package-contract": "node --test scripts/npm-package-contract.test.mjs",
+    "test:package-contract": "node --test scripts/npm-package-contract.test.mjs scripts/extension-load.test.mjs",
     "test": "npm run test:webview && npm run test:server && npm run test:package-contract",
     "verify:npm-package": "node scripts/verify-npm-package.mjs",
     "e2e": "node scripts/run-e2e.mjs",

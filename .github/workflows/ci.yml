@@ -139,6 +139,10 @@ jobs:
 
       # --- Server Tests (require build for hook script) ---
 
+      - name: Install managed browser for server tests
+        if: always() && steps.build.outcome == 'success' && steps.install_dependencies.outcome == 'success'
+        run: npx playwright install --with-deps chromium
+
       - name: Server Tests
         id: server_test
         if: always() && steps.build.outcome == 'success' && steps.install_dependencies.outcome == 'success'

@@ -20,11 +20,13 @@ import {
   type OfficeArtifact,
   validateArtifactReference,
 } from '../../../core/src/artifacts.js';
+import { InvalidOfficeImage } from './artifactErrors.js';
+
+export { InvalidOfficeImage } from './artifactErrors.js';
 
 const ID = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const MIME = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' } as const;
 type ArtifactInput = Omit<OfficeArtifact, 'id' | 'mime' | 'size' | 'createdAt'> & { bytes: Buffer };
-export class InvalidOfficeImage extends Error {}
 
 /** Private image storage. Public records deliberately never contain filesystem paths. */
 export class ArtifactStore {

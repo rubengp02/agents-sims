@@ -10,7 +10,7 @@ import type {
   TeamSettings,
   WorkflowDecomposition,
 } from '../../../core/src/team.js';
-import { InvalidOfficeImage } from '../tools/artifactStore.js';
+import { InvalidOfficeImage } from '../tools/artifactErrors.js';
 import { pickProjectFolder } from './projectFolderPicker.js';
 import { object } from './subscriptionPolicy.js';
 import type { TeamCoordinator } from './teamCoordinator.js';
