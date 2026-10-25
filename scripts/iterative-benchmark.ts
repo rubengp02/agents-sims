@@ -331,7 +331,7 @@ async function main() {
         false,
         team.snapshot().tasks.find((t) => t.id === task.id)!.confirmationFingerprint!,
       );
-      while (team.snapshot().running) await sleep(1000);
+      await team.waitUntilIdle();
       const root = team.snapshot().tasks.find((t) => t.id === task.id)!;
       trial.executionAndChecksMs = Date.now() - started;
       trial.taskStatus = root.status;
@@ -347,7 +347,7 @@ async function main() {
         error instanceof Error ? (error.stack ?? error.message) : String(error),
       );
       trial.reasonCode = error instanceof ExecutionBlocked ? error.code : 'benchmark_failed';
-      trial.taskStatus = 'failed';
+      trial.taskStatus = 'unverified';
       await save();
     } finally {
       clearTimeout(timer);
@@ -396,6 +396,12 @@ async function main() {
   report.totalTurns = totalTurns;
   await save();
   console.log(JSON.stringify({ phase: 'complete', status: report.status, proof, totalTurns }));
+  if (simulated) {
+    assert.equal(report.status, 'completed', 'The simulated verifier did not finish both methods.');
+    assert.equal(report.realInference, false);
+    assert.equal(totalTurns, 6);
+    assert.ok(report.trials.every((trial) => trial.status === 'accepted'));
+  }
 }
 main().catch(async (error) => {
   await recordFailure?.(error);

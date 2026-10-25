@@ -85,3 +85,28 @@ estas comprobaciones no acreditan todavía su corrección en una nueva pareja re
 La comprobación posterior no inició inferencias: la cuota oficial ya superaba
 el margen de inicio de evaluación. El bloque real sigue pendiente; no se aumentó
 su presupuesto ni se ocultó el consumo desconocido del intento anterior.
+
+## Espera del cierre sin consultas periódicas
+
+El verificador espera ahora `TeamCoordinator.waitUntilIdle()`: sigue las promesas
+de ejecuciones, comprobaciones y coordinación hasta liberar sus recursos y registrar
+los recibos. No llama a `snapshot()` repetidamente ni detiene el equipo por un fallo
+de una consulta de estado. La instantánea final se obtiene después de esa espera;
+si no puede verificarse, el resultado se conserva como `unverified`.
+
+Tres regresiones cubren el evento de estado final anterior al recibo, los cinco
+turnos completos con el observador de instantáneas averiado y una pausa humana
+que termina la espera sin reanudar trabajo. Pasan 70 pruebas relacionadas del
+coordinador y las conversaciones. La simulación del benchmark completa ambos
+métodos y sus 36 comprobaciones por método; los contadores son sintéticos.
+
+`npm run benchmark:iterative:test` ejecuta las nueve pruebas del comparador y el
+ensayo completo simulado, y falla si ese ensayo no termina correctamente. Se ha
+añadido al job de runtime de CI. El comando no habilita inferencia; la ejecución
+real sigue siendo un comando separado, `npm run benchmark:iterative:run`.
+
+La comprobación oficial del 25 de octubre, a las 17:47 de Madrid, comunicó un 90%
+en la ventana de cinco horas. No se inició otra inferencia. El contador indicaba
+renovación a las 20:53; deberá consultarse de nuevo antes del siguiente bloque.
+Estos cambios no convierten el primer intento incompleto en una medición válida
+ni prueban aún el nuevo recorrido con un modelo real.

@@ -3727,6 +3727,28 @@ export class TeamCoordinator {
     return pending;
   }
 
+  /** Observe owned work until its receipts and tools settle, without polling or stopping it. */
+  async waitUntilIdle(): Promise<void> {
+    while (true) {
+      const pending = [
+        ...this.pendingRuns,
+        ...this.pendingChecks,
+        ...(this.officeOperation ? [this.officeOperation] : []),
+        ...(this.operation ? [this.operation] : []),
+      ];
+      if (
+        !pending.length &&
+        !this.running &&
+        !this.officeRootId &&
+        !this.draining &&
+        !this.starting
+      )
+        return;
+      if (pending.length) await Promise.allSettled(pending);
+      else await new Promise<void>((resolve) => setImmediate(resolve));
+    }
+  }
+
   async shutdown(): Promise<void> {
     this.closed = true;
     this.pause('server_stopped');

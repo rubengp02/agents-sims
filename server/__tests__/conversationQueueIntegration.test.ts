@@ -95,6 +95,94 @@ function fixture() {
 }
 
 describe('conversation queue and live redirection integration (mock official executor)', () => {
+  it('waits for an individual receipt without snapshot polling or cancelling the run', async () => {
+    const h = fixture();
+    await h.team.queueConversation(h.id, request('Implementa el encargo'));
+    await vi.waitFor(() => expect(h.runs).toHaveLength(1));
+    const snapshot = vi.spyOn(h.team, 'snapshot');
+    let finished = false;
+    const waiting = h.team.waitUntilIdle().then(() => {
+      finished = true;
+    });
+    h.runs[0].options.onState?.(receipt(h.runs[0].options));
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(finished).toBe(false);
+    expect(h.runs[0].options.signal?.aborted).toBe(false);
+    expect(snapshot).not.toHaveBeenCalled();
+    h.runs[0].finish();
+    await waiting;
+    expect(h.runs[0].options.signal?.aborted).toBe(false);
+    snapshot.mockRestore();
+    expect(h.team.snapshot().tasks[0].status).toBe('completed');
+    expect(h.team.snapshot().running).toBe(false);
+    const count = h.runs.length;
+    await h.team.waitUntilIdle();
+    expect(h.runs).toHaveLength(count);
+  });
+  it('waits across employee turns and the final Chief receipt without restarting work', async () => {
+    const h = fixture();
+    await h.team.queueConversation(h.id, request('Implementa y revisa el objetivo', true));
+    await vi.waitFor(() => expect(h.runs).toHaveLength(1));
+    const snapshot = vi.spyOn(h.team, 'snapshot').mockImplementation(() => {
+      throw Object.assign(new Error('Simulated observer failure'), { code: 'EBUSY' });
+    });
+    let finished = false;
+    const waiting = h.team.waitUntilIdle().then(() => {
+      finished = true;
+    });
+    h.runs[0].finish(
+      'OFFICE_DECISION {"action":"assign","role":"developer","title":"Implementar","task":"Implementa el objetivo sin ampliar alcance","message":"Programación"}',
+    );
+    await vi.waitFor(() => expect(h.runs).toHaveLength(2));
+    expect(finished).toBe(false);
+    h.runs[1].finish();
+    await vi.waitFor(() => expect(h.runs).toHaveLength(3));
+    expect(finished).toBe(false);
+    h.runs[2].finish(
+      'OFFICE_DECISION {"action":"assign","role":"tester","title":"Revisar","task":"Revisión independiente sin editar","message":"Revisión"}',
+    );
+    await vi.waitFor(() => expect(h.runs).toHaveLength(4));
+    expect(finished).toBe(false);
+    h.runs[3].finish('OFFICE_REVIEW {"findings":[]}\nOFFICE_RESULT {"status":"completed"}');
+    await vi.waitFor(() => expect(h.runs).toHaveLength(5));
+    expect(finished).toBe(false);
+    expect(h.runs.every((run) => !run.options.signal?.aborted)).toBe(true);
+    h.runs[4].finish(
+      'OFFICE_DECISION {"action":"complete","message":"Entrega terminada y revisada"}',
+    );
+    await waiting;
+    expect(snapshot).not.toHaveBeenCalled();
+    snapshot.mockRestore();
+    const state = h.team.snapshot();
+    expect(state.running).toBe(false);
+    expect(state.tasks.find((task) => task.office)?.status).toBe('completed');
+    expect(state.tasks.find((task) => task.office)?.autonomyBudget?.usage).toMatchObject({
+      attempts: 5,
+      activeAttempts: 0,
+      unknownAttempts: 0,
+      complete: true,
+    });
+    expect(h.runs).toHaveLength(5);
+  });
+  it('settles at a human pause without resuming or dispatching another turn', async () => {
+    const h = fixture();
+    await h.team.queueConversation(h.id, request('Comprueba y pregunta lo necesario', true));
+    await vi.waitFor(() => expect(h.runs).toHaveLength(1));
+    const waiting = h.team.waitUntilIdle();
+    h.runs[0].finish(
+      'OFFICE_DECISION {"action":"human","message":"Elige el resultado visual","responseType":"text"}',
+    );
+    await waiting;
+    const state = h.team.snapshot();
+    expect(state.running).toBe(false);
+    expect(state.tasks.find((task) => task.office)).toMatchObject({
+      status: 'paused',
+      reasonCode: 'office_human_required',
+    });
+    expect(h.runs).toHaveLength(1);
+    await h.team.waitUntilIdle();
+    expect(h.runs).toHaveLength(1);
+  });
   it.each(['text', 'approval', 'legacy_restarted'] as const)(
     'preserves a pending human question and its message metadata across restart (%s)',
     async (mode) => {

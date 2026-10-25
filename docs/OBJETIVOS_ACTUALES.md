@@ -40,6 +40,9 @@ Los detalles privados y las transcripciones permanecen fuera de Git.
 
 P2: [benchmark preparado y primer intento real documentado](BENCHMARK_ITERATIVO.md);
 la medición completa queda pendiente de cuota y de recoger todos los recibos.
+El verificador ya espera al cierre del coordinador sin consultar ni escribir
+estados periódicamente. Pasan 70 regresiones de coordinación/conversaciones y
+el ensayo simulado completo; esa comprobación sin inferencia queda incluida en CI.
 La configuración de permisos y herramientas se separó del ejecutor App Server,
 un módulo de unas 1.900 líneas; conserva su exportación anterior y pasan las
 63 pruebas de protocolo y permisos, tipos y lint. Es un primer paso de simplificación.
