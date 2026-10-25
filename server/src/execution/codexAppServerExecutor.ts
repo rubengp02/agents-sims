@@ -22,6 +22,7 @@ import { type CliRuntime, discoverCodex } from './cliProcess.js';
 import { type AppServerProtocol, CodexAppServerProtocol } from './codexAppServerProtocol.js';
 import { CODEX_TASK_PREFIX } from './codexExecutor.js';
 import { acquireCodexLease } from './executionLease.js';
+import { LocalFileApprovals } from './localFileApprovals.js';
 import { officialMcpLogout } from './officialMcpLogout.js';
 import {
   object,
@@ -1506,15 +1507,17 @@ export class CodexAppServerExecutor implements OfficialExecutor {
       options.signal?.addEventListener('abort', abort, { once: true });
       if (options.signal?.aborted) abort();
       if (ended) return record;
+      const localFileApprovals = new LocalFileApprovals(project, options.allowWrites === true);
       client.onRequest(async (method, params) => {
         if (params.threadId && params.threadId !== record.sessionId) return deny(method);
-        // Local workspace writes already run autonomously inside the sandbox.
-        // These callbacks request broader authority, not the normal local edit.
-        if (
-          method === 'item/permissions/requestApproval' ||
-          method === 'item/fileChange/requestApproval'
-        )
-          return deny(method);
+        if (ended || approvalController.signal.aborted) return deny(method);
+        if (method === 'item/fileChange/requestApproval')
+          return {
+            decision: localFileApprovals.accept(params, record.sessionId, turnId)
+              ? 'accept'
+              : 'decline',
+          };
+        if (method === 'item/permissions/requestApproval') return deny(method);
         if (method === 'item/commandExecution/requestApproval' && !options.allowWrites)
           return deny(method);
         if (
@@ -1587,6 +1590,7 @@ export class CodexAppServerExecutor implements OfficialExecutor {
       client.onNotification((method, params) => {
         if (ended) return;
         if (params.threadId && params.threadId !== record.sessionId) return;
+        localFileApprovals.observe(method, params);
         if (
           (method === 'item/commandExecution/outputDelta' ||
             method === 'item/reasoning/summaryTextDelta') &&
@@ -1844,6 +1848,7 @@ export class CodexAppServerExecutor implements OfficialExecutor {
           stopped: false,
           completed: false,
           invalidateApprovals: () => {
+            localFileApprovals.clear();
             approvalController.abort();
             approvalController = new AbortController();
           },

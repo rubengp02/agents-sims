@@ -984,6 +984,36 @@ describe('Codex App Server executor (fixtures, no inference)', () => {
     controller.abort();
     await pending;
   });
+  it('accepts a known local patch without asking again and retains role and scope restrictions', async () => {
+    const h = harness('wait');
+    const controller = new AbortController();
+    const pending = h.executor.execute({
+      project: h.root,
+      prompt: 'work',
+      allowWrites: true,
+      signal: controller.signal,
+    });
+    await vi.waitFor(() =>
+      expect(h.protocol.request).toHaveBeenCalledWith('turn/start', expect.anything()),
+    );
+    const request = { threadId: 'thread-one', turnId: 'turn-one', itemId: 'patch' };
+    h.notification('item/started', {
+      ...request,
+      item: {
+        id: 'patch',
+        type: 'fileChange',
+        status: 'inProgress',
+        changes: [{ path: join(h.root, 'new.mjs'), kind: { type: 'add' }, diff: '+local' }],
+      },
+    });
+    expect(await h.ask('item/fileChange/requestApproval', request)).toEqual({ decision: 'accept' });
+    expect(await h.ask('item/fileChange/requestApproval', request)).toEqual({
+      decision: 'decline',
+    });
+    expect(h.approvals.request).not.toHaveBeenCalled();
+    controller.abort();
+    await pending;
+  });
   it('pins network-restricted local permissions and only the owned MCP bridge', () => {
     const config = appServerThreadConfig({
       project: '/project',
