@@ -51,5 +51,8 @@ pérdida de conexión y movimiento reducido. Las capturas se revisaron visualmen
 No hubo inferencia de un modelo en este bloque. La compilación de interfaz se
 comprobó en una carpeta separada, sin reemplazar el servidor personal.
 
-La actualización del servidor activo queda pendiente: el árbol compartido contiene
-cambios ajenos de proveedores y runtime; esta entrega no los incluye ni los despliega.
+Actualización local completada desde una copia limpia del commit `ae2a69c`,
+sin incluir los cambios ajenos de proveedores y runtime del árbol compartido.
+Se reinició estando inactiva y se comparó el historial completo: diez
+conversaciones, 135 mensajes y la misma huella antes y después, sin reanudar
+encargos. El bundle instalado coincide con el de la copia limpia.
