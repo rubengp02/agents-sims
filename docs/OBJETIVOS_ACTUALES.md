@@ -43,6 +43,13 @@ la medición completa queda pendiente de cuota y de recoger todos los recibos.
 El verificador ya espera al cierre del coordinador sin consultar ni escribir
 estados periódicamente. Pasan 70 regresiones de coordinación/conversaciones y
 el ensayo simulado completo; esa comprobación sin inferencia queda incluida en CI.
+La [validación de 203f28e](https://github.com/rubengp02/agents-sims/actions/runs/40212920863)
+terminó con éxito, incluida la extracción de configuración. La
+[validación de 60bb528](https://github.com/rubengp02/agents-sims/actions/runs/40213879047)
+está en curso y contiene la nueva espera de recibos y el ensayo simulado en CI;
+no se acredita todavía su resultado. El siguiente bloque real necesita una cuota
+actual inferior al margen de inicio; la última comprobación comunicó un 95%
+en la ventana corta. La elección creativa de P3 sigue pendiente de respuesta.
 La configuración de permisos y herramientas se separó del ejecutor App Server,
 un módulo de unas 1.900 líneas; conserva su exportación anterior y pasan las
 63 pruebas de protocolo y permisos, tipos y lint. Es un primer paso de simplificación.
