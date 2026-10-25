@@ -82,3 +82,10 @@ AO nativo, matriz y doce recorridos standalone; informe `VALIDACION-4de9fb62.jso
 `passed: true`, cero inferencias. El fallo del runtime queda corregido en esa
 revisión; P0 permanece abierto hasta validar también los demás jobs de la gran
 integración con las correcciones de carga de VS Code y de instalación de Chromium.
+
+En la [validación de 515f30d](https://github.com/rubengp02/agents-sims/actions/runs/40200044360),
+el nuevo contrato de carga detectó un error en el orden del job Node 20: se
+ejecutaba antes de construir `dist/extension.js`. Se reordena ese job para verificar
+primero el paquete construido e instalado y ejecutar después sus contratos. Las
+pruebas E2E de esa revisión siguen siendo evidencia útil de la corrección de carga;
+no se declara todavía una ejecución global satisfactoria.

@@ -300,7 +300,9 @@ jobs:
         run: npm ci
 
       - name: Verify npm Package Contract and Installed Artifact
-        run: npm run test:package-contract && npm run verify:npm-package
+        # The extension load contract inspects the built bundle. The package
+        # verifier builds it first, then exercises the installed npm artifact.
+        run: npm run verify:npm-package && npm run test:package-contract
 
   e2e:
     name: ${{ matrix.target.label }} E2E (shard ${{ matrix.shard }}/3)
