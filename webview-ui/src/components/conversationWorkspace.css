@@ -808,6 +808,19 @@
   border: 1px solid #505050;
   cursor: pointer;
 }
+.chat-delivery-evidence {
+  margin-top: 14px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.chat-delivery-evidence summary {
+  cursor: pointer;
+}
+.chat-delivery-evidence h3 {
+  margin: 12px 0 6px;
+  font-size: 14px;
+}
 
 .chat-autonomy-budget {
   width: min(800px, calc(100% - 48px));

@@ -50,6 +50,11 @@ interface Dependencies {
 
 /** AO supplies native session/worktree infrastructure. Office policy owns all starts. */
 export class OrchestratorExecutor implements OfficialExecutor {
+  get executionEvidence(): 'official-cli' | 'unknown' {
+    return this.deps.launch || this.deps.discover || this.deps.verifyBuild || this.deps.metadata
+      ? 'unknown'
+      : 'official-cli';
+  }
   readonly workspaceManager: WorkflowWorkspaceManager;
   readonly engine = 'agent-orchestrator' as const;
   readonly provider = 'codex' as const;

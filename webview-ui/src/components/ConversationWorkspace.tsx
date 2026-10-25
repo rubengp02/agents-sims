@@ -25,6 +25,7 @@ import {
   reasons,
   stateText,
 } from './conversationState.js';
+import { DeliveryEvidence } from './DeliveryEvidence.js';
 import { ImageAttachments } from './ImageAttachments.js';
 import { LiveOfficeActivity } from './LiveOfficeActivity.js';
 import { MessageMarkdown } from './MessageMarkdown.js';
@@ -355,6 +356,7 @@ function Message({
       )}
       <ArtifactGallery artifacts={message.attachments} label="Imágenes adjuntas" />
       <ArtifactGallery artifacts={message.artifacts} label="Resultados visuales" />
+      {message.kind === 'response' && <DeliveryEvidence evidence={message.finalEvidence} />}
       {message.reasonCode && (
         <details className="chat-message-details">
           <summary>Detalles de esta entrega</summary>

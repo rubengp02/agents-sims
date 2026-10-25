@@ -12,6 +12,7 @@ import { dirname, join } from 'node:path';
 
 import { validateArtifactReference } from '../../../core/src/artifacts.js';
 import type { PendingConversationInput } from '../../../core/src/conversations.js';
+import { validDeliveryEvidence } from '../../../core/src/deliveryEvidence.js';
 import {
   CODEX_QUOTA_RESERVE_PERCENT,
   type IncludedQuotaView,
@@ -37,6 +38,7 @@ import { OfficialPlugins } from '../tools/officialPlugins.js';
 import type { AdaptiveRuntime } from './adaptiveRuntime.js';
 import { ConversationDelivery } from './conversationDelivery.js';
 import type { ConversationLibrary } from './conversationLibrary.js';
+import { buildDeliveryEvidence } from './deliveryEvidence.js';
 import type { CheckRunner } from './localChecks.js';
 import { chiefMemoryPrompt, directOfficeAnswer, objectiveMemory } from './objectiveMemory.js';
 import { ObjectiveUsageLedger } from './objectiveUsage.js';
@@ -262,6 +264,17 @@ export class TeamCoordinator {
             task.officeParentId = raw.officeParentId;
           }
           task.id = raw.id;
+          if (
+            raw.executionEvidence !== undefined &&
+            !['official-cli', 'simulated', 'unknown'].includes(raw.executionEvidence)
+          )
+            throw new Error('invalid_execution_evidence');
+          task.executionEvidence = raw.executionEvidence;
+          if (raw.finalEvidence !== undefined) {
+            if (!validDeliveryEvidence(raw.finalEvidence))
+              throw new Error('invalid_final_evidence');
+            task.finalEvidence = structuredClone(raw.finalEvidence);
+          }
           if (
             (raw.inputId !== undefined && !/^[a-f0-9-]{36}$/.test(raw.inputId)) ||
             (raw.objectiveRevision !== undefined &&
@@ -1423,6 +1436,7 @@ export class TeamCoordinator {
     const progress = new OfficeProgressGuard();
     let verifiedRevision: string | undefined;
     let verifiedReadOnly = false;
+    let reviewTask: TeamTask | undefined;
     let checks: NonNullable<TeamTask['localChecks']> = [];
     let reviewedObjectiveRevision = root.objectiveRevision ?? 0;
     root.status = 'running';
@@ -1430,6 +1444,7 @@ export class TeamCoordinator {
     root.office!.phase = 'coordinating';
     root.office!.summary = 'El Jefe está preparando el siguiente paso.';
     root.output = '';
+    root.finalEvidence = undefined;
     try {
       const preparing = new AbortController();
       this.controllers.set(root.id, preparing);
@@ -1456,6 +1471,7 @@ export class TeamCoordinator {
         if (reviewedObjectiveRevision !== objectiveRevision) {
           verifiedRevision = undefined;
           verifiedReadOnly = false;
+          reviewTask = undefined;
           checks = [];
           reviewedObjectiveRevision = objectiveRevision;
         }
@@ -1512,11 +1528,37 @@ export class TeamCoordinator {
               'office_completion_unverified',
               'El Jefe propuso terminar sin una revisión independiente vigente o con comprobaciones fallidas.',
             );
+          const candidate = capture?.();
+          const finalEvidence = buildDeliveryEvidence({
+            root,
+            tasks: this.tasks,
+            base,
+            candidate,
+            checks,
+            reviewTask,
+            direct: directCompletion,
+            execution: this.tasks.some(
+              (task) =>
+                task.officeParentId === root.id &&
+                task.runId &&
+                task.executionEvidence === 'simulated',
+            )
+              ? 'simulated'
+              : this.tasks.some(
+                    (task) =>
+                      task.officeParentId === root.id &&
+                      task.runId &&
+                      task.executionEvidence !== 'official-cli',
+                  )
+                ? 'unknown'
+                : (chief.executionEvidence ?? 'unknown'),
+          });
           this.integratingObjectives.add(root.id);
           try {
             if (root.selfWorkspaceReceipt && !directCompletion)
               await this.services?.integrateSelf(root, verifiedRevision!);
             this.assertOfficeAuthority(root);
+            root.finalEvidence = finalEvidence;
             root.status = 'completed';
           } finally {
             this.integratingObjectives.delete(root.id);
@@ -1642,8 +1684,11 @@ export class TeamCoordinator {
               worker.status = 'blocked';
               worker.reasonCode = 'review_findings';
             } else verifiedRevision = capture!().digest;
-          } else if (base) verifiedRevision = capture!().digest;
-          else verifiedReadOnly = true;
+          } else if (base) {
+            verifiedRevision = capture!().digest;
+            worker.checkedRevision = verifiedRevision;
+          } else verifiedReadOnly = true;
+          if (worker.status === 'completed') reviewTask = worker;
         } else if (decision.role !== 'tester') verifiedReadOnly = false;
         const evidence = base
           ? capture!().digest + JSON.stringify(checks.map((c) => [c.id, c.passed, c.exitCode]))
@@ -3303,6 +3348,7 @@ export class TeamCoordinator {
         );
       }
       dispatchedAt = Date.now();
+      task.executionEvidence = this.executors[provider].executionEvidence ?? 'unknown';
       usageAttemptId = randomUUID();
       this.objectiveUsage.begin(
         usageAttemptId,

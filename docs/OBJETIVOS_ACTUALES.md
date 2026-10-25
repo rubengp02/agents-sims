@@ -10,7 +10,7 @@ con sus limitaciones aceptadas. Registrar estos objetivos no acredita su ejecuci
 | --------- | ------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | P0        | Resolver el fallo del runtime en CI                                 | Validar la última gran integración        | Identificar la ejecución y causa del fallo, corregirlo y acreditar una ejecución de CI satisfactoria de la revisión corregida. Un pase local no sustituye CI.                                            | Completado · CI 2f816c0 |
 | P1        | Añadir un presupuesto de autonomía comprensible                     | Proteger la cuota frente a ciclos largos  | Mostrar consumo conocido, incertidumbre, progreso y motivo de pausa; comprobar continuación y recuperación sin borrar consumo ni imponer cortes arbitrarios de duración.                                 | En validación local     |
-| P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | Pendiente               |
+| P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | En validación local     |
 | P1        | Probar una tarea completa de programación con la interfaz real      | Validar el producto, no solo el backend   | Ejecutar una petición desde Conversaciones hasta cambios, pruebas, revisión y resumen final; conservar evidencia de la interfaz y verificar historial tras reabrir.                                      | Pendiente               |
 | P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Pendiente               |
 | P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Pendiente               |
@@ -72,6 +72,26 @@ persistencia del recibo: al recuperar se pausa el encargo, se conservan los toke
 parciales y no se restaura aceptación sin recibo. Pasaron 60 pruebas de consumo y
 conversaciones después de ese ajuste. Sigue pendiente la validación con Codex real
 junto a la ficha final de evidencias y la tarea de programación del resto de P1.
+
+Segundo P1 implementado y comprobado localmente: ficha de evidencias generada por
+el servidor junto al resumen final del Jefe. Conserva revisión del objetivo,
+archivos comparados y huellas, comprobaciones locales con salida y duración,
+revisión vigente del Tester, referencias a artefactos y limitaciones. No convierte
+comandos citados por el modelo en pruebas registradas ni atribuye autoría a una
+comparación. Se identifica ejecución oficial, simulada o de procedencia no acreditada;
+los adaptadores con lanzamiento o descubrimiento sustituidos no acreditan CLI oficial.
+Las respuestas directas indican que no hubo Tester. Los historiales antiguos siguen
+siendo legibles sin inventarles una ficha. La aceptación humana y publicación no se
+infieren del cierre del modelo.
+
+Pruebas de esta entrega: 169 de servidor relacionadas con ejecutores, cola y
+conversaciones; 101 de interfaz; tipos y lint aprobados (aviso preexistente de
+App.tsx). El recorrido en navegador real con ejecutor simulado muestra la ficha
+y la conserva tras un reinicio sin despachar trabajo. Captura revisada en la vista
+previa aislada. Se rechazan revisiones de otro objetivo, antiguas o de archivos
+distintos; no se permite acreditar cambios mediante una respuesta directa.
+Pendientes: comprobar esta revisión en CI y ejecutar el recorrido completo de
+programación con Codex real. No se ha actualizado la instancia activa.
 
 ## Primer trabajo
 

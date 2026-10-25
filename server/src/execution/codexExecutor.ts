@@ -88,6 +88,11 @@ interface Dependencies {
 
 /** Two independent readers or one exclusive run; no account/payment fallback. */
 export class CodexExecutor implements OfficialExecutor {
+  get executionEvidence(): 'official-cli' | 'unknown' {
+    return this.dependencies.launch || this.dependencies.metadata || this.dependencies.discover
+      ? 'unknown'
+      : 'official-cli';
+  }
   readonly engine = 'codex-cli' as const;
   readonly provider = 'codex' as const;
   readonly maxConcurrentReadOnly = 2 as const;

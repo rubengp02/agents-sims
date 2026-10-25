@@ -1,4 +1,5 @@
 import type { OfficeArtifact } from './artifacts.js';
+import type { DeliveryEvidence } from './deliveryEvidence.js';
 import type { ObjectiveBudgetView } from './objectiveBudget.js';
 import type { TaskContext, TeamTask } from './team.js';
 
@@ -15,6 +16,7 @@ export interface SavedProject {
   checksApproval?: { fingerprint: string; ids: string[]; approvedAt: number };
 }
 export interface ConversationMessage {
+  finalEvidence?: DeliveryEvidence;
   autonomyBudget?: ObjectiveBudgetView;
   id: string;
   origin?: 'user' | 'internal';

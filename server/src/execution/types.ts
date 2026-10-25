@@ -103,6 +103,7 @@ export interface ExecuteOptions {
 
 /** Only local official CLIs may implement this contract. No Google client exists. */
 export interface OfficialExecutor {
+  readonly executionEvidence?: import('../../../core/src/deliveryEvidence.js').ExecutionEvidenceKind;
   readonly workspaceManager?: WorkflowWorkspaceManager;
   readonly provider: ProviderId;
   readonly engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator';

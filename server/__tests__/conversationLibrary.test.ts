@@ -120,7 +120,10 @@ async function open(
     };
   });
   const team = new TeamCoordinator(
-    { codex: { provider: 'codex', diagnose, execute }, claude: new DisabledExecutor('claude') },
+    {
+      codex: { provider: 'codex', executionEvidence: 'simulated', diagnose, execute },
+      claude: new DisabledExecutor('claude'),
+    },
     undefined,
     undefined,
     undefined,
@@ -827,6 +830,18 @@ describe('saved conversations and project approvals (offline)', () => {
       mode: 'codex',
       usage: { attempts: 5, knownTokens: 120, unknownAttempts: 0, complete: true },
     });
+    const finalEvidence = state.tasks.find((task) => task.id === root.id)!.finalEvidence;
+    expect(finalEvidence).toMatchObject({
+      version: 1,
+      execution: 'simulated',
+      changes: { state: 'not_captured' },
+      review: { state: 'tester' },
+      checks: [],
+    });
+    expect(
+      state.library!.selected!.messages.find((message) => message.id === `${root.id}-response`)
+        ?.finalEvidence,
+    ).toEqual(finalEvidence);
     expect(
       state.library!.selected!.messages.find((m) => m.id === `${root.id}-response`)?.autonomyBudget
         ?.usage.knownTokens,
@@ -842,6 +857,12 @@ describe('saved conversations and project approvals (offline)', () => {
     const reopened = await open(f, 'No ejecutar', true);
     expect(reopened.team.snapshot().budgetReason).not.toBe('checkpoint_invalid');
     expect(reopened.team.snapshot().tasks[0].status).toBe('completed');
+    expect(reopened.team.snapshot().tasks[0].finalEvidence).toEqual(finalEvidence);
+    expect(
+      reopened.library
+        .snapshot()
+        .selected!.messages.find((message) => message.id === `${root.id}-response`)?.finalEvidence,
+    ).toEqual(finalEvidence);
     expect(reopened.team.snapshot().tasks[0].autonomyBudget?.usage).toEqual(
       state.tasks.find((t) => t.id === root.id)?.autonomyBudget?.usage,
     );

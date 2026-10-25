@@ -1,5 +1,7 @@
 import type { OfficeArtifact } from './artifacts.js';
 import type { ConversationLibrarySnapshot } from './conversations.js';
+import type { DeliveryEvidence } from './deliveryEvidence.js';
+import type { ExecutionEvidenceKind } from './deliveryEvidence.js';
 import type { IncludedQuotaView, ObjectiveBudgetView } from './objectiveBudget.js';
 import type { OfficeAuthentication, OfficeCapability, OfficeToolApproval } from './officeTools.js';
 
@@ -84,6 +86,8 @@ export interface TeamWorkflow {
   };
 }
 export interface TeamTask {
+  executionEvidence?: ExecutionEvidenceKind;
+  finalEvidence?: DeliveryEvidence;
   /** Server-derived evidence; never accepted as an execution permission. */
   autonomyBudget?: ObjectiveBudgetView;
   inputId?: string;

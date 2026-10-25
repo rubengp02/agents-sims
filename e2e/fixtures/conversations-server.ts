@@ -32,6 +32,7 @@ async function main() {
   const chiefTurns = new Map<string, number>();
   const executor: OfficialExecutor = {
     provider: 'codex',
+    executionEvidence: 'simulated',
     engine: 'codex-app-server',
     supportsSteering: true,
     steer: async (key, input) => {

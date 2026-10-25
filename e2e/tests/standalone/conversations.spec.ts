@@ -403,6 +403,17 @@ test('chat prepares, confirms and executes one message, persists history and sco
       .getByRole('button', { name: 'Usar cuota y ejecutar', exact: true })
       .click();
     await expect(panel.getByRole('log')).toContainText('Objetivo de oficina revisado y terminado');
+    const evidenceCard = panel.getByLabel('Ficha final de evidencias', { exact: true });
+    await evidenceCard.locator(':scope > summary').click();
+    await expect(evidenceCard).toContainText('Comprobación con ejecutor simulado');
+    await expect(evidenceCard).toContainText('No se registraron pruebas locales');
+    await expect(evidenceCard).toContainText('Tester vigente');
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await evidenceCard
+      .getByText('Pruebas locales registradas', { exact: true })
+      .scrollIntoViewIfNeeded();
+    await page.screenshot({ path: testInfo.outputPath('ficha-final-evidencias.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
     await expect(panel.getByRole('log')).toContainText('Entrega del Arquitecto');
     await expect(panel.getByRole('log')).toContainText('Entrega del Tester');
     await panel
@@ -423,6 +434,13 @@ test('chat prepares, confirms and executes one message, persists history and sco
     await page.goto(server.url);
     panel = page.getByRole('dialog', { name: 'Conversaciones', exact: true });
     await expect(panel.getByRole('log')).toContainText('Objetivo de oficina revisado y terminado');
+    await panel
+      .getByLabel('Ficha final de evidencias', { exact: true })
+      .locator(':scope > summary')
+      .click();
+    await expect(panel.getByLabel('Ficha final de evidencias', { exact: true })).toContainText(
+      'Comprobación con ejecutor simulado',
+    );
     await expect(panel.getByRole('log')).toContainText('Entrega del Arquitecto');
     expect(Number(readFileSync(path.join(root, 'runs.txt'), 'utf8'))).toBe(beforeOffice + 5);
     await showNavigation(panel);

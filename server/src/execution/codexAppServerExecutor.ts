@@ -253,6 +253,11 @@ function deny(method: string): unknown {
 
 /** App Server execution uses the same official account, quota guard and lease as exec. */
 export class CodexAppServerExecutor implements OfficialExecutor {
+  get executionEvidence(): 'official-cli' | 'unknown' {
+    return this.dependencies.launch || this.dependencies.protocol || this.dependencies.discover
+      ? 'unknown'
+      : 'official-cli';
+  }
   readonly provider = 'codex' as const;
   readonly engine = 'codex-app-server' as const;
   readonly maxConcurrentReadOnly = 2 as const;

@@ -19,6 +19,7 @@ import type {
   SavedConversation,
   SavedProject,
 } from '../../../core/src/conversations.js';
+import { validDeliveryEvidence } from '../../../core/src/deliveryEvidence.js';
 import { validObjectiveBudget } from '../../../core/src/objectiveBudget.js';
 import type { TaskContext, TeamTask } from '../../../core/src/team.js';
 import { type LocalCheckCommand, LocalChecks } from './localChecks.js';
@@ -264,6 +265,8 @@ export class ConversationLibrary {
         )
           throw new Error('invalid_message');
         text(message.id, 120, 'el mensaje');
+        if (message.finalEvidence !== undefined && !validDeliveryEvidence(message.finalEvidence))
+          throw new Error('invalid_final_evidence');
         if (message.autonomyBudget !== undefined && !validObjectiveBudget(message.autonomyBudget))
           throw new Error('invalid_objective_budget');
         text(message.taskId, 100, 'la tarea');
@@ -718,6 +721,7 @@ export class ConversationLibrary {
         .filter((m) => m.taskId === task.id && m.kind === 'request')
         .every((m) => m.status === task.status && m.reasonCode === task.reasonCode) &&
       existing.role === task.role &&
+      JSON.stringify(existing.finalEvidence) === JSON.stringify(task.finalEvidence) &&
       JSON.stringify(existing.autonomyBudget) === JSON.stringify(task.autonomyBudget) &&
       JSON.stringify(existing.artifacts ?? []) === JSON.stringify(task.artifacts ?? []) &&
       JSON.stringify(
@@ -780,6 +784,7 @@ export class ConversationLibrary {
     if (chunk !== undefined) response.content += chunk;
     else if (task.office) response.content = task.output;
     response.role = task.role;
+    response.finalEvidence = task.finalEvidence ? structuredClone(task.finalEvidence) : undefined;
     response.autonomyBudget = task.autonomyBudget
       ? structuredClone(task.autonomyBudget)
       : undefined;
