@@ -15,6 +15,7 @@ import type {
 import type { OfficeToolApproval } from '../../../core/src/officeTools.js';
 import { TEAM_ROLES, type TeamSnapshot, type TeamTask } from '../../../core/src/team.js';
 import { ArtifactGallery } from './ArtifactGallery.js';
+import { AutonomyBudget } from './AutonomyBudget.js';
 import {
   conversationDisplayMessages,
   conversationMessageGroups,
@@ -897,6 +898,18 @@ function Conversation({
           </Button>
         )}
       </section>
+      <AutonomyBudget
+        budget={
+          task?.autonomyBudget ??
+          [...(library.selected?.messages ?? [])]
+            .reverse()
+            .find((message) => message.origin !== 'internal' && message.autonomyBudget)
+            ?.autonomyBudget
+        }
+        quota={snapshot.includedQuota?.find(
+          (entry) => entry.provider === (task?.choice?.provider ?? 'codex'),
+        )}
+      />
       <div className="chat-composer">
         {library.selected && (
           <PendingConversationInputs

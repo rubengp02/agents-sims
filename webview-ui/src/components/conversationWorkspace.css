@@ -808,3 +808,27 @@
   border: 1px solid #505050;
   cursor: pointer;
 }
+
+.chat-autonomy-budget {
+  width: min(800px, calc(100% - 48px));
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin: 4px auto 8px;
+}
+.chat-autonomy-budget > summary {
+  cursor: pointer;
+}
+.chat-autonomy-budget > div {
+  max-height: min(180px, 20vh);
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.chat-autonomy-budget p {
+  margin: 6px 0;
+}
+@media (max-width: 760px) {
+  .chat-autonomy-budget {
+    width: calc(100% - 24px);
+  }
+}

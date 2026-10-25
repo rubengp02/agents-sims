@@ -44,7 +44,9 @@ async function main() {
     diagnose: async () => ({
       checkedAt: Date.now(),
       plan: 'plus',
-      quota: [],
+      quota: [
+        { id: 'codex:primary', usedPercent: 25, resetsAt: Math.floor(Date.now() / 1000) + 3600 },
+      ],
       models: [{ id: 'gpt-6.1-sol', efforts: ['low', 'medium', 'high'] }],
     }),
     execute: async (options) => {
@@ -169,7 +171,9 @@ async function main() {
     token: 'fixture-only',
     store,
     team,
-    staticDir: path.join(dist, 'webview'),
+    // Trusted test-runner override permits validating an isolated UI build
+    // without replacing the files served by a running personal office.
+    staticDir: process.env.PIXEL_OFFICE_TEST_WEBVIEW ?? path.join(dist, 'webview'),
     assetCache: await buildAssetCache(dist, []),
   });
   process.send?.({ port });

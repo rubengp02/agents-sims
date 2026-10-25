@@ -6,15 +6,15 @@ con sus limitaciones aceptadas. Registrar estos objetivos no acredita su ejecuci
 
 ## Prioridades y aceptación
 
-| Prioridad | Trabajo                                                             | Por qué                                   | Evidencia necesaria para cerrar                                                                                                                                                                          | Estado                      |
-| --------- | ------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| P0        | Resolver el fallo del runtime en CI                                 | Validar la última gran integración        | Identificar la ejecución y causa del fallo, corregirlo y acreditar una ejecución de CI satisfactoria de la revisión corregida. Un pase local no sustituye CI.                                            | En diagnóstico y corrección |
-| P1        | Añadir un presupuesto de autonomía comprensible                     | Proteger la cuota frente a ciclos largos  | Mostrar consumo conocido, incertidumbre, progreso y motivo de pausa; comprobar continuación y recuperación sin borrar consumo ni imponer cortes arbitrarios de duración.                                 | Pendiente                   |
-| P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | Pendiente                   |
-| P1        | Probar una tarea completa de programación con la interfaz real      | Validar el producto, no solo el backend   | Ejecutar una petición desde Conversaciones hasta cambios, pruebas, revisión y resumen final; conservar evidencia de la interfaz y verificar historial tras reabrir.                                      | Pendiente                   |
-| P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Pendiente                   |
-| P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Pendiente                   |
-| P3        | Perfeccionar la representación pixelada de trabajo y entregas       | Diferenciar el producto visualmente       | Propuesta aprobada por el director creativo, implementación vinculada a estados reales y comprobación visual de trabajo, pausa y entrega.                                                                | Pendiente de propuesta      |
+| Prioridad | Trabajo                                                             | Por qué                                   | Evidencia necesaria para cerrar                                                                                                                                                                          | Estado                  |
+| --------- | ------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| P0        | Resolver el fallo del runtime en CI                                 | Validar la última gran integración        | Identificar la ejecución y causa del fallo, corregirlo y acreditar una ejecución de CI satisfactoria de la revisión corregida. Un pase local no sustituye CI.                                            | Completado · CI 2f816c0 |
+| P1        | Añadir un presupuesto de autonomía comprensible                     | Proteger la cuota frente a ciclos largos  | Mostrar consumo conocido, incertidumbre, progreso y motivo de pausa; comprobar continuación y recuperación sin borrar consumo ni imponer cortes arbitrarios de duración.                                 | En validación local     |
+| P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | Pendiente               |
+| P1        | Probar una tarea completa de programación con la interfaz real      | Validar el producto, no solo el backend   | Ejecutar una petición desde Conversaciones hasta cambios, pruebas, revisión y resumen final; conservar evidencia de la interfaz y verificar historial tras reabrir.                                      | Pendiente               |
+| P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Pendiente               |
+| P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Pendiente               |
+| P3        | Perfeccionar la representación pixelada de trabajo y entregas       | Diferenciar el producto visualmente       | Propuesta aprobada por el director creativo, implementación vinculada a estados reales y comprobación visual de trabajo, pausa y entrega.                                                                | Pendiente de propuesta  |
 
 ## Orden de trabajo y reglas
 
@@ -35,6 +35,43 @@ la parada del usuario, las pausas por incertidumbre y las aprobaciones externas.
 Cada entrega registrará la revisión comprobada, qué se implementó, qué se probó
 localmente o con simulaciones, qué se validó realmente y qué queda pendiente.
 Los detalles privados y las transcripciones permanecen fuera de Git.
+
+## Estado vigente
+
+P0 completado: la [ejecución 40201367786](https://github.com/rubengp02/agents-sims/actions/runs/40201367786)
+de `2f816c0459b571db748e580e5523ceb3e3a0c5be` terminó con `success`. Pasaron
+los nueve jobs E2E de Linux, Windows y macOS, el runtime, el paquete Node 20,
+las comprobaciones generales y Required Checks. El despliegue quedó omitido por
+la configuración de ese workflow; no se acredita un despliegue.
+
+Primer P1 implementado y validado localmente, sin actualizar la oficina activa:
+registro de intentos por objetivo (Jefe y empleados), cuota compartida y margen
+del 10% visibles en un detalle plegable, conservación de recibos incompletos y de
+sus contadores parciales, y recuperación sin ejecutar trabajo al abrir el historial.
+No se añade un corte por minutos. La lectura de cuota reutiliza las comprobaciones
+oficiales previas a cada ejecución; el margen no limita por sí solo el consumo de
+una ejecución ya iniciada. Los registros antiguos sin desglose siguen identificados
+como desconocidos, no se reconstruyen como cero.
+
+Validación local de P1: 1.125 pruebas de servidor aprobadas y dos omitidas,
+99 pruebas de interfaz y recorrido de conversación en navegador con ejecutor
+simulado (envío, confirmaciones, presupuesto, historial y reinicios). El frontend
+de esa comprobación se construyó en `.local-office/`, sin reemplazar los archivos
+de la oficina activa. La inspección visual detectó que el detalle desplegado ocultaba
+Enviar en escritorio; se separó del cuadro de escritura y se añadieron comprobaciones
+de visibilidad de Mensaje y Enviar en escritorio y móvil. El recorrido completo volvió
+a pasar, y ambas capturas se revisaron visualmente. Tipos y lint pasan (solo el aviso
+preexistente de dependencia `editor` en App.tsx). Pendiente prueba con Codex real
+junto al resto de P1. Las notas de P0 que
+siguen conservan el diagnóstico histórico; su cierre lo acredita la ejecución anterior.
+
+Revisión final de P1: el presupuesto desplegado se comprobó en capturas de
+escritorio y móvil, con Mensaje y Enviar dentro de la pantalla y sin desbordamiento
+horizontal. Se cubre también el cierre entre el evento final del ejecutor y la
+persistencia del recibo: al recuperar se pausa el encargo, se conservan los tokens
+parciales y no se restaura aceptación sin recibo. Pasaron 60 pruebas de consumo y
+conversaciones después de ese ajuste. Sigue pendiente la validación con Codex real
+junto a la ficha final de evidencias y la tarea de programación del resto de P1.
 
 ## Primer trabajo
 

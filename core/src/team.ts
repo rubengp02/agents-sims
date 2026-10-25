@@ -1,5 +1,6 @@
 import type { OfficeArtifact } from './artifacts.js';
 import type { ConversationLibrarySnapshot } from './conversations.js';
+import type { IncludedQuotaView, ObjectiveBudgetView } from './objectiveBudget.js';
 import type { OfficeAuthentication, OfficeCapability, OfficeToolApproval } from './officeTools.js';
 
 /** Shared wire contract. No provider credentials or shell commands cross this boundary. */
@@ -83,6 +84,8 @@ export interface TeamWorkflow {
   };
 }
 export interface TeamTask {
+  /** Server-derived evidence; never accepted as an execution permission. */
+  autonomyBudget?: ObjectiveBudgetView;
   inputId?: string;
   objectiveRevision?: number;
   userInstructions?: Array<{ id: string; content: string; createdAt: number }>;
@@ -202,6 +205,7 @@ export interface TeamAvailability {
   models: Array<{ id: string; efforts: string[] }>;
 }
 export interface TeamSnapshot {
+  includedQuota?: IncludedQuotaView[];
   toolCapabilities?: OfficeCapability[];
   toolApprovals?: OfficeToolApproval[];
   authentications?: OfficeAuthentication[];

@@ -149,6 +149,29 @@ test('chat prepares, confirms and executes one message, persists history and sco
     ).toBeVisible();
     await expect(panel.getByRole('log').locator('em')).toHaveText('cursiva');
     await expect(panel.getByRole('log').locator('code')).toHaveText('**texto literal**');
+    const autonomy = panel.getByLabel('Presupuesto de autonomía', { exact: true });
+    await autonomy.locator('summary').click();
+    await expect(autonomy).toContainText('24 tokens registrados en 1 intento');
+    await expect(autonomy).toContainText('25% usado');
+    await expect(autonomy).toContainText('Hasta el margen de seguridad en esa lectura: 65%');
+    await expect(autonomy).toContainText('sin un corte fijo por minutos');
+    await expect(panel.getByLabel('Mensaje', { exact: true })).toBeInViewport();
+    await expect(panel.getByRole('button', { name: 'Enviar', exact: true })).toBeInViewport();
+    await page.screenshot({ path: testInfo.outputPath('presupuesto-autonomia.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
+    if (await panel.getByLabel('Proyecto', { exact: true }).isVisible())
+      await panel.getByRole('button', { name: 'Proyecto e historial', exact: true }).click();
+    await expect(panel.getByLabel('Mensaje', { exact: true })).toBeInViewport();
+    await expect(panel.getByRole('button', { name: 'Enviar', exact: true })).toBeInViewport();
+    expect(await panel.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: testInfo.outputPath('presupuesto-autonomia-movil.png') });
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await showNavigation(panel);
+    const recordedAttempts = readFileSync(path.join(root, 'runs.txt'), 'utf8');
+    await autonomy.locator('summary').click();
+    expect(readFileSync(path.join(root, 'runs.txt'), 'utf8')).toBe(recordedAttempts);
     await panel.getByRole('button', { name: 'Nueva conversación', exact: true }).click();
     await expect(panel.getByLabel('Proyecto', { exact: true })).toHaveCount(1);
     await expect(panel.getByRole('log')).not.toContainText(

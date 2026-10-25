@@ -1,4 +1,5 @@
 import type { OfficeArtifact } from './artifacts.js';
+import type { ObjectiveBudgetView } from './objectiveBudget.js';
 import type { TaskContext, TeamTask } from './team.js';
 
 export interface SavedProject {
@@ -14,6 +15,7 @@ export interface SavedProject {
   checksApproval?: { fingerprint: string; ids: string[]; approvedAt: number };
 }
 export interface ConversationMessage {
+  autonomyBudget?: ObjectiveBudgetView;
   id: string;
   origin?: 'user' | 'internal';
   inputId?: string;

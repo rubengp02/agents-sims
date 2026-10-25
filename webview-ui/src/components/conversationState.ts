@@ -76,6 +76,12 @@ export const projectChangeDescription =
   'Los archivos del proyecto cambiaron durante un análisis o una revisión de solo lectura. La comparación no permite identificar quién los modificó.';
 
 export const reasons: Record<string, string> = {
+  quota_reserve:
+    'La cuota ha llegado al margen de seguridad. La oficina espera a que se renueve o a una nueva comprobación explícita; no usa créditos adicionales.',
+  quota_unknown:
+    'No se ha podido comprobar la cuota incluida. La oficina no iniciará otra ejecución hasta verificarla.',
+  provider_limit:
+    'Codex ha indicado un límite de uso. Se conserva el trabajo y hace falta comprobar la cuota antes de continuar.',
   review_scope_large:
     'La restricción de tamaño que detuvo esta revisión se ha retirado. Pulsa Ejecutar para comprobar el estado actual y continuar; la entrega anterior está guardada.',
   instruction_delivery_unknown:

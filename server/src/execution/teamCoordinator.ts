@@ -13,6 +13,10 @@ import { dirname, join } from 'node:path';
 import { validateArtifactReference } from '../../../core/src/artifacts.js';
 import type { PendingConversationInput } from '../../../core/src/conversations.js';
 import {
+  CODEX_QUOTA_RESERVE_PERCENT,
+  type IncludedQuotaView,
+} from '../../../core/src/objectiveBudget.js';
+import {
   type TaskAssessment,
   type TaskContext,
   TEAM_ROLES,
@@ -35,6 +39,7 @@ import { ConversationDelivery } from './conversationDelivery.js';
 import type { ConversationLibrary } from './conversationLibrary.js';
 import type { CheckRunner } from './localChecks.js';
 import { chiefMemoryPrompt, directOfficeAnswer, objectiveMemory } from './objectiveMemory.js';
+import { ObjectiveUsageLedger } from './objectiveUsage.js';
 import { OFFICE_CHIEF_GUIDE, OfficeProgressGuard, parseOfficeDecision } from './officeLoop.js';
 import { projectRevisionCapture } from './projectRevision.js';
 import {
@@ -105,6 +110,8 @@ export class TeamCoordinator {
   private elapsedUsedMs = 0;
   private activeClock = 0;
   private usageKnown = true;
+  private readonly objectiveUsage = new ObjectiveUsageLedger();
+  private readonly includedQuota = new Map<'codex' | 'claude', IncludedQuotaView>();
   private readonly workflows: TeamWorkflow[] = [];
   private readonly workspaces = new Map<string, OwnedWorkspace>();
   private readonly workspaceResults = new Map<string, WorkspaceResult>();
@@ -364,6 +371,23 @@ export class TeamCoordinator {
           task.localChecks = raw.localChecks;
           task.checkedRevision = raw.checkedRevision;
         }
+        if (saved.objectiveUsage !== undefined) {
+          const interruptedTasks = new Set(this.objectiveUsage.restore(saved.objectiveUsage));
+          // A final status event can precede the durable final receipt. A crash
+          // in that gap must not restore this attempt as an accepted delivery.
+          interrupted ||= interruptedTasks.size > 0;
+          for (const task of this.tasks) {
+            if (!interruptedTasks.has(task.id)) continue;
+            const root = task.officeParentId ? this.task(task.officeParentId) : task;
+            for (const pending of new Set([task, root])) {
+              pending.status = 'paused';
+              pending.reasonCode = 'usage_unknown_after_restart';
+              if (pending.office) pending.office.phase = 'paused';
+            }
+          }
+        } else if (saved.runsUsed > 0)
+          for (const task of this.tasks.filter((task) => !task.officeParentId))
+            this.objectiveUsage.markHistoricalUnknown(task.id);
         this.runsUsed = saved.runsUsed;
         this.tokensUsed = saved.tokensUsed;
         if (
@@ -1696,6 +1720,14 @@ export class TeamCoordinator {
   }
 
   private persist(): void {
+    for (const task of this.tasks) {
+      if (task.officeParentId) continue;
+      task.autonomyBudget = {
+        mode: this.providerManagedTask(task) ? 'codex' : 'manual',
+        usage: this.objectiveUsage.summary(task.id),
+        pauseReason: ['paused', 'blocked', 'failed'].includes(task.status) ? task.reasonCode : null,
+      };
+    }
     if (!this.recovering && this.library?.canWrite) {
       try {
         for (const task of this.tasks) this.library.record(task);
@@ -1718,6 +1750,7 @@ export class TeamCoordinator {
       elapsedMs: this.elapsed(),
       usageKnown: this.usageKnown,
       workflows: this.workflows,
+      objectiveUsage: this.objectiveUsage.checkpoint(),
     };
     writeFileSync(this.checkpointFile + '.tmp', JSON.stringify(value), { mode: 0o600 });
     renameSync(this.checkpointFile + '.tmp', this.checkpointFile);
@@ -1765,6 +1798,7 @@ export class TeamCoordinator {
             : {}),
       },
       settings: this.settings,
+      includedQuota: [...this.includedQuota.values()],
       tasks: this.tasks.map((task) =>
         task.requiresConfirmation
           ? { ...task, confirmationFingerprint: this.consentKey(task) }
@@ -1828,7 +1862,31 @@ export class TeamCoordinator {
   private diagnose(provider: 'codex' | 'claude') {
     if (this.closed)
       return Promise.reject(new ExecutionBlocked('server_stopped', 'La oficina se está cerrando.'));
-    const pending = this.executors[provider].diagnose();
+    const pending = this.executors[provider].diagnose().then(
+      (evidence) => {
+        this.includedQuota.set(provider, {
+          provider,
+          checkedAt: evidence.checkedAt,
+          verified: true,
+          reservePercent: CODEX_QUOTA_RESERVE_PERCENT,
+          windows: evidence.quota.map((window) => ({ ...window })),
+          reasonCode: null,
+        });
+        return evidence;
+      },
+      (error) => {
+        const previous = this.includedQuota.get(provider);
+        this.includedQuota.set(provider, {
+          provider,
+          checkedAt: previous?.checkedAt ?? null,
+          verified: false,
+          reservePercent: CODEX_QUOTA_RESERVE_PERCENT,
+          windows: previous?.windows ?? [],
+          reasonCode: failureCode(error),
+        });
+        throw error;
+      },
+    );
     this.pendingChecks.add(pending);
     void pending.then(
       () => this.pendingChecks.delete(pending),
@@ -3057,6 +3115,7 @@ export class TeamCoordinator {
     let outcomeTail = '';
     let receipt: RunRecord | undefined;
     let dispatchedAt: number | undefined;
+    let usageAttemptId: string | undefined;
     let contextCharacters = 0;
     let reviewPacket: ReviewPacket | undefined;
     let reviewOutput = '';
@@ -3244,6 +3303,26 @@ export class TeamCoordinator {
         );
       }
       dispatchedAt = Date.now();
+      usageAttemptId = randomUUID();
+      this.objectiveUsage.begin(
+        usageAttemptId,
+        task.officeParentId ?? task.id,
+        task.id,
+        dispatchedAt,
+      );
+      this.persist();
+      if (controller.signal.aborted) {
+        // A synchronous storage failure can cancel the attempt while recording
+        // its dispatch marker. No adapter was called, so this attempt costs zero.
+        this.objectiveUsage.settle(usageAttemptId, {
+          inputTokens: 0,
+          outputTokens: 0,
+          updatedAt: Date.now(),
+        });
+        usageAttemptId = undefined;
+        dispatchedAt = undefined;
+        return;
+      }
       const result = await this.executors[provider].execute({
         officeRole: task.role,
         ownedWorkspace,
@@ -3339,6 +3418,7 @@ export class TeamCoordinator {
           this.persist();
         },
         onState: (record) => {
+          if (usageAttemptId) this.objectiveUsage.observe(usageAttemptId, record);
           const paused =
             record.status === 'cancelled' && this.budgetReason && !this.cancelled.has(task.id);
           task.runId = record.id;
@@ -3540,7 +3620,7 @@ export class TeamCoordinator {
       }
       task.toolActivity = undefined;
       if (dispatchedAt && this.adaptive) this.timeUsedMs += Math.max(0, Date.now() - dispatchedAt);
-      if (dispatchedAt && !receipt && this.adaptive) {
+      if (dispatchedAt && !receipt) {
         this.usageKnown = false;
         receipt = {
           version: 1,
@@ -3580,6 +3660,7 @@ export class TeamCoordinator {
         }
       }
       this.reservedTokens -= tokenReserve;
+      if (usageAttemptId) this.objectiveUsage.settle(usageAttemptId, receipt);
       if (reserved) this.reservedRuns--;
       clearTimeout(timer);
       this.controllers.delete(task.id);

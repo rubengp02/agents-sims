@@ -1,3 +1,4 @@
+import { CODEX_QUOTA_RESERVE_PERCENT } from '../../../core/src/objectiveBudget.js';
 import { ExecutionBlocked, type ModelCapability, type SubscriptionEvidence } from './types.js';
 
 export function object(value: unknown): Record<string, unknown> {
@@ -107,10 +108,10 @@ export function verifySubscription(
           'La información de cuota está incompleta o caducada.',
         );
       }
-      if (used >= 90) {
+      if (used >= 100 - CODEX_QUOTA_RESERVE_PERCENT) {
         throw new ExecutionBlocked(
           'quota_reserve',
-          'Se conserva un margen del 10% de cuota. La tarea queda en pausa para evitar alcanzar el límite.',
+          `Se conserva un margen del ${CODEX_QUOTA_RESERVE_PERCENT}% de cuota. La tarea queda en pausa para evitar alcanzar el límite.`,
         );
       }
       quota.push({ id: `${id}:${key}`, usedPercent: used, resetsAt: window.resetsAt });

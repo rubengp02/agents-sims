@@ -414,6 +414,11 @@ describe('saved conversations and project approvals (offline)', () => {
     const failed = await h.settled();
     expect(failed.usageKnown).toBe(false);
     expect(failed.budgetReason).toBe('usage_unknown');
+    expect(failed.tasks[0].autonomyBudget?.usage).toMatchObject({
+      attempts: 1,
+      unknownAttempts: 1,
+      complete: false,
+    });
     const oldSample = JSON.parse(readFileSync(join(f.root, 'usage.json'), 'utf8')).samples[0];
     expect(oldSample.input).toBeNull();
     h.diagnose.mockClear();
@@ -426,11 +431,52 @@ describe('saved conversations and project approvals (offline)', () => {
     expect(finished.usageKnown).toBe(false);
     expect(finished.runsUsed).toBe(2);
     expect(finished.tokensUsed).toBe(24);
+    expect(finished.tasks[0].autonomyBudget?.usage.unknownAttempts).toBe(1);
+    expect(finished.tasks.at(-1)!.autonomyBudget?.usage).toMatchObject({
+      attempts: 1,
+      knownTokens: 24,
+      complete: true,
+    });
     expect(JSON.parse(readFileSync(join(f.root, 'usage.json'), 'utf8')).samples[0]).toEqual(
       oldSample,
     );
     await expect(h.team.start()).rejects.toMatchObject({ code: 'usage_unknown' });
+    const reopened = await open(f, 'No ejecutar', true);
+    expect(reopened.execute).not.toHaveBeenCalled();
+    expect(reopened.team.snapshot().tasks[0].autonomyBudget?.usage.unknownAttempts).toBe(1);
+    expect(
+      reopened.library
+        .snapshot()
+        .selected!.messages.find(
+          (message) => message.taskId === failed.tasks[0].id && message.kind === 'response',
+        )?.autonomyBudget?.usage.complete,
+    ).toBe(false);
   });
+  it('does not restore acceptance after a final status event without a settled receipt', async () => {
+    const f = fixture(),
+      h = await open(f, 'Respuesta', true),
+      id = await h.setup();
+    await h.post('conversations/send', { id, message: 'Explica brevemente el contrato' });
+    const completed = await h.settled();
+    const file = join(f.root, 'checkpoint.json');
+    const saved = JSON.parse(readFileSync(file, 'utf8'));
+    saved.objectiveUsage.attempts[0].state = 'active';
+    saved.usageKnown = true;
+    writeFileSync(file, JSON.stringify(saved));
+    const reopened = await open(f, 'No ejecutar', true);
+    const state = reopened.team.snapshot();
+    expect(completed.tasks[0].status).toBe('completed');
+    expect(state.tasks[0].status).toBe('paused');
+    expect(state.usageKnown).toBe(false);
+    expect(state.budgetReason).toBe('usage_unknown_after_restart');
+    expect(state.tasks[0].autonomyBudget?.usage).toMatchObject({
+      knownTokens: 24,
+      unknownAttempts: 1,
+      complete: false,
+    });
+    expect(reopened.execute).not.toHaveBeenCalled();
+  });
+
   it('blocks current-quota recovery if verification fails and never resets the unknown history', async () => {
     const f = fixture(),
       h = await open(f, 'Respuesta', true),
@@ -452,6 +498,10 @@ describe('saved conversations and project approvals (offline)', () => {
     );
     expect(reopened.execute).not.toHaveBeenCalled();
     expect(reopened.team.snapshot().usageKnown).toBe(false);
+    expect(reopened.team.snapshot().includedQuota?.[0]).toMatchObject({
+      verified: false,
+      reasonCode: 'quota_unknown',
+    });
     expect(() => reopened.team.resume()).toThrow();
   });
   it('recovers a zero-decision objective and leaves unfinished internal turns out of the next conversation request', async () => {
@@ -773,6 +823,14 @@ describe('saved conversations and project approvals (offline)', () => {
       'chief',
     ]);
     expect(h.execute.mock.calls.every(([o]) => !o.allowWrites && o.timeoutMs === null)).toBe(true);
+    expect(state.tasks.find((t) => t.id === root.id)?.autonomyBudget).toMatchObject({
+      mode: 'codex',
+      usage: { attempts: 5, knownTokens: 120, unknownAttempts: 0, complete: true },
+    });
+    expect(
+      state.library!.selected!.messages.find((m) => m.id === `${root.id}-response`)?.autonomyBudget
+        ?.usage.knownTokens,
+    ).toBe(120);
     expect(h.execute.mock.calls[2][0].prompt).toContain('Entrega verificable del empleado');
     expect(h.execute.mock.calls[3][0].executionSessionKey).not.toBe(
       h.execute.mock.calls[1][0].executionSessionKey,
@@ -784,6 +842,9 @@ describe('saved conversations and project approvals (offline)', () => {
     const reopened = await open(f, 'No ejecutar', true);
     expect(reopened.team.snapshot().budgetReason).not.toBe('checkpoint_invalid');
     expect(reopened.team.snapshot().tasks[0].status).toBe('completed');
+    expect(reopened.team.snapshot().tasks[0].autonomyBudget?.usage).toEqual(
+      state.tasks.find((t) => t.id === root.id)?.autonomyBudget?.usage,
+    );
     expect(reopened.execute).not.toHaveBeenCalled();
   });
 
