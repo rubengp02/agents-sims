@@ -71,6 +71,9 @@ terminó correctamente. Las revisiones posteriores requieren su propio resultado
 de CI; este documento no lo sustituye. Capturas, recibos y transcripciones de
 aceptación permanecen en el almacén privado local, fuera de Git.
 
+La [validación de la corrección de permisos y aceptación real](https://github.com/rubengp02/agents-sims/actions/runs/40211335637)
+de `d9be62667eb6cdb504a48d188162354c95f9498e` también terminó correctamente.
+
 ## Límites de esta aceptación
 
 Es una tarea pequeña sobre JavaScript, en un proyecto de prueba y una máquina
