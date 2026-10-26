@@ -45,6 +45,9 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let recordFailure: ((error: unknown) => Promise<void>) | undefined;
 const choice = { provider: 'codex' as const, model: plan.model, effort: plan.effort };
 class PinnedTeam extends TeamCoordinator {
+  protected override permitsCapacityFallback(): boolean {
+    return false;
+  }
   override async assign(id: string, prompt?: string) {
     this.override(id, choice);
     return super.assign(id, prompt);
@@ -101,6 +104,8 @@ async function main() {
           'server/src/execution/localFileApprovals.ts',
           'server/src/execution/teamCoordinator.ts',
           'server/src/execution/providerModelPolicy.ts',
+          'server/src/execution/modelCapacity.ts',
+          'server/src/execution/codexAppServerProtocol.ts',
         ].map(async (file) => [file, hash(await readFile(file, 'utf8'))]),
       ),
     ),
@@ -231,7 +236,7 @@ async function main() {
     await save();
     const started = Date.now(),
       controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), plan.maxMsPerMethod);
+    const timer = setTimeout(() => controller.abort('benchmark_time_limit'), plan.maxMsPerMethod);
     const guarded = new Proxy(base, {
       get(target, key) {
         if (key === 'execute')

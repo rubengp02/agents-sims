@@ -189,6 +189,10 @@ export class OfficeToolRuntime {
 }
 
 export class OfficeToolSession {
+  private invoked = false;
+  get hasStartedWork(): boolean {
+    return this.invoked;
+  }
   private context?: BrowserContext;
   private page?: Page;
   private messages: string[] = [];
@@ -361,6 +365,7 @@ export class OfficeToolSession {
     return this.page;
   }
   execute(name: string, args: Record<string, unknown> = {}): Promise<OfficeToolResult> {
+    this.invoked = true;
     const immutable = JSON.parse(JSON.stringify(args)) as Record<string, unknown>;
     const action = this.queue
       .then(() => this.perform(name, immutable))

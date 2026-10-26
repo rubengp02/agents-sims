@@ -2,6 +2,7 @@ import { type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createInterface } from 'node:readline';
 
 import { stopProcess } from './cliProcess.js';
+import { nativeRetry, providerError, type ProviderWait } from './modelCapacity.js';
 import { object } from './subscriptionPolicy.js';
 import { ExecutionBlocked } from './types.js';
 
@@ -11,6 +12,7 @@ export interface AppServerProtocol {
   onNotification(listener: (method: string, params: Record<string, unknown>) => void): () => void;
   onRequest(listener: (method: string, params: Record<string, unknown>) => Promise<unknown>): void;
   onDisconnect(listener: () => void): () => void;
+  onProviderWait?(listener: (wait: ProviderWait) => void): () => void;
   close(): Promise<void>;
 }
 
@@ -25,6 +27,11 @@ function protocolRejection(value: unknown): ExecutionBlocked {
       message.match(
         /\b(401|403|404|429)\s+(?:Unauthorized|Forbidden|Not Found|Too Many Requests)\b/i,
       )?.[1];
+  if (providerError(error)?.kind === 'capacity')
+    return new ExecutionBlocked(
+      'model_at_capacity',
+      'El modelo elegido está temporalmente saturado.',
+    );
   if (/403/.test(message) && /cloudflare|cdn-cgi|challenge-platform/i.test(message))
     return new ExecutionBlocked(
       'app_server_access_challenge',
@@ -77,6 +84,7 @@ export class CodexAppServerProtocol implements AppServerProtocol {
     (method: string, params: Record<string, unknown>) => void
   >();
   private readonly disconnects = new Set<() => void>();
+  private readonly waits = new Set<(wait: ProviderWait) => void>();
   private serverRequest?: (method: string, params: Record<string, unknown>) => Promise<unknown>;
   private readonly pending = new Map<
     number,
@@ -132,7 +140,16 @@ export class CodexAppServerProtocol implements AppServerProtocol {
       if (message.error) pending.reject(protocolRejection(message.error));
       else pending.resolve(message.result);
     });
-    child.stderr.on('data', () => {});
+    let diagnosticTail = '';
+    child.stderr.on('data', (chunk: Buffer) => {
+      diagnosticTail = (diagnosticTail + chunk.toString('utf8')).slice(-8192);
+      const lines = diagnosticTail.split('\n');
+      diagnosticTail = lines.pop() ?? '';
+      for (const line of lines) {
+        const wait = nativeRetry(line);
+        if (wait) for (const listener of this.waits) listener(wait);
+      }
+    });
     child.stdin.on('error', () => this.fail());
     child.on('error', () => this.fail());
     child.on('close', () => this.fail());
@@ -189,6 +206,12 @@ export class CodexAppServerProtocol implements AppServerProtocol {
     this.disconnects.add(listener);
     return () => {
       this.disconnects.delete(listener);
+    };
+  }
+  onProviderWait(listener: (wait: ProviderWait) => void): () => void {
+    this.waits.add(listener);
+    return () => {
+      this.waits.delete(listener);
     };
   }
   private fail(): void {

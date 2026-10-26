@@ -41,6 +41,7 @@ import { ConversationDelivery } from './conversationDelivery.js';
 import type { ConversationLibrary } from './conversationLibrary.js';
 import { buildDeliveryEvidence } from './deliveryEvidence.js';
 import type { CheckRunner } from './localChecks.js';
+import { lowerCapacityModel } from './modelCapacity.js';
 import { chiefMemoryPrompt, directOfficeAnswer, objectiveMemory } from './objectiveMemory.js';
 import { ObjectiveUsageLedger } from './objectiveUsage.js';
 import { OFFICE_CHIEF_GUIDE, OfficeProgressGuard, parseOfficeDecision } from './officeLoop.js';
@@ -273,6 +274,29 @@ export class TeamCoordinator {
           )
             throw new Error('invalid_execution_evidence');
           task.executionEvidence = raw.executionEvidence;
+          if (raw.capacityFallback) {
+            const fallback = raw.capacityFallback;
+            const validChoice = (v: TeamChoice) =>
+              v &&
+              v.provider === 'codex' &&
+              typeof v.model === 'string' &&
+              /^[\w.-]{1,100}$/.test(v.model) &&
+              typeof v.effort === 'string' &&
+              /^[\w-]{1,30}$/.test(v.effort);
+            if (
+              !validChoice(fallback.from) ||
+              !validChoice(fallback.to) ||
+              !Number.isFinite(fallback.at) ||
+              typeof fallback.previousRunId !== 'string' ||
+              typeof fallback.previousUsageUnknown !== 'boolean' ||
+              !['pending', 'started', 'completed', 'paused'].includes(fallback.state)
+            )
+              throw new Error('invalid_capacity_fallback');
+            task.capacityFallback = {
+              ...fallback,
+              state: ['pending', 'started'].includes(fallback.state) ? 'paused' : fallback.state,
+            };
+          }
           if (raw.finalEvidence !== undefined) {
             if (!validDeliveryEvidence(raw.finalEvidence))
               throw new Error('invalid_final_evidence');
@@ -2816,7 +2840,17 @@ export class TeamCoordinator {
       Object.assign(
         task,
         chooseProviderModel(
-          { ...task, prompt: assessmentPrompt ?? task.prompt },
+          {
+            ...task,
+            prompt: assessmentPrompt ?? task.prompt,
+            override:
+              task.override ??
+              (task.role === 'chief' &&
+              task.officeParentId &&
+              this.task(task.officeParentId).capacityFallback?.state === 'completed'
+                ? this.task(task.officeParentId).capacityFallback!.to
+                : null),
+          },
           evidence,
           provider,
           nativeAssessmentPrompt,
@@ -3585,6 +3619,48 @@ export class TeamCoordinator {
         },
       });
       receipt = result;
+      // A confirmed admission failure may continue once under the user's capacity
+      // policy. No tool, approval or model output may have started in this attempt.
+      // The old receipt is settled by finally before executeTask starts another run.
+      if (
+        result.reasonCode === 'model_at_capacity' &&
+        result.workStarted === false &&
+        result.toolCalls === 0 &&
+        !tools?.hasStartedWork() &&
+        !task.output &&
+        !task.capacityFallback &&
+        this.permitsCapacityFallback(task) &&
+        !controller.signal.aborted &&
+        this.running &&
+        !this.budgetReason
+      ) {
+        const next = lowerCapacityModel(
+          task,
+          task.choice!,
+          await this.diagnose('codex'),
+          !!task.attachments?.length || !!task.referenceImages?.length,
+        );
+        if (next && !controller.signal.aborted && this.running && !this.budgetReason) {
+          const unknown = result.inputTokens === null || result.outputTokens === null;
+          if (unknown) this.usageKnown = false;
+          else {
+            this.tokensUsed += result.inputTokens! + result.outputTokens!;
+            this.maxObservedInput = Math.max(this.maxObservedInput, result.inputTokens!);
+          }
+          task.capacityFallback = {
+            from: { ...task.choice! },
+            to: next,
+            at: Date.now(),
+            previousRunId: result.id,
+            previousUsageUnknown: unknown,
+            state: 'pending',
+          };
+          task.status = 'planned';
+          task.reasonCode = 'model_at_capacity';
+          task.explanation = `${task.choice!.model} está saturado. La oficina continuará con ${next.model}, el modelo inferior disponible adecuado, conservando el intento anterior.`;
+          return;
+        }
+      }
       const paused =
         result.status === 'cancelled' && this.budgetReason && !this.cancelled.has(task.id);
       task.runId = result.id;
@@ -3611,7 +3687,10 @@ export class TeamCoordinator {
         this.maxObservedInput = Math.max(this.maxObservedInput, result.inputTokens);
       } else {
         this.usageKnown = false;
-        if (!this.redirecting.has(task.id)) this.pause('usage_unknown');
+        if (!this.redirecting.has(task.id))
+          this.pause(
+            result.reasonCode === 'model_at_capacity' ? 'model_at_capacity' : 'usage_unknown',
+          );
       }
       if (!this.providerManagedTask(task) && this.tokensUsed > this.settings.maxTokens) {
         task.status = 'paused';
@@ -3725,7 +3804,9 @@ export class TeamCoordinator {
       )
         this.pause(
           result.inputTokens === null || result.outputTokens === null
-            ? 'usage_unknown'
+            ? result.reasonCode === 'model_at_capacity'
+              ? 'model_at_capacity'
+              : 'usage_unknown'
             : (task.reasonCode ?? 'execution_failed'),
         );
     } catch (error) {
@@ -3820,8 +3901,52 @@ export class TeamCoordinator {
     }
   }
 
+  /** Evaluation harnesses can pin models without changing normal chat policy. */
+  protected permitsCapacityFallback(task: TeamTask): boolean {
+    return (
+      this.providerManagedTask(task) &&
+      task.choice?.provider === 'codex' &&
+      this.executor('codex').engine === 'codex-app-server' &&
+      this.settings.mode !== 'manual' &&
+      this.library?.projectAt(task.project)?.autonomy === true
+    );
+  }
+
   private executeTask(task: TeamTask): Promise<void> {
-    const pending = this.runTask(task);
+    const pending = (async () => {
+      await this.runTask(task);
+      const fallback = task.capacityFallback;
+      if (fallback?.state !== 'pending') return;
+      // runTask has closed the old tools and lease and persisted its own receipt.
+      if (
+        !this.running ||
+        this.closed ||
+        this.budgetReason ||
+        this.cancelled.has(task.id) ||
+        this.redirecting.has(task.id) ||
+        task.status !== 'planned' ||
+        !this.permitsCapacityFallback(task)
+      ) {
+        fallback.state = 'paused';
+        this.persist();
+        return;
+      }
+      fallback.state = 'started';
+      task.choice = { ...fallback.to };
+      task.override = { ...fallback.to };
+      task.approved = true;
+      task.confirmedModel = null;
+      task.reviewFindings = undefined;
+      task.checkedRevision = undefined;
+      task.finalEvidence = undefined;
+      if (task.role === 'chief' && task.officeParentId)
+        this.task(task.officeParentId).capacityFallback = fallback;
+      this.chatConsents.set(task.id, this.consentKey(task));
+      this.persist();
+      await this.runTask(task);
+      fallback.state = (task.status as TeamTask['status']) === 'completed' ? 'completed' : 'paused';
+      this.persist();
+    })();
     this.pendingRuns.add(pending);
     void pending.finally(() => this.pendingRuns.delete(pending));
     return pending;

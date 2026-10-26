@@ -138,7 +138,21 @@ export function verifySubscription(
           .map((entry) => object(entry).reasoningEffort)
           .filter((entry): entry is string => typeof entry === 'string')
       : [];
-    return typeof id === 'string' && efforts.length ? [{ id, efforts }] : [];
+    return typeof id === 'string' && efforts.length
+      ? [
+          {
+            id,
+            efforts,
+            ...(Array.isArray(item.inputModalities)
+              ? {
+                  inputModalities: item.inputModalities.filter(
+                    (v): v is string => typeof v === 'string',
+                  ),
+                }
+              : {}),
+          },
+        ]
+      : [];
   });
   if (!models.length)
     throw new ExecutionBlocked('catalog_unknown', 'No hay modelos con razonamiento verificable.');

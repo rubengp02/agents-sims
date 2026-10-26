@@ -358,6 +358,14 @@ function Message({
       )}
       <ArtifactGallery artifacts={message.attachments} label="Imágenes adjuntas" />
       <ArtifactGallery artifacts={message.artifacts} label="Resultados visuales" />
+      {message.kind === 'response' && message.capacityFallback && (
+        <p className="chat-message-details">
+          Cambio por saturación: {message.capacityFallback.from.model} →{' '}
+          {message.capacityFallback.to.model}.
+          {message.capacityFallback.previousUsageUnknown &&
+            ' El consumo del intento anterior sigue sin confirmar.'}
+        </p>
+      )}
       {message.kind === 'response' && <DeliveryEvidence evidence={message.finalEvidence} />}
       {message.reasonCode && (
         <details className="chat-message-details">

@@ -265,6 +265,86 @@ function harness(mode = 'success') {
 }
 
 describe('Codex App Server executor (fixtures, no inference)', () => {
+  it('classifies confirmed capacity and closes the official attempt before continuation', async () => {
+    const h = harness('wait');
+    const pending = h.executor.execute({
+      project: h.root,
+      prompt: 'Revisa el contrato.',
+      model: 'gpt-6.1-sol',
+    });
+    await vi.waitFor(() =>
+      expect(h.protocol.request).toHaveBeenCalledWith('turn/start', expect.anything()),
+    );
+    h.notification('error', {
+      threadId: 'thread-one',
+      willRetry: true,
+      error: {
+        message: 'Selected model is at capacity. Please try a different model.',
+        codexErrorInfo: 'serverOverloaded',
+      },
+    });
+    const result = await pending;
+    expect(result).toMatchObject({
+      reasonCode: 'model_at_capacity',
+      status: 'paused',
+      workStarted: false,
+      toolCalls: 0,
+      inputTokens: null,
+    });
+    expect(h.protocol.close).toHaveBeenCalled();
+  });
+  it('shows an ordinary retry without switching models or claiming capacity', async () => {
+    const h = harness('wait');
+    const controller = new AbortController();
+    const progress = vi.fn();
+    const pending = h.executor.execute({
+      project: h.root,
+      prompt: 'Revisa el contrato.',
+      signal: controller.signal,
+      onProgress: progress,
+    });
+    await vi.waitFor(() =>
+      expect(h.protocol.request).toHaveBeenCalledWith('turn/start', expect.anything()),
+    );
+    h.notification('error', {
+      threadId: 'thread-one',
+      willRetry: true,
+      error: {
+        message: 'PRIVATE 429 Too Many Requests TOKEN',
+        codexErrorInfo: { responseTooManyFailedAttempts: { httpStatusCode: 429 } },
+      },
+    });
+    expect(progress).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Esperando al proveedor por un límite temporal',
+        completed: false,
+      }),
+    );
+    expect(JSON.stringify(progress.mock.calls)).not.toContain('PRIVATE');
+    expect(h.protocol.close).not.toHaveBeenCalled();
+    controller.abort();
+    await pending;
+  });
+  it('marks started operations even if their final tool receipt never arrives', async () => {
+    const h = harness('wait');
+    const pending = h.executor.execute({ project: h.root, prompt: 'Comprueba el proyecto.' });
+    await vi.waitFor(() =>
+      expect(h.protocol.request).toHaveBeenCalledWith('turn/start', expect.anything()),
+    );
+    h.notification('item/started', {
+      threadId: 'thread-one',
+      item: { id: 'tool-uncertain', type: 'mcpToolCall', tool: 'external' },
+    });
+    h.notification('turn/completed', {
+      threadId: 'thread-one',
+      turn: { id: 'turn-one', status: 'failed', error: { codexErrorInfo: 'serverOverloaded' } },
+    });
+    expect(await pending).toMatchObject({
+      reasonCode: 'model_at_capacity',
+      workStarted: true,
+      toolCalls: 0,
+    });
+  });
   it('keeps the official process alive after model completion until backend tools settle', async () => {
     const h = harness();
     let release = () => {};

@@ -41,8 +41,41 @@ amplió el límite, no se reintentó automáticamente y no se corrigieron las so
 La lectura oficial posterior indicó 11% corto y 2% semanal; no se atribuye toda
 esa diferencia al benchmark porque la cuenta también comparte esta conversación.
 
-Pendiente: diagnosticar la ausencia de cierre del Tester antes de otra pareja
-real. La simulación y CI satisfactorios no sustituyen ese cierre real.
+### Diagnóstico posterior del Tester
+
+La inspección de los registros persistidos del CLI oficial identificó el motivo
+de la espera. A las 13:44:45 UTC, `codex_core::responses_retry` registró HTTP
+`429 Too Many Requests` y el primer reintento de un máximo de cinco, programado
+para 406,9998307 segundos después (unos seis minutos y 47 segundos).
+La sesión había arrancado a las 13:44:43 UTC. El benchmark interrumpió el turno
+a las 13:50:59 UTC, antes del reintento: quedaban unos 33 segundos de esa espera.
+El historial nativo no contiene mensajes del asistente ni operaciones de revisión;
+no fue una revisión prolongada ni un comando de pruebas bloqueado.
+
+Existe además una carencia de observabilidad de la aplicación. El ejecutor solo
+detiene por notificaciones `error` cuando `willRetry !== true`; los avisos
+reintentables no se muestran como actividad. El transporte descarta `stderr`.
+No se conservó una traza del transporte que acredite si este aviso concreto llegó
+como notificación, pero sí consta en el registro nativo y el adaptador no contempla
+su presentación. La sesión y las consultas de cuota siguieron activas, sin salida
+de trabajo, hasta que la señal del benchmark la canceló.
+
+Esto demuestra una limitación temporal de solicitudes del servicio, no que
+faltaran herramientas, que se agotara la cuota de cinco horas o que el Tester
+consumiera cero tokens. El registro no identifica el límite interno concreto
+que originó el 429. Los avisos de instantánea de PowerShell no compatible y de
+configuración administrada obsoleta aparecen durante el arranque; no acreditan
+ser la causa de esta espera y no se confundieron con el error de transporte.
+
+La evidencia resumida y las huellas se conservan junto al informe privado. La
+investigación no ejecutó inferencia ni reanudó el ensayo. Pendiente antes de otra
+pareja real: presentar los reintentos como espera del proveedor, conservar su
+causa al cancelar y acreditar el cierre real del Tester. No se ha implementado
+esa corrección durante la investigación inicial. Posteriormente se implementó la
+[política de saturación](SATURACION_MODELOS.md), comprobada con errores simulados,
+incluida la espera nativa del primer reintento oculto. El benchmark conserva el
+modelo fijado y no usa sustituciones automáticas. La simulación y CI satisfactorios
+no sustituyen el cierre real.
 
 ## Protocolo exploratorio v1
 

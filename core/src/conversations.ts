@@ -16,6 +16,7 @@ export interface SavedProject {
   checksApproval?: { fingerprint: string; ids: string[]; approvedAt: number };
 }
 export interface ConversationMessage {
+  capacityFallback?: TeamTask['capacityFallback'];
   finalEvidence?: DeliveryEvidence;
   autonomyBudget?: ObjectiveBudgetView;
   id: string;

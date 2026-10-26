@@ -85,6 +85,7 @@ describe('office services across storage, isolated review and restart (no model)
     delete task.selfWorkspaceReceipt;
     const createSession = vi.spyOn(services.runtime, 'createSession');
     const tools = await services.execution(task, new AbortController().signal, checks);
+    expect(tools.hasStartedWork()).toBe(false);
     expect(createSession).toHaveBeenCalledWith(
       expect.objectContaining({
         project: join(task.executionProject!, 'app'),
@@ -103,6 +104,7 @@ describe('office services across storage, isolated review and restart (no model)
         arguments: { args: { path: 'style.css' } },
       });
       expect(JSON.stringify(read)).toContain('isolated');
+      expect(tools.hasStartedWork()).toBe(true);
       const checked = await client.callTool({
         name: 'project_check_run',
         arguments: { args: { id: 'fixture' } },

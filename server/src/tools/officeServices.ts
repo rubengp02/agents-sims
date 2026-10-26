@@ -388,6 +388,7 @@ export class OfficeServices {
         artifactDirectory: outputDirectory,
         toolServer: { url: mcp.url, token: mcp.secret },
         waitForIdle: (signal: AbortSignal) => session.waitForIdle(signal),
+        hasStartedWork: () => session.hasStartedWork,
         close,
       };
     } catch (error) {

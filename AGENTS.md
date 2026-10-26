@@ -43,6 +43,14 @@
   envío o reintento explícito del chat normal puede continuar tras verificar cuota
   actual, sin borrar el recibo ni reiniciar contadores. La cola y el presupuesto
   manual siguen necesitando totales históricos verificables.
+- El usuario autoriza una continuación automática cuando el proveedor confirme
+  saturación del modelo: como máximo una por encargo, al siguiente modelo inferior
+  disponible y adecuado, con el mismo razonamiento, proveedor oficial y cuota incluida
+  nuevamente comprobada. Conserva el recibo anterior, incluso desconocido. Solo
+  continúa si ese intento no inició herramientas, aprobaciones ni salida del modelo;
+  ante efectos inciertos conserva el trabajo y pausa. Un 429 genérico no confirma
+  saturación. Los presupuestos manuales y los benchmarks con modelo fijado no
+  cambian de modelo automáticamente. Reiniciar o abrir el historial no reanuda nada.
 - Claude permanece opcional y desactivado inicialmente. Conserva su adaptador;
   habilitarlo no permite eludir sus comprobaciones oficiales ni su bloqueo actual
   de inferencia por falta de verificación del consumo adicional.

@@ -722,6 +722,7 @@ export class ConversationLibrary {
         .every((m) => m.status === task.status && m.reasonCode === task.reasonCode) &&
       existing.role === task.role &&
       JSON.stringify(existing.finalEvidence) === JSON.stringify(task.finalEvidence) &&
+      JSON.stringify(existing.capacityFallback) === JSON.stringify(task.capacityFallback) &&
       JSON.stringify(existing.autonomyBudget) === JSON.stringify(task.autonomyBudget) &&
       JSON.stringify(existing.artifacts ?? []) === JSON.stringify(task.artifacts ?? []) &&
       JSON.stringify(
@@ -785,6 +786,9 @@ export class ConversationLibrary {
     else if (task.office) response.content = task.output;
     response.role = task.role;
     response.finalEvidence = task.finalEvidence ? structuredClone(task.finalEvidence) : undefined;
+    response.capacityFallback = task.capacityFallback
+      ? structuredClone(task.capacityFallback)
+      : undefined;
     response.autonomyBudget = task.autonomyBudget
       ? structuredClone(task.autonomyBudget)
       : undefined;

@@ -20,6 +20,7 @@ export class ExecutionBlocked extends Error {
 export interface ModelCapability {
   id: string;
   efforts: string[];
+  inputModalities?: string[];
 }
 
 export interface SubscriptionEvidence {
@@ -58,6 +59,8 @@ export interface RunRecord {
   engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator' | 'antigravity-cli';
   executionProject?: string;
   toolCalls?: number;
+  /** Set before any tool/approval begins, including operations without a receipt. */
+  workStarted?: boolean;
   /** Safe aggregates, absent on historical receipts. No raw event payloads. */
   metrics?: ExecutionMetrics;
 }

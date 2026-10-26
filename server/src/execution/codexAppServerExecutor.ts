@@ -24,6 +24,7 @@ import { type AppServerProtocol, CodexAppServerProtocol } from './codexAppServer
 import { CODEX_TASK_PREFIX } from './codexExecutor.js';
 import { acquireCodexLease } from './executionLease.js';
 import { LocalFileApprovals } from './localFileApprovals.js';
+import { providerError, type ProviderWait } from './modelCapacity.js';
 import { officialMcpLogout } from './officialMcpLogout.js';
 import {
   object,
@@ -1327,6 +1328,7 @@ export class CodexAppServerExecutor implements OfficialExecutor {
       contextFingerprint: options.contextFingerprint,
       sessionMode: 'new',
       toolCalls: 0,
+      workStarted: false,
     };
     mkdirSync(this.stateDir, { recursive: true, mode: 0o700 });
     const release = acquireCodexLease(this.stateDir, record.id, options.parallelReadOnly === true);
@@ -1386,8 +1388,10 @@ export class CodexAppServerExecutor implements OfficialExecutor {
         options.interruptionReason?.() === 'redirected_by_user' ||
           options.signal?.reason === 'redirected_by_user'
           ? 'redirected_by_user'
-          : 'cancelled_by_user',
-        'cancelled',
+          : options.signal?.reason === 'benchmark_time_limit'
+            ? 'time_limit'
+            : 'cancelled_by_user',
+        options.signal?.reason === 'benchmark_time_limit' ? 'paused' : 'cancelled',
       );
     try {
       save();
@@ -1458,6 +1462,7 @@ export class CodexAppServerExecutor implements OfficialExecutor {
       client.onRequest(async (method, params) => {
         if (params.threadId && params.threadId !== record.sessionId) return deny(method);
         if (ended || approvalController.signal.aborted) return deny(method);
+        record.workStarted = true;
         if (method === 'item/fileChange/requestApproval')
           return {
             decision: localFileApprovals.accept(params, record.sessionId, turnId)
@@ -1534,6 +1539,27 @@ export class CodexAppServerExecutor implements OfficialExecutor {
         progress.set(event.id, safe);
         options.onProgress?.(safe);
       };
+      const waiting = (wait: ProviderWait) => {
+        if (ended) return;
+        const title =
+          wait.kind === 'capacity'
+            ? 'Esperando disponibilidad de Codex'
+            : wait.kind === 'rate-limit'
+              ? 'Esperando al proveedor por un límite temporal'
+              : 'Esperando reconexión con Codex';
+        reportProgress({
+          id: 'provider-wait',
+          title,
+          completed: false,
+          detail:
+            (wait.retryAfterMs !== undefined
+              ? `Codex ha programado un reintento dentro de ${Math.ceil(wait.retryAfterMs / 1000)} segundos. `
+              : 'Codex ha comunicado una espera del proveedor. ') +
+            'El trabajo está conservado. Esta espera no es una revisión ni una ejecución de comandos.',
+        });
+        options.onToolActivity?.(title);
+      };
+      client.onProviderWait?.(waiting);
       client.onNotification((method, params) => {
         if (ended) return;
         if (params.threadId && params.threadId !== record.sessionId) return;
@@ -1587,6 +1613,19 @@ export class CodexAppServerExecutor implements OfficialExecutor {
         if (method === 'item/started' || method === 'item/completed') {
           const item = object(params.item);
           const type = String(item.type);
+          if (
+            [
+              'commandExecution',
+              'fileChange',
+              'webSearch',
+              'mcpToolCall',
+              'imageGeneration',
+              'imageView',
+            ].includes(type)
+          )
+            record.workStarted = true;
+          const wait = progress.get('provider-wait');
+          if (wait && !wait.completed) reportProgress({ ...wait, completed: true });
           const titles: Record<string, string> = {
             reasoning: 'Pensando',
             commandExecution: 'Ejecutando un comando',
@@ -1688,12 +1727,27 @@ export class CodexAppServerExecutor implements OfficialExecutor {
           const turn = object(params.turn);
           if (turnId && turn.id !== turnId) return;
           if (turn.status !== 'completed')
-            return stop(turn.status === 'interrupted' ? 'turn_interrupted' : 'turn_failed');
+            return stop(
+              turn.status === 'interrupted'
+                ? 'turn_interrupted'
+                : providerError(turn.error)?.kind === 'capacity'
+                  ? 'model_at_capacity'
+                  : 'turn_failed',
+            );
           turnCompleted = true;
           if (activeExecution) activeExecution.completed = true;
           finish?.();
         }
-        if (method === 'error' && params.willRetry !== true) stop('app_server_turn_error');
+        if (method === 'error') {
+          const failure = providerError(params.error);
+          if (failure) waiting(failure);
+          else if (params.willRetry === true) waiting({ kind: 'retry' });
+          if (failure?.kind === 'capacity') stop('model_at_capacity');
+          else if (params.willRetry !== true)
+            stop(
+              failure?.kind === 'rate-limit' ? 'app_server_rate_limited' : 'app_server_turn_error',
+            );
+        }
       });
       if (
         priorSession &&

@@ -102,6 +102,15 @@ export interface TeamTask {
   toolActivity?: string;
   humanRequest?: { id: string; question: string; responseType: 'text' | 'approval' };
   liveActivity?: { id: string; title: string; detail?: string; at: number; completed: boolean }[];
+  /** Server-owned, bounded continuation after confirmed model capacity. Never execution authority on recovery. */
+  capacityFallback?: {
+    from: TeamChoice;
+    to: TeamChoice;
+    at: number;
+    previousRunId: string;
+    previousUsageUnknown: boolean;
+    state: 'pending' | 'started' | 'completed' | 'paused';
+  };
   selfWorkspaceReceipt?: string;
   conversationId?: string;
   requiresConfirmation?: boolean;

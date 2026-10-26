@@ -76,6 +76,10 @@ export const projectChangeDescription =
   'Los archivos del proyecto cambiaron durante un análisis o una revisión de solo lectura. La comparación no permite identificar quién los modificó.';
 
 export const reasons: Record<string, string> = {
+  model_at_capacity:
+    'El modelo está temporalmente saturado. Se conserva el trabajo; no se ha iniciado otra ejecución automáticamente.',
+  app_server_rate_limited:
+    'Codex ha comunicado un límite temporal de solicitudes. No se confunde con saturación del modelo ni con cuota agotada.',
   quota_reserve:
     'La cuota ha llegado al margen de seguridad. La oficina espera a que se renueve o a una nueva comprobación explícita; no usa créditos adicionales.',
   quota_unknown:

@@ -33,6 +33,21 @@ function harness(timeout = 500) {
 }
 
 describe('owned App Server stdio transport', () => {
+  it('surfaces the hidden first native retry using fixed categories and no raw stderr', async () => {
+    const h = harness();
+    const waits = vi.fn();
+    const notifications = vi.fn();
+    h.client.onProviderWait(waits);
+    h.client.onNotification(notifications);
+    h.child.stderr.write('WARN codex_core::responses_re');
+    h.child.stderr.write(
+      'try: stream disconnected - retrying sampling request (1/5 in 406.9998307s)... PRIVATE bearer token sampling_error=exceeded retry limit, last status: 429 Too Many Requests\n',
+    );
+    expect(waits).toHaveBeenCalledWith({ kind: 'rate-limit', retryAfterMs: 407000 });
+    expect(JSON.stringify(waits.mock.calls)).not.toContain('PRIVATE');
+    expect(notifications).not.toHaveBeenCalled();
+    await h.client.close();
+  });
   it.each([
     [-32602, 'private parameter payload', 'app_server_invalid_params'],
     [-32601, 'private method payload', 'app_server_unsupported'],

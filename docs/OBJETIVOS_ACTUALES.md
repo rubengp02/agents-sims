@@ -49,6 +49,23 @@ La cuota ya no es el motivo vigente. El [informe](BENCHMARK_ITERATIVO.md) recoge
 la limitación del contrato y el intento fallido; no se amplió ni repitió el bloque.
 La oficina habitual sigue sin tareas activas.
 
+Investigación posterior: el CLI oficial recibió HTTP 429 al iniciar el Tester y
+programó un reintento tras unos 407 segundos. El temporizador de evaluación lo
+interrumpió antes de ese reintento; no hubo una revisión de seis minutos. La
+oficina no presenta los avisos reintentables y descarta stderr, por lo que no
+mostró esa espera. La causa inmediata está identificada; falta corregir esa
+presentación y acreditar una revisión real completa. No se conoce qué límite
+interno del servicio provocó el 429 ni se reconstruye el consumo desconocido.
+
+Corrección posterior implementada: [esperas y continuación por saturación](SATURACION_MODELOS.md).
+La oficina muestra las categorías de espera que comunica el CLI y permite una
+continuación al modelo inmediatamente inferior adecuado cuando hay confirmación
+de saturación, con cuota nuevamente comprobada y recibos conservados. Un 429
+genérico no activa esa continuación. Pasan la batería local de 1.253 pruebas de
+servidor (dos omitidas), 106 de interfaz y ocho contratos; el ensayo simulado del
+benchmark completa los seis turnos y sus comprobaciones. Queda por registrar el
+nuevo intento real; la prueba de saturación y sustitución es simulada.
+
 Actualización del 26 de octubre: integración de Antigravity y segundo bloque de
 simplificación publicados en `0ff6a21c29c294d785cb58f6b687377c7de83a7a`.
 La [validación 40327075378](https://github.com/rubengp02/agents-sims/actions/runs/40327075378)
