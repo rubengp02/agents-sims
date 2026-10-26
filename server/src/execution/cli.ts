@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 
+import { AntigravityExecutor } from './antigravityExecutor.js';
 import { ClaudeExecutor } from './claudeExecutor.js';
 import { CodexExecutor } from './codexExecutor.js';
-import { DisabledExecutor } from './optionalExecutors.js';
 import { ExecutionBlocked, type OfficialExecutor } from './types.js';
 
 export function parseExecutionArgs(args: string[]): {
@@ -41,16 +41,35 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
   let executor: OfficialExecutor;
   if (provider === 'codex') executor = new CodexExecutor(resolve('.local-office', 'executions'));
   else if (provider === 'claude') executor = new ClaudeExecutor(() => true);
-  else if (provider === 'antigravity') executor = new DisabledExecutor(provider);
+  else if (provider === 'antigravity')
+    executor = new AntigravityExecutor(resolve('.local-office', 'executions'), () => true);
   else throw new ExecutionBlocked('provider_unknown', 'Proveedor no permitido.');
   if (action === 'check') {
-    const evidence = await executor.diagnose();
+    const evidence = await executor.diagnose().catch((error: unknown) => {
+      if (error instanceof ExecutionBlocked && error.inspection) {
+        console.log(
+          `Antigravity CLI ${error.inspection.cliVersion}: catálogo consultado; ejecución bloqueada.`,
+        );
+        for (const model of error.inspection.models) console.log(`  ${model.id}: ${model.label}`);
+        for (const check of error.inspection.checks)
+          console.log(`  ${check.state}: ${check.message}`);
+      }
+      throw error;
+    });
+    if (provider === 'antigravity') {
+      console.log(
+        'Antigravity: cuota Google incluida comprobada y créditos adicionales desactivados. La ejecución requiere el puente de herramientas de la oficina.',
+      );
+      for (const model of evidence.models)
+        console.log(`  ${model.id}: ${model.efforts.join(', ')}`);
+      return;
+    }
     console.log(
       `Codex: sesión de ChatGPT ${evidence.plan}. Comprobación actual correcta; sin créditos adicionales comunicados. Cada tarea volverá a verificarse.`,
     );
     console.log('Modelos y razonamientos anunciados:');
     for (const model of evidence.models) console.log(`  ${model.id}: ${model.efforts.join(', ')}`);
-    console.log('Claude: desactivado. Antigravity: no implementado.');
+    console.log('Claude: desactivado.');
     return;
   }
   // Check before asking the user to type a task; execute checks again before start.

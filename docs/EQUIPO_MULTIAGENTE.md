@@ -262,7 +262,9 @@ Los endpoints de control exigen origen/host local y un nonce local para modifica
 estado. No son una API pública para exponer en Internet.
 
 No hay compra de créditos, cambio de cuenta, rutas API de inferencia ni recargas.
-Antigravity sigue sin implementación.
+Antigravity es opcional: verifica cuota incluida y ausencia de créditos adicionales,
+utiliza las herramientas mediadas de la oficina y conserva el contexto nativo del
+Jefe por objetivo. Consulta [capacidades, comprobaciones y límites](ANTIGRAVITY.md).
 
 ## Reutilización de código abierto
 

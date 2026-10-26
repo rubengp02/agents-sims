@@ -13,7 +13,7 @@ con sus limitaciones aceptadas. Registrar estos objetivos no acredita su ejecuci
 | P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | Completado · prueba real            |
 | P1        | Probar una tarea completa de programación con la interfaz real      | Validar el producto, no solo el backend   | Ejecutar una petición desde Conversaciones hasta cambios, pruebas, revisión y resumen final; conservar evidencia de la interfaz y verificar historial tras reabrir.                                      | Completado · prueba real            |
 | P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Preparado · real pendiente de cuota |
-| P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Primer paso comprobado              |
+| P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Completado · dos extracciones       |
 | P3        | Perfeccionar la representación pixelada de trabajo y entregas       | Diferenciar el producto visualmente       | Propuesta aprobada por el director creativo, implementación vinculada a estados reales y comprobación visual de trabajo, pausa y entrega.                                                                | Completado · simulación visual      |
 
 ## Orden de trabajo y reglas
@@ -37,6 +37,16 @@ localmente o con simulaciones, qué se validó realmente y qué queda pendiente.
 Los detalles privados y las transcripciones permanecen fuera de Git.
 
 ## Estado vigente
+
+Segundo bloque de simplificación completado: la política por proveedor se extrae
+de `TeamCoordinator`, un módulo de más de cuatro mil líneas, a
+`providerModelPolicy.ts`. El coordinador conserva diagnóstico, cancelación y
+despacho; el módulo puro decide sobre el catálogo ya verificado. Se mantienen
+la elección manual, el criterio por riesgo, la revisión independiente y las
+explicaciones existentes. Seis regresiones cubren objetivos frente a instrucciones
+internas, riesgo, Tester, catálogos vacíos y compatibilidad con Codex; pasan junto
+con las 46 pruebas relacionadas de coordinación y Antigravity. No constituye una
+reescritura ni una promesa de haber simplificado todos los módulos.
 
 P2: [benchmark preparado y primer intento real documentado](BENCHMARK_ITERATIVO.md);
 la medición completa queda pendiente de cuota y de recoger todos los recibos.

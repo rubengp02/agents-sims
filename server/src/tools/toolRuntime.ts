@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
 
@@ -23,6 +23,7 @@ import { previewUrl, requestBodyPreview, toolPreview } from './toolPreview.js';
 
 const execFileAsync = promisify(execFile);
 export interface OfficeToolSessionOptions {
+  images?: ReadonlyArray<{ name: string; path: string; mimeType: string }>;
   taskId: string;
   conversationId?: string;
   role: TeamRole;
@@ -110,6 +111,10 @@ export const OFFICE_TOOL_NAMES = [
   'office_memory',
   'project_list',
   'project_read',
+  'project_write',
+  'project_delete',
+  'attachment_list',
+  'attachment_read',
   'project_checks',
   'project_check_run',
   'browser_open',
@@ -880,6 +885,33 @@ export class OfficeToolSession {
       return result(
         await projectFileTool(this.options.projectRoot ?? this.options.project, name, args),
       );
+    if (name === 'project_write' || name === 'project_delete') {
+      if (this.options.role !== 'developer' || !this.options.allowWrites)
+        throw new Error(
+          'Solo el Programador con permiso de escritura puede modificar la implementación.',
+        );
+      return result(
+        await projectFileTool(this.options.projectRoot ?? this.options.project, name, args),
+      );
+    }
+    if (name === 'attachment_list')
+      return result({
+        images: (this.options.images ?? []).map((image, index) => ({ index, name: image.name })),
+      });
+    if (name === 'attachment_read') {
+      const index = numberArg(args, 'index');
+      const image = this.options.images?.[index];
+      if (!image) throw new Error('La imagen no pertenece a este encargo.');
+      return {
+        content: [
+          {
+            type: 'image',
+            mimeType: image.mimeType,
+            data: (await readFile(image.path)).toString('base64'),
+          },
+        ],
+      };
+    }
     if (name === 'project_checks')
       return result({
         checks: this.options.projectChecks?.list() ?? [],

@@ -23,6 +23,7 @@ import {
   TEAM_ROLES,
   type TeamAvailability,
   type TeamChoice,
+  type TeamProvider,
   type TeamRole,
   type TeamSettings,
   type TeamSnapshot,
@@ -43,7 +44,8 @@ import type { CheckRunner } from './localChecks.js';
 import { chiefMemoryPrompt, directOfficeAnswer, objectiveMemory } from './objectiveMemory.js';
 import { ObjectiveUsageLedger } from './objectiveUsage.js';
 import { OFFICE_CHIEF_GUIDE, OfficeProgressGuard, parseOfficeDecision } from './officeLoop.js';
-import { projectRevisionCapture } from './projectRevision.js';
+import { captureDirectoryRevision, projectRevisionCapture } from './projectRevision.js';
+import { chooseProviderModel } from './providerModelPolicy.js';
 import {
   buildReviewPacket,
   captureRevision,
@@ -65,7 +67,8 @@ import {
 } from './workflowPolicy.js';
 import type { OwnedWorkspace, WorkspaceResult } from './workflowWorkspace.js';
 
-type Executors = Record<'codex' | 'claude', OfficialExecutor>;
+type Executors = Record<'codex' | 'claude', OfficialExecutor> &
+  Partial<Record<'antigravity', OfficialExecutor>>;
 type TaskInput = {
   inputId?: string;
   requiresConfirmation?: boolean;
@@ -113,7 +116,7 @@ export class TeamCoordinator {
   private activeClock = 0;
   private usageKnown = true;
   private readonly objectiveUsage = new ObjectiveUsageLedger();
-  private readonly includedQuota = new Map<'codex' | 'claude', IncludedQuotaView>();
+  private readonly includedQuota = new Map<TeamProvider, IncludedQuotaView>();
   private readonly workflows: TeamWorkflow[] = [];
   private readonly workspaces = new Map<string, OwnedWorkspace>();
   private readonly workspaceResults = new Map<string, WorkspaceResult>();
@@ -346,7 +349,7 @@ export class TeamCoordinator {
             !['completed', 'cancelled'].includes(raw.status)
           ) {
             task.output =
-              'Una ejecución anterior no comunicó su consumo. Al continuar se comprobará la cuota actual de Codex; el historial incompleto se conservará.';
+              'Una ejecución anterior no comunicó su consumo. Al continuar se comprobará la cuota actual del proveedor; el historial incompleto se conservará.';
             task.office.summary = task.output;
           }
           task.executionProject = raw.executionProject;
@@ -355,7 +358,7 @@ export class TeamCoordinator {
           const settled = ['completed', 'failed', 'cancelled'].includes(raw.status);
           if (settled && raw.choice) {
             if (
-              !['codex', 'claude'].includes(raw.choice.provider) ||
+              !['codex', 'claude', 'antigravity'].includes(raw.choice.provider) ||
               typeof raw.choice.model !== 'string' ||
               !raw.choice.model ||
               raw.choice.model.length > 160 ||
@@ -668,7 +671,8 @@ export class TeamCoordinator {
     if (this.integratingObjectives.has(root.id)) return 'not_running';
     const active = root.office ? this.tasks.find((t) => t.id === root.office!.currentTaskId) : root;
     const executor = this.executors[active?.choice?.provider ?? 'codex'];
-    if (!executor.supportsSteering || !executor.steer)
+    const officeRedirect = !!root.office && executor?.supportsOfficeRedirect === true;
+    if ((!executor?.supportsSteering || !executor.steer) && !officeRedirect)
       throw new ExecutionBlocked(
         'steering_unavailable',
         'Este motor no permite aplicar indicaciones durante el trabajo. Puedes dejar el mensaje pendiente.',
@@ -683,8 +687,8 @@ export class TeamCoordinator {
       attachments.map((a) => this.services!.artifacts.path(a.id)),
     );
     let result: 'accepted' | 'not_running' | 'unknown' = 'accepted';
-    if (active && (!root.office || active.role === 'chief')) {
-      const answer = await executor.steer(active.executionSessionKey ?? active.id, {
+    if (!officeRedirect && active && (!root.office || active.role === 'chief')) {
+      const answer = await executor!.steer!(active.executionSessionKey ?? active.id, {
         id: input.id,
         text:
           input.content +
@@ -717,7 +721,7 @@ export class TeamCoordinator {
       ).slice(0, 10);
       this.officeAuthority.set(root.id, this.consentKey(root));
       if (active) this.services?.runtime.approvals.cancelTask(active.id);
-      if (root.office && (!active || active.role !== 'chief')) {
+      if (root.office && (!active || active.role !== 'chief' || officeRedirect)) {
         const target = active?.id;
         if (target) {
           this.redirecting.add(target);
@@ -736,7 +740,9 @@ export class TeamCoordinator {
         // An explicit instruction authorizes a fresh quota check after intentional interruption.
         if (root.status === 'running' && !this.budgetReason) {
           try {
-            await this.diagnose('codex');
+            await this.diagnose(
+              active?.choice?.provider ?? this.settings.defaultProvider ?? 'codex',
+            );
           } catch (error) {
             this.pause(failureCode(error));
           }
@@ -753,6 +759,16 @@ export class TeamCoordinator {
 
   private checksFor(project: string): CheckRunner | undefined {
     return this.library ? this.library.checksFor(project) : this.checks;
+  }
+
+  private captureTaskRevision(task: TeamTask) {
+    const root = task.officeParentId ? this.task(task.officeParentId) : task;
+    const project = task.executionProject ?? task.project;
+    // A managed self-copy deliberately has no Git metadata. Its containing
+    // repository may ignore the private store; that must not hide the candidate.
+    return root.selfWorkspaceReceipt
+      ? () => captureDirectoryRevision(project)
+      : projectRevisionCapture(project);
   }
 
   private libraryRequired(): ConversationLibrary {
@@ -1134,7 +1150,8 @@ export class TeamCoordinator {
         'invalid_office_mode',
         'La oficina iterativa requiere el modo normal de Codex.',
       );
-    if (officeMode && this.executors.codex.engine === 'agent-orchestrator')
+    const conversationExecutor = this.executor(this.settings.defaultProvider ?? 'codex');
+    if (officeMode && conversationExecutor.engine === 'agent-orchestrator')
       throw new ExecutionBlocked(
         'office_engine_unavailable',
         'La coordinación iterativa requiere el motor Codex CLI. AO conserva sus flujos aislados y no se cambia de motor automáticamente.',
@@ -1163,7 +1180,10 @@ export class TeamCoordinator {
         'tools_not_configured',
         'Las imágenes no están configuradas en esta oficina.',
       );
-    if (ids.length && this.executors.codex.engine !== 'codex-app-server')
+    if (
+      ids.length &&
+      !['codex-app-server', 'antigravity-cli'].includes(conversationExecutor.engine ?? '')
+    )
       throw new ExecutionBlocked(
         'image_engine_unavailable',
         'Este motor no admite adjuntos visuales. Selecciona Codex App Server.',
@@ -1179,7 +1199,10 @@ export class TeamCoordinator {
     // Select the model for the actual role, rather than applying the coding
     // evidence gate to an informational Chief objective before changing its role.
     if (officeMode) this.task(task.id).role = 'chief';
-    if (this.services && this.executors.codex.engine === 'codex-app-server') {
+    if (
+      this.services &&
+      ['codex-app-server', 'antigravity-cli'].includes(conversationExecutor.engine ?? '')
+    ) {
       const history = library.conversation(id).messages.slice(-8).reverse();
       const referenceIds = [
         ...new Set(
@@ -1209,7 +1232,7 @@ export class TeamCoordinator {
     if (this.adaptive && stored.choice)
       stored.estimate = this.adaptive.estimate(
         stored,
-        this.executors[stored.choice.provider].engine ?? 'codex-cli',
+        this.executors[stored.choice.provider]?.engine ?? 'codex-cli',
         this.taskPacket(stored, true).characters,
       );
     this.persist();
@@ -1453,12 +1476,10 @@ export class TeamCoordinator {
       } finally {
         this.controllers.delete(root.id);
       }
-      const capture = root.allowWrites
-        ? projectRevisionCapture(root.executionProject ?? root.project)
-        : undefined;
+      const capture = root.allowWrites ? this.captureTaskRevision(root) : undefined;
       if (root.selfWorkspaceReceipt)
         await this.checksFor(root.project)?.authorizeSelfWorkspace?.(root.selfWorkspaceReceipt);
-      const base = capture?.();
+      const base = capture ? ((await this.services?.selfReviewBase(root)) ?? capture()) : undefined;
       const approvedChecks =
         this.checksFor(root.project)
           ?.describe?.()
@@ -1640,8 +1661,19 @@ export class TeamCoordinator {
             'project_changed_during_read',
             'Los archivos del proyecto cambiaron durante el análisis de solo lectura. La comparación no identifica quién los modificó. Revisa el estado actualizado antes de continuar.',
           );
-        if (decision.role === 'developer') {
-          verifiedRevision = undefined;
+        if (decision.role === 'tester' && worker.localChecks?.length)
+          checks = [
+            ...checks.filter((check) => !worker.localChecks!.some((r) => r.id === check.id)),
+            ...worker.localChecks,
+          ];
+        if (
+          decision.role === 'developer' ||
+          (decision.role === 'tester' &&
+            base &&
+            !checks.length &&
+            this.tasks.some((t) => t.officeParentId === root.id && t.role === 'developer'))
+        ) {
+          if (decision.role === 'developer') verifiedRevision = undefined;
           const runner = this.checksFor(root.project);
           const ids = runner?.describe?.().map((c) => c.id) ?? [];
           if (approvedChecks.some((id) => !ids.includes(id)))
@@ -1670,6 +1702,11 @@ export class TeamCoordinator {
             this.assertOfficeAuthority(root);
             if (objectiveRevision !== (root.objectiveRevision ?? 0)) continue;
             worker.localChecks = checks;
+            if (decision.role === 'tester' && capture!().digest !== before)
+              throw new ExecutionBlocked(
+                'project_changed_during_read',
+                'Los archivos cambiaron durante las comprobaciones de la revisión. Se necesita revisar el estado actualizado.',
+              );
             if (checks.some((c) => !c.passed)) {
               worker.status = 'failed';
               worker.reasonCode = 'local_checks_failed';
@@ -1703,7 +1740,7 @@ export class TeamCoordinator {
         root.explanation = ['usage_unknown', 'usage_unknown_after_restart'].includes(
           root.reasonCode,
         )
-          ? 'Codex terminó sin comunicar el consumo del intento anterior. Pulsa Ejecutar para comprobar la cuota actual y continuar; el historial incompleto se conservará.'
+          ? 'El ejecutor terminó sin comunicar el consumo del intento anterior. Pulsa Ejecutar para comprobar la cuota actual y continuar; el historial incompleto se conservará.'
           : failureMessage(error);
         root.output = root.explanation;
         root.office!.phase = 'paused';
@@ -1827,9 +1864,12 @@ export class TeamCoordinator {
         : {}),
       ...(library ? { library } : {}),
       capabilities: {
-        steering: this.executors.codex.supportsSteering === true,
-        engine: this.executors.codex.engine ?? 'codex-cli',
-        isolatedWriters: !!this.executors.codex.workspaceManager,
+        ...(this.executor(this.settings.defaultProvider ?? 'codex').supportsOfficeRedirect
+          ? { officeRedirect: true }
+          : {}),
+        steering: this.executor(this.settings.defaultProvider ?? 'codex').supportsSteering === true,
+        engine: this.executor(this.settings.defaultProvider ?? 'codex').engine ?? 'codex-cli',
+        isolatedWriters: !!this.executor(this.settings.defaultProvider ?? 'codex').workspaceManager,
         budgetReview: !!this.adaptive,
         ...(library
           ? {
@@ -1904,10 +1944,28 @@ export class TeamCoordinator {
     return packet;
   }
 
-  private diagnose(provider: 'codex' | 'claude') {
+  private executor(provider: TeamProvider): OfficialExecutor {
+    const executor = this.executors[provider];
+    if (!executor)
+      throw new ExecutionBlocked(
+        'provider_unavailable',
+        `El proveedor ${provider} no está disponible.`,
+      );
+    return executor;
+  }
+
+  private diagnose(provider: TeamProvider) {
     if (this.closed)
       return Promise.reject(new ExecutionBlocked('server_stopped', 'La oficina se está cerrando.'));
-    const pending = this.executors[provider].diagnose().then(
+    const executor = this.executors[provider];
+    if (!executor)
+      return Promise.reject(
+        new ExecutionBlocked(
+          'provider_unavailable',
+          `El proveedor ${provider} no está disponible.`,
+        ),
+      );
+    const pending = executor.diagnose().then(
       (evidence) => {
         this.includedQuota.set(provider, {
           provider,
@@ -1966,16 +2024,23 @@ export class TeamCoordinator {
   }
 
   async refresh(): Promise<TeamSnapshot> {
+    const list: TeamProvider[] = this.executors.antigravity
+      ? ['codex', 'claude', 'antigravity']
+      : ['codex', 'claude'];
     this.providers = await Promise.all(
-      (['codex', 'claude'] as const).map(async (provider) => {
-        const enabled = provider === 'codex' || this.settings.claudeEnabled;
+      list.map(async (provider) => {
+        const enabled =
+          provider === 'codex' ||
+          (provider === 'claude' && this.settings.claudeEnabled) ||
+          (provider === 'antigravity' && this.settings.antigravityEnabled === true);
         if (!enabled)
           return {
             provider,
             enabled: false,
             available: false,
-            reasonCode: 'claude_disabled',
-            message: 'Claude está desactivado.',
+            reasonCode: provider === 'claude' ? 'claude_disabled' : 'antigravity_disabled',
+            message:
+              provider === 'claude' ? 'Claude está desactivado.' : 'Antigravity está desactivado.',
             models: [],
           };
         try {
@@ -1986,8 +2051,11 @@ export class TeamCoordinator {
             available: true,
             reasonCode: null,
             message:
-              'Suscripción verificada en esta comprobación. Se revisará de nuevo antes de ejecutar.',
+              provider === 'antigravity'
+                ? 'Cuota Google incluida comprobada; créditos adicionales desactivados. Las herramientas pasan por la oficina.'
+                : 'Suscripción verificada. Se volverá a comprobar antes de ejecutar.',
             models: evidence.models,
+            ...(evidence.inspection ? { inspection: evidence.inspection } : {}),
           };
         } catch (error) {
           return {
@@ -1997,6 +2065,9 @@ export class TeamCoordinator {
             reasonCode: failureCode(error),
             message: failureMessage(error),
             models: [],
+            ...(error instanceof ExecutionBlocked && error.inspection
+              ? { inspection: error.inspection }
+              : {}),
           };
         }
       }),
@@ -2687,9 +2758,14 @@ export class TeamCoordinator {
         'task_locked',
         'Pausa una tarea activa antes de cambiar su asignación.',
       );
+    const hasAntigravity =
+      this.executors.antigravity?.engine === 'antigravity-cli' &&
+      this.settings.antigravityEnabled === true;
+    const allowed: TeamProvider[] = ['codex', 'claude'];
+    if (hasAntigravity) allowed.push('antigravity');
     if (
       choice &&
-      (!['codex', 'claude'].includes(choice.provider) ||
+      (!allowed.includes(choice.provider) ||
         typeof choice.model !== 'string' ||
         choice.model.length > 100 ||
         typeof choice.effort !== 'string' ||
@@ -2715,10 +2791,16 @@ export class TeamCoordinator {
     )
       throw new ExecutionBlocked('task_locked', 'La tarea está activa o terminada.');
     this.assigning.add(id);
-    const provider = task.override?.provider ?? 'codex';
+    const provider =
+      task.override?.provider ??
+      task.proposedChoice?.provider ??
+      this.settings.defaultProvider ??
+      'codex';
     try {
       if (provider === 'claude' && !this.settings.claudeEnabled)
         throw new ExecutionBlocked('claude_disabled', 'Claude está desactivado.');
+      if (provider === 'antigravity' && !this.settings.antigravityEnabled)
+        throw new ExecutionBlocked('antigravity_disabled', 'Antigravity está desactivado.');
       if (this.settings.mode === 'manual' && !task.override)
         throw new ExecutionBlocked(
           'manual_choice_required',
@@ -2726,9 +2808,19 @@ export class TeamCoordinator {
         );
       const evidence = await this.diagnose(provider);
       if (this.cancelled.has(id)) return structuredClone(task);
+      const nativeAssessmentPrompt =
+        assessmentPrompt ??
+        (task.officeParentId
+          ? this.objectivePrompt(this.task(task.officeParentId))
+          : (task.context?.objective ?? task.prompt));
       Object.assign(
         task,
-        chooseModel({ ...task, prompt: assessmentPrompt ?? task.prompt }, evidence),
+        chooseProviderModel(
+          { ...task, prompt: assessmentPrompt ?? task.prompt },
+          evidence,
+          provider,
+          nativeAssessmentPrompt,
+        ),
       );
       if (
         this.adaptive &&
@@ -2736,7 +2828,7 @@ export class TeamCoordinator {
         task.role === 'developer' &&
         task.assessment?.scope !== 'explanation' &&
         task.choice?.model === 'gpt-6-luna' &&
-        !this.adaptive.allowsLightCode(task, this.executors[provider].engine ?? 'codex-cli')
+        !this.adaptive.allowsLightCode(task, this.executors[provider]?.engine ?? 'codex-cli')
       )
         throw new ExecutionBlocked(
           'model_evidence_required',
@@ -2790,7 +2882,7 @@ export class TeamCoordinator {
       );
     task.budgetReview = {
       choiceKey: JSON.stringify(
-        this.adaptive.key(task, this.executors[task.choice.provider].engine ?? 'codex-cli'),
+        this.adaptive.key(task, this.executor(task.choice.provider).engine ?? 'codex-cli'),
       ),
       tokens,
       durationMs,
@@ -2815,7 +2907,7 @@ export class TeamCoordinator {
       const packet = this.taskPacket(task, true);
       const estimate = this.adaptive.estimate(
         task,
-        this.executors[task.choice.provider].engine ?? 'codex-cli',
+        this.executor(task.choice.provider).engine ?? 'codex-cli',
         packet.characters,
       );
       task.estimate = estimate;
@@ -2900,7 +2992,7 @@ export class TeamCoordinator {
     if (!this.usageKnown)
       throw new ExecutionBlocked(
         'usage_unknown',
-        'El historial de consumo está incompleto. Los presupuestos manuales necesitan revisión; el chat normal comprueba la cuota actual de Codex.',
+        'El historial de consumo está incompleto. Los presupuestos manuales necesitan revisión; el chat normal comprueba la cuota actual del proveedor.',
       );
     if (this.runsUsed + (includeReservations ? this.reservedRuns : 0) >= this.settings.maxRuns)
       throw new ExecutionBlocked('run_budget', 'Se alcanzó el límite de llamadas.');
@@ -2968,7 +3060,7 @@ export class TeamCoordinator {
     }
     const capacity = isolatedPair
       ? 2
-      : (this.executors[task.choice!.provider].maxConcurrentReadOnly ?? 1);
+      : (this.executor(task.choice!.provider).maxConcurrentReadOnly ?? 1);
     if (
       active.length >= this.settings.maxParallel ||
       active.filter((other) => other.choice?.provider === task.choice!.provider).length >= capacity
@@ -3187,6 +3279,8 @@ export class TeamCoordinator {
       const provider = task.choice!.provider;
       if (provider === 'claude' && !this.settings.claudeEnabled)
         throw new ExecutionBlocked('claude_disabled', 'Claude está desactivado.');
+      if (provider === 'antigravity' && !this.settings.antigravityEnabled)
+        throw new ExecutionBlocked('antigravity_disabled', 'Antigravity está desactivado.');
       // Guard again even for dependency-injected adapters. No unverified run.
       const evidence = await this.diagnose(provider);
       chooseModel({ ...task, override: task.choice }, evidence);
@@ -3257,7 +3351,7 @@ export class TeamCoordinator {
         contextCharacters = reviewContext.characters;
         const estimate = this.adaptive.estimate(
           task,
-          this.executors[provider].engine ?? 'codex-cli',
+          this.executor(provider).engine ?? 'codex-cli',
           contextCharacters,
         );
         if (
@@ -3274,7 +3368,12 @@ export class TeamCoordinator {
       this.persist();
       // Consent is for one dispatch. Retries, recovery and new messages must be confirmed again.
       this.chatConsents.delete(task.id);
-      if (this.services && this.executors[provider].engine === 'codex-app-server') {
+      if (
+        this.services &&
+        ['codex-app-server', 'antigravity-cli'].includes(this.executor(provider).engine ?? '')
+      ) {
+        const toolExecutor =
+          provider === 'antigravity' ? this.executors.codex : this.executor(provider);
         if (!task.officeParentId) await this.services.prepareSelf(task, controller.signal);
         if (task.selfWorkspaceReceipt)
           await this.checksFor(task.project)?.authorizeSelfWorkspace?.(task.selfWorkspaceReceipt);
@@ -3287,14 +3386,14 @@ export class TeamCoordinator {
             await this.refreshTools();
             return this.services!.capabilities();
           },
-          this.executors[provider].openPluginManagement
+          toolExecutor.openPluginManagement
             ? new OfficialPlugins(
                 join(this.services.directory, 'plugin-operations'),
-                (signal) => this.executors[provider].openPluginManagement!(signal),
+                (signal) => toolExecutor.openPluginManagement!(signal),
                 undefined,
-                this.executors[provider].openPluginMcp
+                toolExecutor.openPluginMcp
                   ? (selection, signal) =>
-                      this.executors[provider].openPluginMcp!(
+                      toolExecutor.openPluginMcp!(
                         task.executionProject ?? task.project,
                         selection,
                         signal,
@@ -3303,10 +3402,10 @@ export class TeamCoordinator {
                 { taskId: task.id, conversationId: task.conversationId },
               )
             : undefined,
-          this.executors[provider].openAuthentication
-            ? (signal) => this.executors[provider].openAuthentication!(signal)
+          toolExecutor.openAuthentication
+            ? (signal) => toolExecutor.openAuthentication!(signal)
             : undefined,
-          this.executors[provider].openIntegrations
+          toolExecutor.openIntegrations
             ? new OfficialIntegrations(
                 join(
                   this.services.directory,
@@ -3314,41 +3413,36 @@ export class TeamCoordinator {
                   task.officeParentId ?? task.id,
                 ),
                 (signal) =>
-                  this.executors[provider].openIntegrations!(
-                    task.executionProject ?? task.project,
-                    signal,
-                  ),
+                  toolExecutor.openIntegrations!(task.executionProject ?? task.project, signal),
                 { taskId: task.id, conversationId: task.conversationId },
               )
             : undefined,
-          this.executors[provider].openMcpRegistration &&
-            this.executors[provider].openManagedMcp &&
-            this.executors[provider].openManagedAuthentication
+          toolExecutor.openMcpRegistration &&
+            toolExecutor.openManagedMcp &&
+            toolExecutor.openManagedAuthentication
             ? {
                 registration: new OfficialMcpRegistration(
                   join(this.services.directory, 'mcp-registrations'),
-                  (signal) => this.executors[provider].openMcpRegistration!(signal),
+                  (signal) => toolExecutor.openMcpRegistration!(signal),
                   { taskId: task.id, conversationId: task.conversationId },
                 ),
                 open: (target, signal) =>
-                  this.executors[provider].openManagedMcp!(
+                  toolExecutor.openManagedMcp!(
                     task.executionProject ?? task.project,
                     target,
                     signal,
                   ),
                 authentication: (target, signal) =>
-                  this.executors[provider].openManagedAuthentication!(target, signal),
+                  toolExecutor.openManagedAuthentication!(target, signal),
               }
             : undefined,
-          this.executors[provider].openApplications
-            ? new OfficialApplications((signal) =>
-                this.executors[provider].openApplications!(signal),
-              )
+          toolExecutor.openApplications
+            ? new OfficialApplications((signal) => toolExecutor.openApplications!(signal))
             : undefined,
         );
       }
       dispatchedAt = Date.now();
-      task.executionEvidence = this.executors[provider].executionEvidence ?? 'unknown';
+      task.executionEvidence = this.executors[provider]?.executionEvidence ?? 'unknown';
       usageAttemptId = randomUUID();
       this.objectiveUsage.begin(
         usageAttemptId,
@@ -3369,7 +3463,13 @@ export class TeamCoordinator {
         dispatchedAt = undefined;
         return;
       }
-      const result = await this.executors[provider].execute({
+      const executor = this.executors[provider];
+      if (!executor)
+        throw new ExecutionBlocked(
+          'provider_unavailable',
+          `El proveedor ${provider} no está disponible.`,
+        );
+      const result = await executor.execute({
         officeRole: task.role,
         ownedWorkspace,
         project: task.executionProject ?? task.project,
@@ -3416,7 +3516,7 @@ export class TeamCoordinator {
         parallelReadOnly:
           task.parallelSafe &&
           !task.allowWrites &&
-          (this.executors[provider].maxConcurrentReadOnly ?? 1) > 1,
+          (this.executor(provider).maxConcurrentReadOnly ?? 1) > 1,
         signal: controller.signal,
         timeoutMs: this.providerManagedTask(task)
           ? null
@@ -3546,7 +3646,7 @@ export class TeamCoordinator {
       ) {
         task.status = 'running';
         const captureChecks = this.providerManagedTask(task)
-          ? projectRevisionCapture(task.executionProject ?? task.project)
+          ? this.captureTaskRevision(task)
           : () => captureRevision(task.executionProject ?? task.project);
         const beforeChecks = this.adaptive ? captureChecks().digest : undefined;
         task.localChecks = await this.checksFor(task.project)!.run(
@@ -3593,7 +3693,7 @@ export class TeamCoordinator {
         );
       }
       if (task.status === 'completed' && ownedWorkspace && task.ownedFiles) {
-        const sealed = this.executors[provider].workspaceManager!.seal(
+        const sealed = this.executor(provider).workspaceManager!.seal(
           ownedWorkspace,
           task.ownedFiles,
         );
@@ -3694,7 +3794,7 @@ export class TeamCoordinator {
         try {
           this.adaptive.record(
             task,
-            this.executors[task.choice!.provider].engine ?? 'codex-cli',
+            this.executor(task.choice!.provider).engine ?? 'codex-cli',
             receipt,
             contextCharacters,
             task.estimate?.tokens ?? null,
@@ -3933,10 +4033,15 @@ export class TeamCoordinator {
     const generation = this.generation;
     let planningTask: TeamTask | undefined;
     try {
-      const catalog = this.adaptive ? await this.diagnose('codex') : null;
-      const plannerGuide = catalog
-        ? `Catálogo actual permitido (revalidado al ejecutar): ${JSON.stringify(catalog.models.filter((m) => ['gpt-6-luna', 'gpt-6.1-sol'].includes(m.id)))}. Puedes proponer choice:{provider:"codex",model,effort}, assessment:{scope,risk,uncertainty,modules,tests}, context:{objective,files,decisions,acceptance,checks} y reviewMode:"focused"|"deep" por tarea. No inventes cobertura ni comandos. Luna para código no se promociona sin evidencia. Usa Sol low para trabajo acotado y medium/high para riesgo justificado. La revisión recibe diff y pruebas, en sesión independiente. Una tarea clara puede resolverse con un solo Programador y aceptación local acreditada. No declares reservas ni permisos.\n`
-        : '';
+      const catalog = this.adaptive
+        ? await this.diagnose(this.settings.defaultProvider ?? 'codex')
+        : null;
+      const plannerGuide =
+        catalog && this.settings.defaultProvider === 'antigravity'
+          ? `Catálogo actual de Antigravity con cuota incluida comprobada: ${JSON.stringify(catalog.models)}. Puedes proponer choice:{provider:"antigravity",model,effort:"default"}, assessment y context por tarea. No cambies de proveedor ni inventes pruebas o cobertura. La asignación es provisional; no acredita eficiencia medida.\n`
+          : catalog
+            ? `Catálogo actual permitido (revalidado al ejecutar): ${JSON.stringify(catalog.models.filter((m) => ['gpt-6-luna', 'gpt-6.1-sol'].includes(m.id)))}. Puedes proponer choice:{provider:"codex",model,effort}, assessment:{scope,risk,uncertainty,modules,tests}, context:{objective,files,decisions,acceptance,checks} y reviewMode:"focused"|"deep" por tarea. No inventes cobertura ni comandos. Luna para código no se promociona sin evidencia. Usa Sol low para trabajo acotado y medium/high para riesgo justificado. La revisión recibe diff y pruebas, en sesión independiente. Una tarea clara puede resolverse con un solo Programador y aceptación local acreditada. No declares reservas ni permisos.\n`
+            : '';
       const decompositionGuide =
         this.settings.experimentalParallelWriters &&
         local &&

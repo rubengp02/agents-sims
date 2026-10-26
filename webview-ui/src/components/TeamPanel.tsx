@@ -8,6 +8,7 @@ import {
   type TeamTask,
 } from '../../../core/src/team.js';
 import { ConversationWorkspace } from './ConversationWorkspace.js';
+import { ProviderStatus } from './ProviderStatus.js';
 import { ProjectChecksApproval, SavedConversations } from './SavedConversations.js';
 import { TeamScopeForm } from './TeamScopeForm.js';
 import { TaskBudgetControl, TeamWorkflowCard } from './TeamWorkflowCard.js';
@@ -213,7 +214,44 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
                 />{' '}
                 Habilitar comprobación de Claude
               </label>
+              <label className="flex items-center gap-4">
+                <input
+                  type="checkbox"
+                  checked={snapshot.settings.antigravityEnabled === true}
+                  disabled={!!active}
+                  onChange={(event) =>
+                    void action('settings', {
+                      ...snapshot.settings,
+                      antigravityEnabled: event.target.checked,
+                      defaultProvider:
+                        !event.target.checked && snapshot.settings.defaultProvider === 'antigravity'
+                          ? 'codex'
+                          : snapshot.settings.defaultProvider,
+                    })
+                  }
+                />{' '}
+                Habilitar Antigravity (Google)
+              </label>
             </div>
+            <label>
+              Proveedor del equipo
+              <select
+                className={field}
+                value={snapshot.settings.defaultProvider ?? 'codex'}
+                disabled={!!active}
+                onChange={(event) =>
+                  void action('settings', {
+                    ...snapshot.settings,
+                    defaultProvider: event.target.value,
+                  })
+                }
+              >
+                <option value="codex">Codex</option>
+                <option value="antigravity" disabled={!snapshot.settings.antigravityEnabled}>
+                  Antigravity
+                </option>
+              </select>
+            </label>
             <details className="border border-border p-4 mb-8">
               <summary>Organización del trabajo · un Programador por defecto</summary>
               <p className="my-4">
@@ -259,10 +297,7 @@ export function TeamPanel({ onClose }: { onClose: () => void }) {
                 <p>Codex disponible para comprobar. Claude desactivado inicialmente.</p>
               )}
               {snapshot.providers.map((provider) => (
-                <p key={provider.provider}>
-                  <strong>{provider.provider === 'codex' ? 'Codex' : 'Claude'}: </strong>
-                  {provider.message}
-                </p>
+                <ProviderStatus key={provider.provider} provider={provider} />
               ))}
             </div>
             <details className="border border-border p-4 mb-8">
@@ -719,6 +754,7 @@ function TaskCard({
               }
             >
               <option value="codex">Codex</option>
+              <option value="antigravity">Antigravity</option>
               <option value="claude">Claude</option>
             </select>
           </label>

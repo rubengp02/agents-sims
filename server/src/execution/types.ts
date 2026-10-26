@@ -1,4 +1,4 @@
-import type { TeamRole } from '../../../core/src/team.js';
+import type { ProviderInspection, TeamRole } from '../../../core/src/team.js';
 import type { ExecutionMetrics } from './executionMetrics.js';
 import type { OwnedWorkspace, WorkflowWorkspaceManager } from './workflowWorkspace.js';
 
@@ -10,6 +10,7 @@ export class ExecutionBlocked extends Error {
   constructor(
     readonly code: string,
     message: string,
+    readonly inspection?: ProviderInspection,
   ) {
     super(message);
     this.name = 'ExecutionBlocked';
@@ -22,8 +23,9 @@ export interface ModelCapability {
 }
 
 export interface SubscriptionEvidence {
+  inspection?: ProviderInspection;
   checkedAt: number;
-  plan: 'plus' | 'pro';
+  plan: 'plus' | 'pro' | 'google-included';
   quota: Array<{ id: string; usedPercent: number; resetsAt: number }>;
   models: ModelCapability[];
 }
@@ -32,7 +34,7 @@ export interface RunRecord {
   officeRole?: TeamRole;
   version: 1;
   id: string;
-  provider: 'codex' | 'claude';
+  provider: 'codex' | 'claude' | 'antigravity';
   billing: 'subscription-only';
   status: RunStatus;
   project: string;
@@ -53,7 +55,7 @@ export interface RunRecord {
   subscriptionCheckedAt?: number;
   contextFingerprint?: string;
   sessionMode?: 'new' | 'resume';
-  engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator';
+  engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator' | 'antigravity-cli';
   executionProject?: string;
   toolCalls?: number;
   /** Safe aggregates, absent on historical receipts. No raw event payloads. */
@@ -106,9 +108,11 @@ export interface OfficialExecutor {
   readonly executionEvidence?: import('../../../core/src/deliveryEvidence.js').ExecutionEvidenceKind;
   readonly workspaceManager?: WorkflowWorkspaceManager;
   readonly provider: ProviderId;
-  readonly engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator';
+  readonly engine?: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator' | 'antigravity-cli';
   readonly maxConcurrentReadOnly?: 1 | 2;
   readonly supportsSteering?: boolean;
+  /** A controlled office interruption; never claims native in-turn steering. */
+  readonly supportsOfficeRedirect?: boolean;
   steer?(executionSessionKey: string, input: SteeringInput): Promise<SteeringResult>;
   releaseObjectiveSession?(key: string): void;
   openIntegrations?(

@@ -17,7 +17,7 @@ function publicToolError(error: unknown): string {
     : 'La herramienta no pudo completar la operación. Revisa su conexión y el estado del encargo.';
 }
 
-/** One loopback endpoint and random bearer token per execution session. Never persisted. */
+/** One loopback endpoint and random transient bearer per execution session. */
 export async function startOfficeMcp(
   session: OfficeToolSession,
 ): Promise<{ url: string; secret: string; close: () => Promise<void> }> {
@@ -25,6 +25,14 @@ export async function startOfficeMcp(
   const mcp = new McpServer({ name: 'oficina-local', version: '1.0.0' });
   for (const name of OFFICE_TOOL_NAMES) {
     const nativeDescription: Record<string, string> = {
+      project_write:
+        'Crea o actualiza un archivo de texto relativo al proyecto: args.path, args.content y args.expectedSha256 (huella devuelta por project_read, o null si no existe). Solo el Programador autorizado. Si el archivo cambió, vuelve a leerlo; no repitas sobrescrituras a ciegas.',
+      project_delete:
+        'Elimina un archivo relativo: args.path y args.expectedSha256 de project_read. Solo el Programador autorizado. No admite carpetas, credenciales ni rutas externas.',
+      attachment_list:
+        'Enumera las imágenes autorizadas de este encargo con index y nombre. No revela rutas del disco.',
+      attachment_read:
+        'Devuelve la imagen REAL autorizada para inspección visual: args.index obtenido de attachment_list. No sustituye una imagen por una descripción ni acepta rutas arbitrarias.',
       connection_operations:
         'Consulta recibos persistentes de llamadas MCP administradas: args.connectionId opcional de connections_list. Muestra identificador de operación, huellas de argumentos y esquema, aprobación registrada, empleado, estado y revisión humana cuando consta. No contiene argumentos ni respuestas privados. El registro indica su fecha de inicio y no acredita llamadas anteriores; no supone que una lista vacía demuestre ausencia histórica. dispatching recuperado se muestra como review_required y no se reenvía.',
       connection_check:

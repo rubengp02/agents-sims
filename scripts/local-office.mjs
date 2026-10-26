@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const localDir = path.join(root, '.local-office');
 const stateFile = path.join(localDir, 'server.json');
 const config = JSON.parse(fs.readFileSync(path.join(root, 'office.config.json'), 'utf8'));
-const knownProviders = ['claude', 'hermes', 'codex'];
+const knownProviders = ['claude', 'hermes', 'codex', 'antigravity'];
 if (
   !Number.isInteger(config.port) ||
   config.port < 1 ||

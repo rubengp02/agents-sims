@@ -19,7 +19,7 @@ export interface ObjectiveBudgetView {
 
 export const CODEX_QUOTA_RESERVE_PERCENT = 10;
 export interface IncludedQuotaView {
-  provider: 'codex' | 'claude';
+  provider: 'codex' | 'claude' | 'antigravity';
   checkedAt: number | null;
   verified: boolean;
   reservePercent: number;

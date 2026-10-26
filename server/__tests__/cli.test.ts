@@ -122,6 +122,7 @@ describe('parseArgs', () => {
   it('keeps all original integrations by default and allows Codex alone', () => {
     expect(parseArgs([]).providers).toEqual(['claude', 'hermes', 'codex']);
     expect(parseArgs(['--providers', 'codex']).providers).toEqual(['codex']);
+    expect(parseArgs(['--providers', 'antigravity']).providers).toEqual(['antigravity']);
     expect(parseArgs(['--providers', 'codex,claude,codex']).providers).toEqual(['claude', 'codex']);
   });
 

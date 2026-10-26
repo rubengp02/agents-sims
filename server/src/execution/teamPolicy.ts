@@ -5,6 +5,8 @@ import { ExecutionBlocked, type SubscriptionEvidence } from './types.js';
 export const DEFAULT_TEAM_SETTINGS: TeamSettings = {
   mode: 'auto',
   claudeEnabled: false,
+  antigravityEnabled: false,
+  defaultProvider: 'codex',
   maxRuns: 8,
   maxParallel: 2,
   experimentalParallelWriters: false,
@@ -14,12 +16,26 @@ export const DEFAULT_TEAM_SETTINGS: TeamSettings = {
 
 export function validateSettings(value: TeamSettings): TeamSettings {
   if (
+    (value.defaultProvider !== undefined &&
+      !['codex', 'antigravity'].includes(value.defaultProvider)) ||
+    (value.defaultProvider === 'antigravity' && value.antigravityEnabled !== true)
+  )
+    throw new ExecutionBlocked(
+      'invalid_settings',
+      'Habilita Antigravity antes de seleccionarlo como proveedor del equipo.',
+    );
+  if (
     value.experimentalParallelWriters !== undefined &&
     typeof value.experimentalParallelWriters !== 'boolean'
   )
     throw new ExecutionBlocked(
       'invalid_settings',
       'La activación experimental debe ser explícita y booleana.',
+    );
+  if (value.antigravityEnabled !== undefined && typeof value.antigravityEnabled !== 'boolean')
+    throw new ExecutionBlocked(
+      'invalid_settings',
+      'La activación de Antigravity debe ser booleana.',
     );
   if (!['auto', 'manual', 'mixed'].includes(value.mode) || typeof value.claudeEnabled !== 'boolean')
     throw new ExecutionBlocked('invalid_settings', 'Modo o proveedor incorrectos.');
@@ -37,6 +53,8 @@ export function validateSettings(value: TeamSettings): TeamSettings {
   return {
     mode: value.mode,
     claudeEnabled: value.claudeEnabled,
+    antigravityEnabled: value.antigravityEnabled === true,
+    defaultProvider: value.defaultProvider ?? 'codex',
     maxRuns: value.maxRuns,
     maxParallel: value.maxParallel,
     experimentalParallelWriters: value.experimentalParallelWriters === true,
@@ -78,9 +96,13 @@ export function chooseModel(
   if (task.proposedChoice) {
     const proposed = task.proposedChoice;
     const allowed =
-      proposed.provider === 'codex' &&
-      ((proposed.model === 'gpt-6-luna' && proposed.effort === 'low' && !complex) ||
-        (proposed.model === 'gpt-6.1-sol' && ['low', 'medium', 'high'].includes(proposed.effort)));
+      (proposed.provider === 'codex' &&
+        ((proposed.model === 'gpt-6-luna' && proposed.effort === 'low' && !complex) ||
+          (proposed.model === 'gpt-6.1-sol' &&
+            ['low', 'medium', 'high'].includes(proposed.effort)))) ||
+      (proposed.provider === 'antigravity' &&
+        evidence.plan === 'google-included' &&
+        proposed.effort === 'default');
     if (
       !allowed ||
       !evidence.models.some((m) => m.id === proposed.model && m.efforts.includes(proposed.effort))

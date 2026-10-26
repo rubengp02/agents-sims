@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -10,7 +11,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { TeamTask } from '../../core/src/team.js';
 import { LocalChecks } from '../src/execution/localChecks.js';
-import { projectRevisionCapture } from '../src/execution/projectRevision.js';
+import {
+  captureDirectoryRevision,
+  projectRevisionCapture,
+} from '../src/execution/projectRevision.js';
 import { OfficeServices } from '../src/tools/officeServices.js';
 
 const roots: string[] = [];
@@ -35,6 +39,27 @@ async function fixture(nestedHost = false) {
   return { root, project, services, task };
 }
 describe('office services across storage, isolated review and restart (no model)', () => {
+  it('reviews every managed-copy file even when the containing repository ignores private storage', async () => {
+    const { root, project, services, task } = await fixture();
+    execFileSync('git', ['init', root], { windowsHide: true, stdio: 'ignore' });
+    writeFileSync(join(root, '.gitignore'), 'private/\n');
+    await services.prepareSelf(task);
+    const copy = task.executionProject!;
+    writeFileSync(join(copy, 'new.cjs'), 'module.exports = 1;');
+    const reviewed = captureDirectoryRevision(copy);
+    expect(Object.keys(reviewed.files)).toEqual(['new.cjs', 'style.css']);
+    expect(Object.keys((await services.selfReviewBase(task))!.files)).toEqual(['style.css']);
+    // Git in the containing repo intentionally sees none of these private files.
+    expect(Object.keys(projectRevisionCapture(copy)().files)).toEqual([]);
+    writeFileSync(join(copy, 'style.css'), 'changed after review');
+    await expect(services.integrateSelf(task, reviewed.digest)).rejects.toMatchObject({
+      code: 'self_review_outdated',
+    });
+    writeFileSync(join(copy, 'style.css'), 'body { color: red; }');
+    await services.integrateSelf(task, reviewed.digest);
+    expect(readFileSync(join(project, 'new.cjs'), 'utf8')).toBe('module.exports = 1;');
+    await services.close();
+  });
   it('binds project reads and registered checks to the isolated project for the Tester', async () => {
     const { root, project, services, task } = await fixture(true);
     task.role = 'tester';
@@ -83,6 +108,9 @@ describe('office services across storage, isolated review and restart (no model)
         arguments: { args: { id: 'fixture' } },
       });
       expect(JSON.stringify(checked)).toContain('\\"passed\\":true');
+      expect(task.localChecks).toEqual([
+        expect.objectContaining({ id: 'fixture', passed: true, exitCode: 0 }),
+      ]);
       expect(readFileSync(join(project, 'style.css'), 'utf8')).toContain('red');
     } finally {
       await client.close();

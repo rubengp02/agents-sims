@@ -23,6 +23,7 @@ import { readConfig } from './configPersistence.js';
 import { MAX_PORT, MIN_PORT } from './constants.js';
 import { AdaptiveRuntime } from './execution/adaptiveRuntime.js';
 import { adaptiveStateDirectory } from './execution/adaptiveState.js';
+import { AntigravityExecutor } from './execution/antigravityExecutor.js';
 import { ClaudeExecutor } from './execution/claudeExecutor.js';
 import { ConversationLibrary } from './execution/conversationLibrary.js';
 import { createOfficeExecutor } from './execution/engine.js';
@@ -35,6 +36,7 @@ import { UsageHistory } from './execution/usageHistory.js';
 import { FileStateAdapter } from './fileStateAdapter.js';
 import { copyHermesPlugin } from './providers/hook/hermes/hermesHookInstaller.js';
 import {
+  antigravityProvider,
   claudeProvider,
   codexProvider,
   copyHookScript,
@@ -47,7 +49,7 @@ import { OfficeServices } from './tools/officeServices.js';
 /** All providers this standalone server hosts, sharing one office. Claude stays
  *  first: AgentRuntime treats providers[0] as primary for its file-scanning
  *  singletons and legacy (no-providerId) call sites -- see agentRuntime.ts. */
-const ALL_PROVIDERS = [claudeProvider, hermesProvider, codexProvider];
+const ALL_PROVIDERS = [claudeProvider, hermesProvider, codexProvider, antigravityProvider];
 
 // ── Argument parsing ──────────────────────────────────────────
 
@@ -66,7 +68,10 @@ export interface CliArgs {
 export class CliArgsError extends Error {}
 
 export function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { host: '127.0.0.1', providers: ALL_PROVIDERS.map((p) => p.id) };
+  const args: CliArgs = {
+    host: '127.0.0.1',
+    providers: ALL_PROVIDERS.filter((p) => p.id !== 'antigravity').map((p) => p.id),
+  };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--port' || argv[i] === '-p') {
       const raw = argv[i + 1];
@@ -91,7 +96,7 @@ export function parseArgs(argv: string[]): CliArgs {
       const ids = raw?.split(',').map((id) => id.trim()) ?? [];
       if (!ids.length || ids.some((id) => !ALL_PROVIDERS.some((p) => p.id === id))) {
         throw new CliArgsError(
-          'Invalid --providers: choose claude, hermes, codex (comma-separated).',
+          'Invalid --providers: choose claude, hermes, codex, antigravity (comma-separated).',
         );
       }
       // Preserve the original primary-provider order, regardless of argument order.
@@ -205,6 +210,12 @@ async function main(): Promise<void> {
         claude: preview
           ? { ...previewExecutor, provider: 'claude' }
           : new ClaudeExecutor(() => team.snapshot().settings.claudeEnabled),
+        antigravity: preview
+          ? { ...previewExecutor, provider: 'antigravity' }
+          : new AntigravityExecutor(
+              executionDirectory,
+              () => team.snapshot().settings.antigravityEnabled === true,
+            ),
       },
       path.join(localRuntime, 'team-settings.json'),
       new TeamOfficeBridge(store, runtime),
@@ -265,6 +276,14 @@ async function main(): Promise<void> {
           console.log('[Pixel Agents] Codex JSONL tailer started');
         } catch (err) {
           console.error('[Pixel Agents] Failed to start Codex tailer:', err);
+        }
+      }
+      if (args.providers.includes('antigravity')) {
+        try {
+          await antigravityProvider.installHooks(serverUrl, authToken);
+          console.log('[Pixel Agents] Antigravity JSONL tailer started');
+        } catch (err) {
+          console.error('[Pixel Agents] Failed to start Antigravity tailer:', err);
         }
       }
     };

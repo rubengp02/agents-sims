@@ -56,7 +56,7 @@ Los estados de pausa/cancelación conservan la referencia de sesión. El Jefe ya
 
 ## Otros proveedores
 
-Claude está desactivado inicialmente. Ya tiene adaptador de diagnóstico oficial y constructor de argumentos, pero la inferencia sigue bloqueada por falta de una comprobación oficial previa del consumo adicional. Habilitar su comprobación puede iniciar `claude auth status`, sin inferencia ni lectura de credenciales. La cola de dos proveedores solo se ha probado conjuntamente con simulaciones. Antigravity mantiene una reserva y rechazo explícito, sin cliente Google.
+Claude está desactivado inicialmente. Ya tiene adaptador de diagnóstico oficial y constructor de argumentos, pero la inferencia sigue bloqueada por falta de una comprobación oficial previa del consumo adicional. Habilitar su comprobación puede iniciar `claude auth status`, sin inferencia ni lectura de credenciales. La cola de dos proveedores solo se ha probado conjuntamente con simulaciones. Antigravity es opcional y verifica cuota incluida, créditos adicionales desactivados y permisos en su carpeta privada antes de ejecutar con el MCP de la oficina. Consulta [sus capacidades y límites comprobados](ANTIGRAVITY.md).
 
 ## Verificación inicial del ejecutor
 

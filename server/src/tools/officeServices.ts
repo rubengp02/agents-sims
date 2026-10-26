@@ -12,7 +12,8 @@ import type { OfficeCapability } from '../../../core/src/officeTools.js';
 import type { TeamTask } from '../../../core/src/team.js';
 import { stopProcess } from '../execution/cliProcess.js';
 import type { CheckRunner } from '../execution/localChecks.js';
-import { projectRevisionCapture } from '../execution/projectRevision.js';
+import { captureDirectoryRevision } from '../execution/projectRevision.js';
+import { captureFiles } from '../execution/revisionStore.js';
 import {
   createSelfWorkspace,
   inspectSelfWorkspace,
@@ -256,11 +257,22 @@ export class OfficeServices {
       }
     }
   }
+  async selfReviewBase(task: TeamTask) {
+    if (!task.selfWorkspaceReceipt) return undefined;
+    const { receipt } = await inspectSelfWorkspace(task.selfWorkspaceReceipt);
+    const baseline = captureFiles(receipt.sourceRoot, Object.keys(receipt.base));
+    if (Object.entries(receipt.base).some(([name, hash]) => baseline.files[name] !== hash))
+      throw new ExecutionBlocked(
+        'self_workspace_conflict',
+        'El proyecto original cambió desde la copia. Se conservan ambas versiones para su revisión.',
+      );
+    return baseline;
+  }
   async integrateSelf(task: TeamTask, reviewedDigest: string): Promise<void> {
     if (!task.selfWorkspaceReceipt) return;
     const { changes } = await inspectSelfWorkspace(task.selfWorkspaceReceipt);
     if (!changes.length) return;
-    const candidate = projectRevisionCapture(task.executionProject ?? task.project)();
+    const candidate = captureDirectoryRevision(task.executionProject ?? task.project);
     if (candidate.digest !== reviewedDigest)
       throw new ExecutionBlocked(
         'self_review_outdated',
@@ -319,6 +331,13 @@ export class OfficeServices {
       allowWrites: task.allowWrites,
       project: previewProject,
       projectRoot: effectiveProject,
+      images: [...(task.attachments ?? []), ...(task.referenceImages ?? [])].map(
+        (image, index) => ({
+          name: image.name,
+          mimeType: image.mime,
+          path: imagePaths[index],
+        }),
+      ),
       objectiveMemory: memory,
       discoverCapabilities,
       plugins,
@@ -338,7 +357,17 @@ export class OfficeServices {
       projectChecks: checks
         ? {
             list: () => checks.describe?.() ?? [],
-            run: async (id) => checks.run([id], effectiveProject, signal),
+            run: async (id) => {
+              const results = await checks.run([id], effectiveProject, signal);
+              // These are server-owned receipts, not claims in a model response.
+              task.localChecks = [
+                ...(task.localChecks ?? []).filter(
+                  (check) => !results.some((r) => r.id === check.id),
+                ),
+                ...results,
+              ];
+              return results;
+            },
           }
         : undefined,
       signal,

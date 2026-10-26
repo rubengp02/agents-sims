@@ -81,11 +81,11 @@ export const reasons: Record<string, string> = {
   quota_unknown:
     'No se ha podido comprobar la cuota incluida. La oficina no iniciará otra ejecución hasta verificarla.',
   provider_limit:
-    'Codex ha indicado un límite de uso. Se conserva el trabajo y hace falta comprobar la cuota antes de continuar.',
+    'El proveedor ha indicado un límite de uso. Se conserva el trabajo y hace falta comprobar la cuota antes de continuar.',
   review_scope_large:
     'La restricción de tamaño que detuvo esta revisión se ha retirado. Pulsa Ejecutar para comprobar el estado actual y continuar; la entrega anterior está guardada.',
   instruction_delivery_unknown:
-    'No se pudo confirmar si Codex recibió la nueva indicación. El trabajo se ha detenido para evitar un resultado con requisitos inciertos. Revisa la respuesta y el mensaje pendiente antes de continuar.',
+    'No se pudo confirmar si el ejecutor recibió la nueva indicación. El trabajo se ha detenido para evitar un resultado con requisitos inciertos. Revisa la respuesta y el mensaje pendiente antes de continuar.',
   project_changed_during_read: projectChangeDescription,
   review_changed_files: projectChangeDescription,
   budget_review_required:
@@ -99,9 +99,9 @@ export const reasons: Record<string, string> = {
   user_pause: 'Has pausado el trabajo.',
   cancelled_by_user: 'Se ha registrado la cancelación del encargo.',
   usage_unknown_after_restart:
-    'Falta el consumo del trabajo interrumpido. Al continuar se comprobará la cuota actual de Codex y se conservará el historial incompleto.',
+    'Falta el consumo del trabajo interrumpido. Al continuar se comprobará la cuota actual del proveedor y se conservará el historial incompleto.',
   usage_unknown:
-    'La ejecución anterior no comunicó su consumo. Puedes continuar comprobando la cuota actual de Codex; los datos anteriores no se borrarán.',
+    'La ejecución anterior no comunicó su consumo. Puedes continuar comprobando la cuota actual del proveedor; los datos anteriores no se borrarán.',
   checkpoint_invalid: 'No se puede recuperar la cola. Tus conversaciones siguen disponibles.',
   check_unconfigured:
     'Hay pruebas del encargo pendientes de aprobación o cuya configuración ha cambiado.',

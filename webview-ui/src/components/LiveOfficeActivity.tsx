@@ -42,7 +42,7 @@ export function LiveOfficeActivity({
   if (!working && !events.length) return null;
   const title = waiting
     ? 'Esperando tu confirmación'
-    : (active?.title ?? (working ? 'Esperando la respuesta de Codex' : 'Actividad finalizada'));
+    : (active?.title ?? (working ? 'Esperando la respuesta del empleado' : 'Actividad finalizada'));
   const elapsed = active ? Math.max(0, Math.floor((now - active.at) / 1000)) : 0;
   return (
     <section className="chat-live-activity" aria-label="Actividad en directo">
@@ -86,7 +86,7 @@ export function LiveOfficeActivity({
                       {e.title === 'Pensando'
                         ? e.completed
                           ? 'Esta fase ha terminado sin resumen público. Las búsquedas, comandos y resultados comunicados aparecen en la actividad; el razonamiento interno no está disponible.'
-                          : 'Codex está procesando el encargo. Aquí aparecerá su resumen público cuando lo comunique y las acciones que realice después; el razonamiento interno no está disponible.'
+                          : 'El empleado está procesando el encargo. Aquí aparecerá su resumen público cuando lo comunique y las acciones que realice después; el razonamiento interno no está disponible.'
                         : e.completed
                           ? 'Operación finalizada. No se recibió contenido adicional para este evento.'
                           : 'Esperando los datos de esta operación: se mostrarán cuando lleguen del ejecutor.'}

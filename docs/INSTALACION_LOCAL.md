@@ -27,7 +27,10 @@ La aplicación es principalmente un visualizador de actividad. El modo navegador
 
 Claude usa sus hooks; Hermes usa su complemento de Python; Codex se observa leyendo sus archivos locales estructurados de sesión. Esta última integración depende del formato de esos archivos y puede requerir mantenimiento cuando Codex cambie. No se presenta como una API oficial estable de Codex.
 
-No existe integración con Google Antigravity. El punto de extensión por proveedores queda conservado; cualquier futura integración deberá verificarse con su documentación oficial cuando se aborde.
+Antigravity se habilita y selecciona explícitamente en Equipo. El ejecutor verifica
+versión, catálogo, cuota y créditos adicionales desactivados; utiliza el puente de
+herramientas de la oficina con permisos por empleado. Codex sigue como proveedor
+predeterminado. Consulta [capacidades y límites comprobados](ANTIGRAVITY.md).
 
 ## Instalación y ajustes
 

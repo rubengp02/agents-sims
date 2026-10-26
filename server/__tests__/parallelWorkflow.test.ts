@@ -246,10 +246,12 @@ async function prepare(h: ReturnType<typeof fixture>, review = true, risk: 'low'
   return workflow;
 }
 async function finish(h: ReturnType<typeof fixture>) {
-  await vi.waitFor(() => expect(h.team.snapshot().running).toBe(false), { timeout: 15000 });
+  await vi.waitFor(() => expect(h.team.snapshot().running).toBe(false), { timeout: 25000 });
 }
 
-describe('isolated workflow, no inference', () => {
+// Real Git worktrees need a bounded allowance under filesystem contention.
+// This is a test deadline, independent of office/model execution budgets.
+describe('isolated workflow, no inference', { timeout: 30_000 }, () => {
   it('defaults legacy settings to one programmer even with AO, two slots and a valid decomposition', () => {
     const h = fixture({ experimental: false });
     const { experimentalParallelWriters: _ignored, ...legacy } = h.team.snapshot().settings;

@@ -6,7 +6,7 @@ import type { IncludedQuotaView, ObjectiveBudgetView } from './objectiveBudget.j
 import type { OfficeAuthentication, OfficeCapability, OfficeToolApproval } from './officeTools.js';
 
 /** Shared wire contract. No provider credentials or shell commands cross this boundary. */
-export type TeamProvider = 'codex' | 'claude';
+export type TeamProvider = 'codex' | 'claude' | 'antigravity';
 export type TeamRole = 'chief' | 'designer' | 'architect' | 'developer' | 'tester';
 export type TeamMode = 'auto' | 'manual' | 'mixed';
 export const TEAM_ROLES: Record<TeamRole, string> = {
@@ -19,6 +19,8 @@ export const TEAM_ROLES: Record<TeamRole, string> = {
 export interface TeamSettings {
   mode: TeamMode;
   claudeEnabled: boolean;
+  antigravityEnabled?: boolean;
+  defaultProvider?: 'codex' | 'antigravity';
   maxRuns: number;
   maxParallel: number;
   /** Explicit opt-in for experimental decompositions with two isolated writers. */
@@ -200,6 +202,22 @@ export interface OfficeObjectiveMemory {
   }>;
   checks: NonNullable<TeamTask['localChecks']>;
 }
+/** A catalog is metadata, never authorization to run a model. */
+export interface ProviderInspection {
+  checkedAt: number;
+  cliVersion: string;
+  models: Array<{ id: string; label: string }>;
+  includedUsage?: {
+    verified: boolean;
+    creditsEnabled: boolean | null;
+    windows: Array<{ id: string; usedPercent: number; resetsAt: number }>;
+  };
+  checks: Array<{
+    id: string;
+    state: 'verified' | 'unverified' | 'unsupported';
+    message: string;
+  }>;
+}
 export interface TeamAvailability {
   provider: TeamProvider;
   enabled: boolean;
@@ -207,6 +225,7 @@ export interface TeamAvailability {
   reasonCode: string | null;
   message: string;
   models: Array<{ id: string; efforts: string[] }>;
+  inspection?: ProviderInspection;
 }
 export interface TeamSnapshot {
   includedQuota?: IncludedQuotaView[];
@@ -227,7 +246,8 @@ export interface TeamSnapshot {
   /** Server-derived capabilities; settings and model output never grant them. */
   capabilities?: {
     steering?: boolean;
-    engine: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator';
+    officeRedirect?: boolean;
+    engine: 'codex-cli' | 'codex-app-server' | 'agent-orchestrator' | 'antigravity-cli';
     isolatedWriters: boolean;
     budgetReview: boolean;
     checks?: Array<{ id: string; acceptance: boolean }>;

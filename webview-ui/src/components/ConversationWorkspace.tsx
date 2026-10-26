@@ -223,7 +223,9 @@ function ProjectForm({
             disabled={disabled}
             onChange={(e) => setInstructions(e.target.value)}
           />
-          <span>Codex lee los AGENTS.md aplicables. No necesitas repetir aquí sus reglas.</span>
+          <span>
+            La oficina lee los AGENTS.md aplicables. No necesitas repetir aquí sus reglas.
+          </span>
         </label>
       </details>
       <Button type="submit" disabled={disabled || picking}>
@@ -588,7 +590,9 @@ function Conversation({
   const working = task && ['checking', 'running', 'queued'].includes(task.status);
   const queuedInputs = library.selected?.pendingInputs ?? [];
   const shouldQueue = !!task || snapshot.running || queuedInputs.length > 0;
-  const canSteer = snapshot.capabilities?.steering === true;
+  const canSteer =
+    snapshot.capabilities?.steering === true ||
+    (!!officeRoot && snapshot.capabilities?.officeRedirect === true);
   const submittedInputId = useRef<string | null>(null);
   const active = busy || snapshot.running;
   const pending = task && !working;
@@ -712,8 +716,12 @@ function Conversation({
         </p>
         <p>
           <strong>Cuota:</strong> se usará la incluida en tu suscripción de{' '}
-          {task.choice?.provider === 'claude' ? 'Claude' : 'Codex'}. Se comprobará de nuevo antes de
-          empezar.
+          {task.choice?.provider === 'antigravity'
+            ? 'Antigravity'
+            : task.choice?.provider === 'claude'
+              ? 'Claude'
+              : 'Codex'}
+          . Se comprobará de nuevo antes de empezar.
         </p>
         {task.choice && (
           <p>
@@ -735,9 +743,10 @@ function Conversation({
         )}
         {task.requiresConfirmation && task.budgetMode === 'codex' && (
           <p>
-            Codex gestiona el contexto y su compactación. No necesitas introducir límites técnicos.
-            Se comprueba la cuota de tu suscripción y se mantiene la cancelación y la supervisión
-            del proceso. No hay un corte fijo por duración: puedes detenerlo cuando quieras.
+            El ejecutor gestiona el contexto de la conversación. No necesitas introducir límites
+            técnicos. Se comprueba la cuota de tu suscripción y se mantiene la cancelación y la
+            supervisión del proceso. No hay un corte fijo por duración: puedes detenerlo cuando
+            quieras.
           </p>
         )}
         {task.requiresConfirmation &&
@@ -909,7 +918,9 @@ function Conversation({
             ?.autonomyBudget
         }
         quota={snapshot.includedQuota?.find(
-          (entry) => entry.provider === (task?.choice?.provider ?? 'codex'),
+          (entry) =>
+            entry.provider ===
+            (task?.choice?.provider ?? snapshot.settings.defaultProvider ?? 'codex'),
         )}
       />
       <div className="chat-composer">
@@ -1010,7 +1021,7 @@ function Conversation({
             <p>
               {teamMode && !manualBudget && snapshot.capabilities?.engine !== 'agent-orchestrator'
                 ? 'El Jefe organiza el trabajo y revisa las entregas hasta completar tu objetivo.'
-                : 'Un encargo individual con Codex.'}
+                : 'Un encargo individual con el proveedor seleccionado.'}
             </p>
             {snapshot.capabilities?.budgetReview && (
               <details className="chat-project-settings">
@@ -1026,7 +1037,8 @@ function Conversation({
                 </label>
                 <p>
                   Opcional. Añade cotas de tokens, duración y contexto que tendrás que revisar antes
-                  de ejecutar. El modo normal utiliza la cuota de Codex sin pedirte esas cifras.
+                  de ejecutar. El modo normal utiliza la cuota incluida del proveedor seleccionado
+                  sin pedirte esas cifras.
                 </p>
               </details>
             )}

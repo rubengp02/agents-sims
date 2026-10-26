@@ -100,6 +100,7 @@ async function main() {
           'server/src/execution/codexAppServerConfig.ts',
           'server/src/execution/localFileApprovals.ts',
           'server/src/execution/teamCoordinator.ts',
+          'server/src/execution/providerModelPolicy.ts',
         ].map(async (file) => [file, hash(await readFile(file, 'utf8'))]),
       ),
     ),

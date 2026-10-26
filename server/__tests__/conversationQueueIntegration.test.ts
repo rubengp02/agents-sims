@@ -91,10 +91,71 @@ function fixture() {
     library,
   );
   teams.push(team);
-  return { team, library, id, projectId, root, runs, execute, steer, executor };
+  return { team, library, id, projectId, project, root, runs, execute, steer, executor };
 }
 
 describe('conversation queue and live redirection integration (mock official executor)', () => {
+  it('recovers server-owned check evidence when finishing an implementation after a restart', async () => {
+    const h = fixture();
+    // This case starts real npm children; the default 1s wait is too short when
+    // the whole suite competes for process startup and filesystem access.
+    const untilRuns = (count: number) =>
+      vi.waitFor(() => expect(h.runs).toHaveLength(count), { timeout: 10_000 });
+    writeFileSync(
+      join(h.project, 'package.json'),
+      JSON.stringify({
+        private: true,
+        scripts: { test: 'node -e "console.log(42)"' },
+      }),
+    );
+    await h.team.queueConversation(h.id, request('Implementa un módulo y revisa su prueba', true));
+    await untilRuns(1);
+    h.runs[0].finish(
+      'OFFICE_DECISION {"action":"assign","role":"developer","title":"Implementar","task":"Crea result.cjs","message":"Cambio pequeño"}',
+    );
+    await untilRuns(2);
+    writeFileSync(join(h.project, 'result.cjs'), 'module.exports = 42;');
+    h.runs[1].finish();
+    await untilRuns(3);
+    h.runs[2].finish(
+      'OFFICE_DECISION {"action":"human","message":"¿Continúo con la revisión?","responseType":"text"}',
+    );
+    await h.team.waitUntilIdle();
+    const original = h.team.snapshot().tasks.find((t) => t.office)!;
+    await h.team.shutdown();
+    const restored = new TeamCoordinator(
+      { codex: h.executor, claude: new DisabledExecutor('claude') },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      join(h.root, 'checkpoint.json'),
+      new AdaptiveRuntime(new UsageHistory(join(h.root, 'usage.json')), join(h.root, 'artifacts')),
+      new ConversationLibrary(join(h.root, 'history')),
+    );
+    teams.push(restored);
+    await restored.answerOfficeQuestion(original.id, original.humanRequest!.id, 'Continuar');
+    await untilRuns(4);
+    h.runs[3].finish(
+      'OFFICE_DECISION {"action":"assign","role":"tester","title":"Revisar","task":"Revisión independiente","message":"Contrastar el resultado"}',
+    );
+    await untilRuns(5);
+    h.runs[4].finish('OFFICE_REVIEW {"findings":[]}\nOFFICE_RESULT {"status":"completed"}');
+    await untilRuns(6);
+    expect(h.runs[5].options.prompt).toContain('"passed":true');
+    h.runs[5].finish(
+      'OFFICE_DECISION {"action":"complete","message":"Cambio revisado y comprobado"}',
+    );
+    await restored.waitUntilIdle();
+    const delivered = restored.snapshot().tasks.find((t) => t.id === original.id)!;
+    expect(delivered.status).toBe('completed');
+    expect(delivered.finalEvidence?.checks).toEqual([
+      expect.objectContaining({ id: 'test', passed: true, exitCode: 0 }),
+    ]);
+    expect(delivered.finalEvidence?.limitations.join(' ')).not.toContain(
+      'No hay comprobaciones locales',
+    );
+  }, 30_000);
   it('waits for an individual receipt without snapshot polling or cancelling the run', async () => {
     const h = fixture();
     await h.team.queueConversation(h.id, request('Implementa el encargo'));

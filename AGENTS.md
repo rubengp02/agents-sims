@@ -46,8 +46,11 @@
 - Claude permanece opcional y desactivado inicialmente. Conserva su adaptador;
   habilitarlo no permite eludir sus comprobaciones oficiales ni su bloqueo actual
   de inferencia por falta de verificación del consumo adicional.
-- Antigravity es únicamente una integración futura: no lo conectes ni intentes
-  eludir restricciones. No incorpores OpenCode como motor sin un encargo específico.
+- Antigravity utiliza su CLI oficial con cuota incluida y créditos adicionales desactivados,
+  verificados antes de cada intento y en su carpeta privada. Conserva su guardián MCP,
+  los permisos por empleado y las aprobaciones externas. Solo las versiones acreditadas
+  pueden ejecutar. Un catálogo por sí solo no acredita esos permisos.
+  No inventes evidencia ni eludas restricciones. No incorpores OpenCode sin un encargo específico.
 - Mantén el modo automático predeterminado, el control manual de asignaciones,
   las dependencias, los límites y la selección sobre modelos realmente disponibles.
   Respeta las pausas: no eleves presupuestos ni reanudes tareas automáticamente.
