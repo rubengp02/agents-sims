@@ -38,6 +38,26 @@ Los detalles privados y las transcripciones permanecen fuera de Git.
 
 ## Estado vigente
 
+Actualización del 26 de octubre: integración de Antigravity y segundo bloque de
+simplificación publicados en `0ff6a21c29c294d785cb58f6b687377c7de83a7a`.
+La [validación 40327075378](https://github.com/rubengp02/agents-sims/actions/runs/40327075378)
+terminó con éxito: comprobaciones generales, runtime sin inferencia, paquete
+Node 20, nueve grupos E2E en Linux/Windows/macOS y Required Checks. Los despliegues
+se omitieron por la configuración del workflow; no se acredita un despliegue.
+La instancia local se actualizó estando inactiva y conserva ocho proyectos,
+diez conversaciones, 135 mensajes con las mismas huellas de contenido y diez
+referencias de imágenes. Se verificaron cero tareas activas tras reiniciar.
+
+Único punto pendiente de esta hoja de ruta: completar la pareja del benchmark
+real. El nuevo intento acreditó preparación y 36 comprobaciones de referencia,
+pero se bloqueó por cuota antes de iniciar inferencias: cero turnos, sin nuevos
+recibos de modelo ni resultados comparativos. La lectura oficial posterior indica
+82% en la ventana corta y 13% semanal; el protocolo exige menos del 80% en ambas
+antes de cada método. El reinicio comunicado es el 26 de octubre a las 16:38
+(Europe/Madrid). La autorización del usuario para este bloque ya está concedida;
+falta cuota disponible, no otra confirmación. No se elevó el umbral ni se utilizó
+un reinicio de cortesía o facturación adicional.
+
 Segundo bloque de simplificación completado: la política por proveedor se extrae
 de `TeamCoordinator`, un módulo de más de cuatro mil líneas, a
 `providerModelPolicy.ts`. El coordinador conserva diagnóstico, cancelación y
@@ -56,10 +76,10 @@ el ensayo simulado completo; esa comprobación sin inferencia queda incluida en 
 La [validación de 203f28e](https://github.com/rubengp02/agents-sims/actions/runs/40212920863)
 terminó con éxito, incluida la extracción de configuración. La
 [validación de 60bb528](https://github.com/rubengp02/agents-sims/actions/runs/40213879047)
-está en curso y contiene la nueva espera de recibos y el ensayo simulado en CI;
-no se acredita todavía su resultado. El siguiente bloque real necesita una cuota
-actual inferior al margen de inicio; la última comprobación comunicó un 95%
-en la ventana corta. La elección creativa de P3 quedó resuelta: Señales discretas.
+terminó con éxito y contiene la nueva espera de recibos y el ensayo simulado en CI.
+El siguiente bloque real necesita una cuota actual inferior al margen de inicio;
+la lectura vigente se indica arriba. La elección creativa de P3 quedó resuelta:
+Señales discretas.
 La configuración de permisos y herramientas se separó del ejecutor App Server,
 un módulo de unas 1.900 líneas; conserva su exportación anterior y pasan las
 63 pruebas de protocolo y permisos, tipos y lint. Es un primer paso de simplificación.

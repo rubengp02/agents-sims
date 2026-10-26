@@ -2,6 +2,17 @@
 
 ## Protocolo exploratorio v1
 
+Estado al 26 de octubre de 2026: un nuevo intento sobre la revisión `0ff6a21`
+comprobó la preparación, pero el control oficial de cuota impidió iniciar el primer
+método. No ejecutó turnos ni consumió cuota de inferencia. El historial anterior
+sigue incompleto y no se utiliza para publicar cocientes de eficiencia.
+La lectura posterior comunicó 82% de uso en cinco horas y 13% semanal; el margen
+de inicio sigue siendo inferior al 80% en cada ventana. Reinicio comunicado:
+26 de octubre, 16:38 (Europe/Madrid). El bloque real está autorizado por el usuario;
+no se necesita otra autorización para ejecutarlo cuando la cuota lo permita.
+La simulación de ambos métodos y las nueve regresiones del comparador pasan;
+también pasan en el [runtime de CI de esa revisión](https://github.com/rubengp02/agents-sims/actions/runs/40327075378).
+
 Una pareja sobre el caso de facturación en céntimos de la batería existente.
 Antes de inferencia, se acredita que la implementación inicial falla y la de
 referencia supera 36 comprobaciones externas. El contrato, archivos iniciales,

@@ -125,3 +125,25 @@ Fuentes oficiales: [protocolo](https://antigravity.google/docs/cli/headless/),
 [configuración](https://antigravity.google/docs/settings?tab=cli),
 [hooks](https://antigravity.google/docs/hooks/) y
 [MCP](https://antigravity.google/docs/mcp/).
+
+### Publicación y comprobación posterior
+
+La integración se publicó en `0ff6a21c29c294d785cb58f6b687377c7de83a7a`.
+La [ejecución de GitHub 40327075378](https://github.com/rubengp02/agents-sims/actions/runs/40327075378)
+terminó con éxito, incluidos runtime sin inferencia, paquete Node 20 y los nueve
+grupos E2E de Linux, Windows y macOS. Esto acredita compatibilidad de la aplicación
+y sus pruebas simuladas; la inferencia real de Antigravity continúa acreditada
+únicamente en Windows con la versión indicada en este documento.
+
+Antes de publicar pasaron 106 pruebas de interfaz, 1.226 de servidor y ocho
+contratos de empaquetado (dos pruebas de servidor omitidas). Tras extraer la
+política de modelos pasaron sus seis regresiones nuevas y las 46 relacionadas.
+Tipos, lint, formato, empaquetado, cuatro pruebas de contexto y ensayo simulado
+del benchmark finalizaron correctamente. Se conservan el aviso previo de `editor`
+en App.tsx y el de tamaño del bundle.
+
+La actualización local posterior se hizo sin encargos activos. Conserva ocho
+proyectos, diez conversaciones, 135 mensajes con las mismas huellas de contenido
+y diez referencias de imágenes. El archivo completo de persistencia cambió de
+huella al reiniciar; no se afirma identidad binaria ni de todos sus metadatos.
+Se verificaron cero tareas activas y Codex como proveedor predeterminado.
