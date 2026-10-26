@@ -1,5 +1,46 @@
 # Comparación controlada: Codex individual y oficina iterativa
 
+## Medición real completa del 26 de octubre
+
+El nuevo intento sobre `500463eada3ce0aab0b0f8e7f7ced1a2307a42c3` terminó ambos
+métodos, con `controlsPassed: true`, seis turnos y todos los recibos de consumo.
+La [ficha pública de métricas](evidence/iterative-benchmark-2026-10-26.json)
+excluye transcripciones, rutas personales, cuentas e identificadores de sesiones.
+La preparación rechazó el código inicial y aceptó las 36 pruebas de referencia.
+No se alteró el contrato v1 ni se repararon soluciones desde el verificador.
+
+| Resultado                            | Codex individual | Oficina iterativa                        |
+| ------------------------------------ | ---------------- | ---------------------------------------- |
+| Tiempo total con comprobaciones      | 50.136 ms        | 171.255 ms                               |
+| Tokens comunicados, entrada + salida | 165.398          | 374.467                                  |
+| Turnos                               | 1                | 5: Jefe, Programador, Jefe, Tester, Jefe |
+| Pruebas externas                     | 32/36            | 32/36                                    |
+| Pruebas públicas                     | Aprobadas        | Aprobadas                                |
+| Cambios dentro del alcance           | Sí               | Sí                                       |
+| Recibos y objetivo terminados        | Sí               | Sí                                       |
+| Solución aceptada por el verificador | No               | No                                       |
+
+La oficina usó 2,26 veces los tokens y 3,42 veces el tiempo de esta ejecución
+individual. El Tester completó su turno en 48.096 ms con siete llamadas de
+herramientas. El Jefe mantuvo la misma sesión en sus tres intervenciones. No hubo
+sustitución de modelo: todos los turnos confirmaron `gpt-6.1-sol`, esfuerzo
+`medium`. La cuota antes de cada método fue 19%/6% y 21%/7%, respectivamente,
+inferior al margen del 80% de ambas ventanas.
+
+Las dos soluciones fallaron las mismas cuatro comprobaciones de clases de error
+en fracciones y `NaN`. Se mantiene la ambigüedad del contrato v1 documentada en
+los intentos anteriores; estos resultados no prueban una calidad general idéntica
+ni una ventaja del equipo. La medición está completa, pero las soluciones no
+cumplen todos los criterios externos. Los tokens incluyen contexto en caché; no
+representan un precio ni se convierten a porcentaje de suscripción. El orden fijo
+y una sola pareja impiden afirmar una ventaja causal o estadística.
+
+La [continuación por saturación](SATURACION_MODELOS.md) se comprobó con errores
+simulados y catálogo real. Este bloque sin saturación no acredita una sustitución
+real provocada por el proveedor. Los intentos incompletos y sus consumos desconocidos
+siguen conservados por separado. La medición P2 queda completada; ampliar el estudio
+o modificar el contrato requiere un nuevo bloque definido previamente.
+
 ## Nuevo intento real: cuota disponible, cierre incompleto
 
 El 26 de octubre se ejecutó una nueva pareja autorizada sobre `64c040c`, con

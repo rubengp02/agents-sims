@@ -57,6 +57,10 @@ El temporizador del benchmark se identifica ahora como límite de tiempo, sin
 atribuir la parada al usuario. El ensayo conserva su modelo fijado y no convierte
 una ejecución con modelos distintos en una comparación válida.
 
+La instancia habitual se actualizó estando inactiva: conserva ocho proyectos,
+diez conversaciones, 135 mensajes con las mismas huellas de contenido y diez
+referencias de imágenes. No se reanudaron encargos al abrirla.
+
 ## Evidencia
 
 Las pruebas locales usan errores simulados: clasificación de saturación frente a
@@ -66,6 +70,13 @@ recuperación sin despacho y conservación de recibos desconocidos. Una simulaci
 de saturación no acredita que el servicio haya rechazado y recuperado una petición
 real; las pruebas reales posteriores se registran por separado en el informe del
 benchmark.
+
+La pareja real posterior sobre `500463e` terminó: el Tester respondió en 48.096 ms,
+todos los recibos se conservaron y no hubo cambio de modelo. Esa ejecución acredita
+la recuperación del recorrido, pero no demuestra que se haya producido y superado
+una saturación real. La batería local pasó 1.253 pruebas de servidor (dos omitidas),
+106 de interfaz y ocho contratos. El endurecimiento adicional contra operaciones
+MCP ya iniciadas pasó 23 regresiones pertinentes con navegador y comandos locales.
 
 Referencias oficiales: [errores del protocolo](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/app-server-protocol/schema/json/v2/ErrorNotification.json),
 [primer reintento oculto](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/core/src/responses_retry.rs)

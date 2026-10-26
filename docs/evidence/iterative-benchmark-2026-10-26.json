@@ -1,0 +1,180 @@
+{
+  "version": 1,
+  "date": "2026-10-26",
+  "sourceRevision": "500463eada3ce0aab0b0f8e7f7ced1a2307a42c3",
+  "protocolFingerprint": "2e3aed9193b6f713150e24c5da604fb5fa6b12f3151c3dee72a45aeca47fe0cf",
+  "runtimeFingerprint": "bbe1ab1871e8b2827bd57b6d2bc5a98d7c0b8cae2ada7a143818a3224de785e3",
+  "realInference": true,
+  "simulation": false,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "order": [
+    "direct",
+    "office"
+  ],
+  "protocolVersion": "iterative-office-v1",
+  "bounds": {
+    "maxTokensPerMethod": 600000,
+    "maxMsPerMethod": 480000,
+    "maxTurnsPerMethod": 6,
+    "maxUsedPercentAtStart": 80
+  },
+  "controlsPassed": true,
+  "measurementStatus": "completed",
+  "generalImprovementProven": false,
+  "comparison": {
+    "directAccepted": false,
+    "officeAccepted": false,
+    "tokenRatioOfficeToDirect": 2.2640358408203243,
+    "elapsedRatioOfficeToDirect": 3.415808999521302
+  },
+  "modelSubstitutionUsed": false,
+  "chiefSessionRetained": true,
+  "trials": [
+    {
+      "method": "direct",
+      "taskStatus": "completed",
+      "solutionAccepted": false,
+      "usageKnown": true,
+      "tokens": 165398,
+      "totalMs": 50136,
+      "publicCheck": {
+        "passed": true,
+        "durationMs": 247,
+        "exitCode": 0
+      },
+      "authorizedChanges": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "externalChecks": {
+        "passed": 32,
+        "total": 36,
+        "failed": [
+          "quantity-range-2",
+          "quantity-range-4",
+          "discount-range-2",
+          "discount-range-3"
+        ]
+      },
+      "runs": [
+        {
+          "role": "developer",
+          "status": "completed",
+          "inputTokens": 163411,
+          "outputTokens": 1987,
+          "cachedInputTokens": 134272,
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "sessionMode": "new",
+          "toolCalls": 10,
+          "durationMs": 47228
+        }
+      ]
+    },
+    {
+      "method": "office",
+      "taskStatus": "completed",
+      "solutionAccepted": false,
+      "usageKnown": true,
+      "tokens": 374467,
+      "totalMs": 171255,
+      "publicCheck": {
+        "passed": true,
+        "durationMs": 178,
+        "exitCode": 0
+      },
+      "authorizedChanges": {
+        "changed": [
+          "invoice.mjs",
+          "money.mjs"
+        ],
+        "unexpected": [],
+        "passed": true
+      },
+      "externalChecks": {
+        "passed": 32,
+        "total": 36,
+        "failed": [
+          "quantity-range-2",
+          "quantity-range-4",
+          "discount-range-2",
+          "discount-range-3"
+        ]
+      },
+      "runs": [
+        {
+          "role": "chief",
+          "status": "completed",
+          "inputTokens": 20630,
+          "outputTokens": 360,
+          "cachedInputTokens": 7168,
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "sessionMode": "new",
+          "toolCalls": 0,
+          "durationMs": 15426
+        },
+        {
+          "role": "developer",
+          "status": "completed",
+          "inputTokens": 173198,
+          "outputTokens": 1862,
+          "cachedInputTokens": 149632,
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "sessionMode": "new",
+          "toolCalls": 9,
+          "durationMs": 68804
+        },
+        {
+          "role": "chief",
+          "status": "completed",
+          "inputTokens": 26241,
+          "outputTokens": 266,
+          "cachedInputTokens": 20864,
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "sessionMode": "resume",
+          "toolCalls": 0,
+          "durationMs": 13160
+        },
+        {
+          "role": "tester",
+          "status": "completed",
+          "inputTokens": 116534,
+          "outputTokens": 1491,
+          "cachedInputTokens": 98816,
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "sessionMode": "new",
+          "toolCalls": 7,
+          "durationMs": 48096
+        },
+        {
+          "role": "chief",
+          "status": "completed",
+          "inputTokens": 33781,
+          "outputTokens": 104,
+          "cachedInputTokens": 26368,
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "sessionMode": "resume",
+          "toolCalls": 0,
+          "durationMs": 7655
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "One exploratory pair, fixed order; no general or statistical superiority claim.",
+    "Reported tokens include cached input and are not price or a quota percentage.",
+    "Both solutions fail four external error-class checks; protocol v1 error contract has a documented ambiguity.",
+    "Earlier incomplete attempts remain separate; their unknown costs are not reconstructed.",
+    "Capacity fallback was verified with fixtures, not induced on the real provider."
+  ]
+}

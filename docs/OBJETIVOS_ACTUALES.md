@@ -6,15 +6,15 @@ con sus limitaciones aceptadas. Registrar estos objetivos no acredita su ejecuci
 
 ## Prioridades y aceptación
 
-| Prioridad | Trabajo                                                             | Por qué                                   | Evidencia necesaria para cerrar                                                                                                                                                                          | Estado                              |
-| --------- | ------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| P0        | Resolver el fallo del runtime en CI                                 | Validar la última gran integración        | Identificar la ejecución y causa del fallo, corregirlo y acreditar una ejecución de CI satisfactoria de la revisión corregida. Un pase local no sustituye CI.                                            | Completado · CI 2f816c0             |
-| P1        | Añadir un presupuesto de autonomía comprensible                     | Proteger la cuota frente a ciclos largos  | Mostrar consumo conocido, incertidumbre, progreso y motivo de pausa; comprobar continuación y recuperación sin borrar consumo ni imponer cortes arbitrarios de duración.                                 | Completado · prueba real            |
-| P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | Completado · prueba real            |
-| P1        | Probar una tarea completa de programación con la interfaz real      | Validar el producto, no solo el backend   | Ejecutar una petición desde Conversaciones hasta cambios, pruebas, revisión y resumen final; conservar evidencia de la interfaz y verificar historial tras reabrir.                                      | Completado · prueba real            |
-| P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Real incompleto · Tester sin cierre |
-| P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Completado · dos extracciones       |
-| P3        | Perfeccionar la representación pixelada de trabajo y entregas       | Diferenciar el producto visualmente       | Propuesta aprobada por el director creativo, implementación vinculada a estados reales y comprobación visual de trabajo, pausa y entrega.                                                                | Completado · simulación visual      |
+| Prioridad | Trabajo                                                             | Por qué                                   | Evidencia necesaria para cerrar                                                                                                                                                                          | Estado                          |
+| --------- | ------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| P0        | Resolver el fallo del runtime en CI                                 | Validar la última gran integración        | Identificar la ejecución y causa del fallo, corregirlo y acreditar una ejecución de CI satisfactoria de la revisión corregida. Un pase local no sustituye CI.                                            | Completado · CI 2f816c0         |
+| P1        | Añadir un presupuesto de autonomía comprensible                     | Proteger la cuota frente a ciclos largos  | Mostrar consumo conocido, incertidumbre, progreso y motivo de pausa; comprobar continuación y recuperación sin borrar consumo ni imponer cortes arbitrarios de duración.                                 | Completado · prueba real        |
+| P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | Completado · prueba real        |
+| P1        | Probar una tarea completa de programación con la interfaz real      | Validar el producto, no solo el backend   | Ejecutar una petición desde Conversaciones hasta cambios, pruebas, revisión y resumen final; conservar evidencia de la interfaz y verificar historial tras reabrir.                                      | Completado · prueba real        |
+| P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Completado · pareja real medida |
+| P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Completado · dos extracciones   |
+| P3        | Perfeccionar la representación pixelada de trabajo y entregas       | Diferenciar el producto visualmente       | Propuesta aprobada por el director creativo, implementación vinculada a estados reales y comprobación visual de trabajo, pausa y entrega.                                                                | Completado · simulación visual  |
 
 ## Orden de trabajo y reglas
 
@@ -38,7 +38,20 @@ Los detalles privados y las transcripciones permanecen fuera de Git.
 
 ## Estado vigente
 
-Última comprobación: ya hay cuota y se ejecutó la pareja real sobre `64c040c`.
+Benchmark P2 completado sobre `500463e`: Codex individual, 50.136 ms y 165.398
+tokens; oficina, 171.255 ms y 374.467 tokens, con revisión del Tester de 48.096 ms
+y continuidad nativa del Jefe. Los seis turnos conservaron modelo y razonamiento,
+recibos completos y alcance permitido. Ambos métodos superaron 32/36 pruebas
+externas y las pruebas públicas: medición completa, soluciones no aceptadas por
+las cuatro discrepancias de clases de error ya documentadas en el contrato v1.
+No se afirma superioridad general. La [ficha pública](evidence/iterative-benchmark-2026-10-26.json)
+y el [informe](BENCHMARK_ITERATIVO.md) conservan métricas, controles y limitaciones.
+La hoja de ruta tiene sus entregas implementadas y acreditadas con las limitaciones
+de cada prueba; los párrafos siguientes preservan el historial de diagnóstico.
+La corrección adicional de saturación está publicada en `500463e`, validada
+localmente; su CI 40364720876 sigue pendiente de finalizar.
+
+Intento anterior: ya había cuota y se ejecutó la pareja real sobre `64c040c`.
 Individual terminó en 65.784 ms con 106.433 tokens conocidos; la oficina alcanzó
 480.652 ms y se detuvo mientras esperaba al Tester, cuyo recibo no tiene contadores
 finales. Conserva al menos 194.756 tokens conocidos, sin reconstruir el resto.
