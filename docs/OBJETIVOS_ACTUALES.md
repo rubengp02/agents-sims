@@ -49,7 +49,13 @@ y el [informe](BENCHMARK_ITERATIVO.md) conservan métricas, controles y limitaci
 La hoja de ruta tiene sus entregas implementadas y acreditadas con las limitaciones
 de cada prueba; los párrafos siguientes preservan el historial de diagnóstico.
 La corrección adicional de saturación está publicada en `500463e`, validada
-localmente; su CI 40364720876 sigue pendiente de finalizar.
+localmente. En su [CI 40364720876](https://github.com/rubengp02/agents-sims/actions/runs/40364720876)
+pasaron las comprobaciones generales, runtime, paquete, los tres grupos de Windows,
+dos de Linux y uno de macOS al comprobar el estado. El grupo macOS 1/3 fue cancelado
+antes de ejecutar pasos: GitHub no consiguió asignar un runner y anotó falta de
+capacidad en macOS ARM. Los otros dos grupos aún estaban ejecutándose; la ejecución
+remota completa de esta corrección no se acredita como satisfactoria. La revisión
+con la ficha pública genera una nueva ejecución de la misma fuente.
 
 Intento anterior: ya había cuota y se ejecutó la pareja real sobre `64c040c`.
 Individual terminó en 65.784 ms con 106.433 tokens conocidos; la oficina alcanzó

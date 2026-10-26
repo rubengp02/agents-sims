@@ -78,6 +78,13 @@ una saturación real. La batería local pasó 1.253 pruebas de servidor (dos omi
 106 de interfaz y ocho contratos. El endurecimiento adicional contra operaciones
 MCP ya iniciadas pasó 23 regresiones pertinentes con navegador y comandos locales.
 
+La [validación de GitHub](https://github.com/rubengp02/agents-sims/actions/runs/40364720876)
+aprobó comprobaciones generales, runtime, paquete y varios grupos E2E. El grupo
+macOS 1/3 se canceló sin ejecutar pasos: las anotaciones de GitHub indican que no
+se pudo asignar una máquina y que hay restricciones de capacidad en macOS ARM.
+No se presenta esa ejecución remota completa como aprobada ni se cambia la
+plataforma del job para ocultar la limitación.
+
 Referencias oficiales: [errores del protocolo](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/app-server-protocol/schema/json/v2/ErrorNotification.json),
 [primer reintento oculto](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/core/src/responses_retry.rs)
 y [significado de saturación según un mantenedor de OpenAI](https://github.com/openai/codex/issues/19583#issuecomment-4406790538).
