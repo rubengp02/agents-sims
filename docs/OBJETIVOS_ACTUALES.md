@@ -12,7 +12,7 @@ con sus limitaciones aceptadas. Registrar estos objetivos no acredita su ejecuci
 | P1        | Añadir un presupuesto de autonomía comprensible                     | Proteger la cuota frente a ciclos largos  | Mostrar consumo conocido, incertidumbre, progreso y motivo de pausa; comprobar continuación y recuperación sin borrar consumo ni imponer cortes arbitrarios de duración.                                 | Completado · prueba real            |
 | P1        | Completar una ficha final de evidencias junto al resumen del Jefe   | Hacer la entrega más fiable y verificable | Una entrega identifica cambios, pruebas y resultados, artefactos, revisión y limitaciones; persiste al reabrir el chat y distingue simulación de comprobación real.                                      | Completado · prueba real            |
 | P1        | Probar una tarea completa de programación con la interfaz real      | Validar el producto, no solo el backend   | Ejecutar una petición desde Conversaciones hasta cambios, pruebas, revisión y resumen final; conservar evidencia de la interfaz y verificar historial tras reabrir.                                      | Completado · prueba real            |
-| P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Preparado · real pendiente de cuota |
+| P2        | Benchmark controlado de Codex individual frente al equipo iterativo | Medir calidad, tiempo y tokens            | Comparar tareas y condiciones equivalentes, con criterios de calidad previos y registro de tiempo, tokens, coordinación, revisión e integración; declarar consumos desconocidos y límites de la muestra. | Real incompleto · Tester sin cierre |
 | P2        | Simplificar los módulos más extensos gradualmente                   | Reducir coste de mantenimiento            | Elegir módulos por evidencia de complejidad, extraer responsabilidades en cambios pequeños y verificar compatibilidad con pruebas pertinentes.                                                           | Completado · dos extracciones       |
 | P3        | Perfeccionar la representación pixelada de trabajo y entregas       | Diferenciar el producto visualmente       | Propuesta aprobada por el director creativo, implementación vinculada a estados reales y comprobación visual de trabajo, pausa y entrega.                                                                | Completado · simulación visual      |
 
@@ -38,6 +38,17 @@ Los detalles privados y las transcripciones permanecen fuera de Git.
 
 ## Estado vigente
 
+Última comprobación: ya hay cuota y se ejecutó la pareja real sobre `64c040c`.
+Individual terminó en 65.784 ms con 106.433 tokens conocidos; la oficina alcanzó
+480.652 ms y se detuvo mientras esperaba al Tester, cuyo recibo no tiene contadores
+finales. Conserva al menos 194.756 tokens conocidos, sin reconstruir el resto.
+Ambos métodos pasaron 32/36 comprobaciones externas, las pruebas públicas y el
+alcance de archivos permitido. La comparación queda incompleta, sin cocientes
+de eficiencia: falta diagnosticar y acreditar el cierre real de la revisión.
+La cuota ya no es el motivo vigente. El [informe](BENCHMARK_ITERATIVO.md) recoge
+la limitación del contrato y el intento fallido; no se amplió ni repitió el bloque.
+La oficina habitual sigue sin tareas activas.
+
 Actualización del 26 de octubre: integración de Antigravity y segundo bloque de
 simplificación publicados en `0ff6a21c29c294d785cb58f6b687377c7de83a7a`.
 La [validación 40327075378](https://github.com/rubengp02/agents-sims/actions/runs/40327075378)
@@ -48,8 +59,8 @@ La instancia local se actualizó estando inactiva y conserva ocho proyectos,
 diez conversaciones, 135 mensajes con las mismas huellas de contenido y diez
 referencias de imágenes. Se verificaron cero tareas activas tras reiniciar.
 
-Único punto pendiente de esta hoja de ruta: completar la pareja del benchmark
-real. El nuevo intento acreditó preparación y 36 comprobaciones de referencia,
+Antecedente, sustituido por la comprobación real indicada arriba: el intento
+anterior acreditó preparación y 36 comprobaciones de referencia,
 pero se bloqueó por cuota antes de iniciar inferencias: cero turnos, sin nuevos
 recibos de modelo ni resultados comparativos. La lectura oficial posterior indica
 82% en la ventana corta y 13% semanal; el protocolo exige menos del 80% en ambas

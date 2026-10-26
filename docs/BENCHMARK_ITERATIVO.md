@@ -1,8 +1,52 @@
 # Comparación controlada: Codex individual y oficina iterativa
 
+## Nuevo intento real: cuota disponible, cierre incompleto
+
+El 26 de octubre se ejecutó una nueva pareja autorizada sobre `64c040c`, con
+el mismo protocolo v1 y sin modificar soluciones ni límites. La consulta inicial
+comunicó 1% de uso corto y 0% semanal. El ejecutor volvió a comprobar la cuota
+antes de cada método: 3%/0% para individual y 4%/1% para oficina, ambos por debajo
+del 80%. La cuota dejó de ser el bloqueo.
+
+| Medición                               | Codex individual         | Oficina iterativa                    |
+| -------------------------------------- | ------------------------ | ------------------------------------ |
+| Tiempo total, incluidas comprobaciones | 65.784 ms                | 480.652 ms, interrupción por límite  |
+| Turnos iniciados                       | 1                        | 4: Jefe, Programador, Jefe, Tester   |
+| Tokens conocidos de entrada + salida   | 106.433                  | Al menos 194.756; Tester desconocido |
+| Comprobaciones externas                | 32/36                    | 32/36 sobre los archivos conservados |
+| Pruebas públicas                       | Aprobadas                | Aprobadas                            |
+| Escritura dentro del alcance           | Sí                       | Sí                                   |
+| Objetivo y recibos completos           | Sí, solución no aceptada | No, pausado por consumo desconocido  |
+
+El Tester confirmó el modelo, pero no comunicó salida, llamadas de herramientas ni
+contadores finales antes de la parada de ocho minutos. El recibo se conserva como
+cancelado y con consumo desconocido; no se deduce que consumiera cero. La razón
+genérica almacenada por el adaptador es `cancelled_by_user`, aunque en este ensayo
+la señal de cancelación la emitió el temporizador del verificador. El objetivo
+quedó `paused` con `usage_unknown`. No se atribuye una causa interna al modelo o
+al proveedor sin evidencia adicional.
+
+Las cuatro discrepancias de ambos métodos siguen siendo `TypeError` frente al
+`RangeError` externo esperado para valores fraccionarios y `NaN` en cantidades y
+descuentos. Se conserva la limitación ya documentada del contrato v1: no debe
+interpretarse esa puntuación como una medida general de calidad. La oficina no
+obtuvo aceptación ni cierre independiente en este bloque.
+
+El informe terminó `incomplete`, con `controlsPassed: false` y sin cocientes de
+tiempo o tokens. La equivalencia de archivos iniciales, modelo y esfuerzo sí quedó
+verificada para los turnos recibidos. La huella del protocolo fue
+`2e3aed9193b6f713150e24c5da604fb5fa6b12f3151c3dee72a45aeca47fe0cf`; los recibos
+y el informe completo se conservan en el almacén privado, fuera de Git. No se
+amplió el límite, no se reintentó automáticamente y no se corrigieron las soluciones.
+La lectura oficial posterior indicó 11% corto y 2% semanal; no se atribuye toda
+esa diferencia al benchmark porque la cuenta también comparte esta conversación.
+
+Pendiente: diagnosticar la ausencia de cierre del Tester antes de otra pareja
+real. La simulación y CI satisfactorios no sustituyen ese cierre real.
+
 ## Protocolo exploratorio v1
 
-Estado al 26 de octubre de 2026: un nuevo intento sobre la revisión `0ff6a21`
+Antecedente del 26 de octubre de 2026: un intento sobre la revisión `0ff6a21`
 comprobó la preparación, pero el control oficial de cuota impidió iniciar el primer
 método. No ejecutó turnos ni consumió cuota de inferencia. El historial anterior
 sigue incompleto y no se utiliza para publicar cocientes de eficiencia.
